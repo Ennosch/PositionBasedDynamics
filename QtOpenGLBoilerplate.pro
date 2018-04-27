@@ -27,3 +27,8 @@ OTHER_FILES += \
     .gitignore \
     Doxyfile \
     README.md
+# add the glsl shader files
+    # shaders/*.glsl \
+
+RESOURCES += \
+    resources.qrc

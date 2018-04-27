@@ -38,6 +38,8 @@ void Window::initializeGL()
 {
   if (scene())
     scene()->initialize();
+
+
 }
 
 void Window::paintGL()

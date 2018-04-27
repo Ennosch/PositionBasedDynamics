@@ -10,6 +10,9 @@
 // Project
 #include "AbstractScene.h"
 #include "Window.h"
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+#include <QtGui/QOpenGLShaderProgram>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @class Scene
@@ -49,6 +52,14 @@ public:
   /// @brief Gets called everytime we want to draw the scene.
   //////////////////////////////////////////////////////////////////////////////
   void paint();
+
+  void QtOpenGLinitialize();
+  void OpenGLinitialize();
+
+  //members
+  QOpenGLShaderProgram* m_program;
+  QOpenGLBuffer m_vvbo;
+  QOpenGLVertexArrayObject m_vao;
 
 };
 

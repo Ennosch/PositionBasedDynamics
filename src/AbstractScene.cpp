@@ -34,6 +34,7 @@ const QOpenGLContext *AbstractScene::context() const
 void AbstractScene::initialize()
 {
   initializeOpenGLFunctions();
+
 }
 
 
