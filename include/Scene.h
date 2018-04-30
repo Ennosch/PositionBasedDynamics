@@ -60,6 +60,9 @@ public:
   QOpenGLShaderProgram* m_program;
   QOpenGLBuffer m_vvbo;
   QOpenGLVertexArrayObject m_vao;
+  unsigned int shaderProgram;
+  unsigned int VAO;
+  unsigned int VBO;
 
 };
 

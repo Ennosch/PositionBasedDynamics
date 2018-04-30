@@ -7,6 +7,8 @@
 // Project
 #include "Window.h"
 
+#include <iostream>
+
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
   connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));

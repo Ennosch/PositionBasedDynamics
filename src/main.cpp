@@ -9,31 +9,51 @@
 #include <QPropertyAnimation>
 
 #include <QFile>
-#include <QDebug>
+#include <Qdebug>
+#include <QTextStream>
+
 
 // Project
 #include "Scene.h"
 #include "Window.h"
 
+#include <iostream>
+
+QString getString(QString Filename)
+{
+    QFile mFile(Filename);
+    if(!mFile.open(QFile::ReadOnly | QFile::Text))
+    {
+        qDebug()<< "could not open file for writing";
+        return 0;
+    }
+    QTextStream in (&mFile);
+    QString mText = in.readAll();
+    //qDebug() << mText;
+    mFile.close();
+    return mText;
+}
+
+
+void Read(QString Filename)
+{
+    QFile mFile(Filename);
+    if(!mFile.open(QFile::ReadOnly | QFile::Text))
+    {
+        qDebug()<< "could not open file for writing";
+        return;
+    }
+    QTextStream in (&mFile);
+    QString mText = in.readAll();
+    qDebug() << mText;
+    mFile.close();
+}
+
+
 int main(int argc, char *argv[])
 {
-
-  /*
-  QString path = qApp->applicationDirPath();
-
-  //path.append("./resources/shaders/simple.vert");
-  path.append("./test.txt");
-  QFile fileUrl(path);
-  QString a = fileUrl.readAll();
-
-  if( fileUrl.open(QIODevice::ReadWrite | QIODevice::Text) ) {
-  QTextStream out(&fileUrl);
-
-  //qDebug()<<a<<endl;
-
-  }*/
-
   QGuiApplication app(argc, argv);
+
   Window window;
   QSurfaceFormat fmt;
   fmt.setMinorVersion(3);
@@ -50,6 +70,13 @@ int main(int argc, char *argv[])
 
   window.resize(720, 720);
   window.show();
+
+  QString mFilename = "/Users/ennoschlunder/Dev/QtOpenGLBoilerplate/test.txt";
+  QString shader = ":/shader/simple.frag";
+
+  //Write(mFilename);
+  //Read(shader);
+
 
   return app.exec();
 }
