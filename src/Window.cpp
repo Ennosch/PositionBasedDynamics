@@ -6,7 +6,7 @@
 
 // Project
 #include "Window.h"
-
+#include <QDebug>
 #include <iostream>
 
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
@@ -38,9 +38,13 @@ void Window::setScene(AbstractScene *_scene)
 
 void Window::initializeGL()
 {
+  // Init OpenGL Backend  (QOpenGLFunctions)
   if (scene())
     scene()->initialize();
-
+  // Init QtWindow specific things, connectionQtype
+  // sender signal receive, method
+  connect(context(), SIGNAL(aboutToBeDestroyed()), this, SLOT(teardownGL()), Qt::DirectConnection);
+  connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
 
 }
 
@@ -53,4 +57,19 @@ void Window::paintGL()
 void Window::resizeGL(int _w, int _h)
 {
   qDebug("New window size: %d, %d", _w, _h);
+}
+
+void Window::teardownGL()
+{
+    /*
+  // Actually destroy our OpenGL information
+  m_object.destroy();
+  m_vertex.destroy();
+  delete m_program;
+  */
+}
+
+void Window::update()
+{
+    // handle key press events
 }

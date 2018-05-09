@@ -16,6 +16,7 @@
 // Project
 #include "Scene.h"
 #include "Window.h"
+#include "vertex.h"
 
 #include <iostream>
 
@@ -52,6 +53,7 @@ void Read(QString Filename)
 
 int main(int argc, char *argv[])
 {
+
   QGuiApplication app(argc, argv);
 
   Window window;
@@ -72,11 +74,13 @@ int main(int argc, char *argv[])
   window.show();
 
   QString mFilename = "/Users/ennoschlunder/Dev/QtOpenGLBoilerplate/test.txt";
-  QString shader = ":/shader/simple.frag";
+  QString shader = ":/shader/simple.vert";
 
+  //:/shader/simple.vert
+  //:/shaders/simple.vert
   //Write(mFilename);
   //Read(shader);
 
-
   return app.exec();
+
 }

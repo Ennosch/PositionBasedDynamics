@@ -10,7 +10,8 @@ SOURCES += \
     src/main.cpp \
     src/AbstractScene.cpp \
     src/Scene.cpp \
-    src/Window.cpp
+    src/Window.cpp \
+    src/vertex.cpp
 
 
 OBJECTS_DIR = build/obj
@@ -21,7 +22,8 @@ INCLUDEPATH += include
 HEADERS += \
     include/AbstractScene.h \
     include/Scene.h \
-    include/Window.h
+    include/Window.h \
+    include/vertex.h
 
 OTHER_FILES += \
     .gitignore \
