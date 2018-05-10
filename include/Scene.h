@@ -5,17 +5,15 @@
 //Qt
 #include <QMatrix4x4>
 #include <QVector3D>
+#include <QTransform>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QtGui/QOpenGLShaderProgram>
-
 
 // Project
 #include "AbstractScene.h"
 #include "Window.h"
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
-#include <QtGui/QOpenGLShaderProgram>
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @class Scene
@@ -42,9 +40,12 @@ public:
 
   void QtOpenGLinitialize();
   void OpenGLinitialize();
+  void update();
 
 //private:
   //members
+  int u_modelToWorld;
+
   QOpenGLShaderProgram* m_program;
   QOpenGLBuffer m_vvbo;
   QOpenGLVertexArrayObject m_vao;
@@ -54,6 +55,7 @@ public:
   QMatrix4x4 m_model_matrix;
   QMatrix4x4 m_view_matrix;
   QMatrix4x4 m_projection_matrix;
+  QTransform m_transform;
 
 };
 

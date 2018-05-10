@@ -10,6 +10,7 @@
 // Qt
 #include <QOpenGLWindow>
 #include <QTimer>
+#include <QElapsedTimer>
 
 // Project
 #include "AbstractScene.h"
@@ -42,7 +43,7 @@ public:
   /// @brief Scene setter.
   //////////////////////////////////////////////////////////////////////////////
   void setScene(AbstractScene *_scene);
-
+  QElapsedTimer m_elapsTimer;
 
 protected slots:
     void teardownGL();

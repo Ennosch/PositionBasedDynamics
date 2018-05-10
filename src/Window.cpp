@@ -1,8 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-/// @file Window.cpp
-/// @author Ramon Blanquer
-/// @version 0.0.1
-////////////////////////////////////////////////////////////////////////////////
 
 // Project
 #include "Window.h"
@@ -12,6 +7,9 @@
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
   connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
+
+  qDebug()<< format().swapInterval();
+
   if(format().swapInterval() == -1)
   {
       // V_blank synchronization not available (tearing likely to happen)
@@ -23,7 +21,9 @@ Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
       // V_blank synchronization available
       m_timer.setInterval(0);
   }
+  m_timer.setInterval(500);
   m_timer.start();
+  //m_elapsTimer.start();
 }
 
 AbstractScene *Window::scene() const
@@ -34,6 +34,7 @@ AbstractScene *Window::scene() const
 void Window::setScene(AbstractScene *_scene)
 {
   m_scene = _scene;
+
 }
 
 void Window::initializeGL()
@@ -41,11 +42,11 @@ void Window::initializeGL()
   // Init OpenGL Backend  (QOpenGLFunctions)
   if (scene())
     scene()->initialize();
+
   // Init QtWindow specific things, connectionQtype
   // sender signal receive, method
   connect(context(), SIGNAL(aboutToBeDestroyed()), this, SLOT(teardownGL()), Qt::DirectConnection);
   connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
-
 }
 
 void Window::paintGL()
@@ -71,5 +72,8 @@ void Window::teardownGL()
 
 void Window::update()
 {
+
     // handle key press events
+    qDebug("update");
+    //m_scene->update();
 }

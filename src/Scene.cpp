@@ -3,11 +3,19 @@
 #include "Scene.h"
 #include <array>
 #include <iostream>
+#include <math.h>
 
 #include <QFile>
 #include <QDebug>
 #include <QString>
-#include <QVector3D>
+
+
+/*
+//                   P               V              M               Pos
+  gl_Position = cameraToView * worldToCamera * modelToWorld * vec4(position, 1.0);
+
+ */
+
 
 /*
 static const QVector3D myShape[] = {
@@ -23,15 +31,16 @@ static const QVector3D myShape[] = {
 };*/
 
 
+
 static const QVector3D myShape[] = {
     QVector3D( 0.0f,  0.75f,  1.0f),
-    //QVector3D( 1.0f,  0.0f,  0.0f),
+    QVector3D( 1.0f,  0.0f,  0.0f),
 
     QVector3D( -0.75f,  -0.75f,  1.0f),
-    //QVector3D( 0.0f,  1.0f,  0.0f),
+    QVector3D( 0.0f,  1.0f,  0.0f),
 
     QVector3D( 0.75f,  -0.75f,  1.0f),
-    //QVector3D( 0.0f,  0.0f,  1.0f)
+    QVector3D( 0.0f,  0.0f,  1.0f)
 };
 
 
@@ -63,6 +72,10 @@ void Scene::QtOpenGLinitialize()
 
     m_model_matrix.setToIdentity();
     m_model_matrix.translate(0.0, 0.0, 0.0);
+    m_projection_matrix.setToIdentity();
+
+    u_modelToWorld = m_program->uniformLocation("ModelMatrix");
+    //m_projection_matrix.perspective(45.0f, width / float(height), 0.0f, 1000.0f);
 
     m_vvbo.create();
     m_vvbo.bind();
@@ -72,11 +85,18 @@ void Scene::QtOpenGLinitialize()
     m_vao.create();
     m_vao.bind();
     m_program->enableAttributeArray(0);
-    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(QVector3D));
+    m_program->enableAttributeArray(1);
+    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 2*sizeof(QVector3D));
+    m_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 2*sizeof(QVector3D));
 
     m_vao.release();
     m_vvbo.release();
     m_program->release();
+
+
+
+    qDebug()<< m_window;
+    //m_window->foo();
 
     /*
     qDebug()<<"init 1";
@@ -219,13 +239,30 @@ void Scene::paint()
   glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
+  /*
+  //                   P               V              M               Pos
+    gl_Position = cameraToView * worldToCamera * modelToWorld * vec4(position, 1.0);
+
+
+    modelToWorld = M
+    worldToView = P
+   */
+
+
   m_program->bind();
+  m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+  {
+    m_vao.bind();
 
-  m_vao.bind();
-  glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
-  m_vao.release();
-
+    //float tx = sin(m_window->m_timer);
+    m_model_matrix.translate(0.0, 0.0, 0.0);
+    //m_program->setUniformValue("ModelMatrix", m_model_matrix);
+    m_program->setUniformValue(u_modelToWorld, m_model_matrix);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
+    m_vao.release();
+  }
   m_program->release();
+
 
 
   /*
@@ -252,5 +289,11 @@ void Scene::paint()
   glBindVertexArray(VAO);
   glDrawArrays(GL_TRIANGLES, 0, 3);
   */
+
+}
+
+void Scene::update()
+{
+    // update from Window Qtimer
 
 }

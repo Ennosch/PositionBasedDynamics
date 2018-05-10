@@ -17,6 +17,7 @@
 #include "Scene.h"
 #include "Window.h"
 #include "vertex.h"
+#include "AbstractScene.h"
 
 #include <iostream>
 
@@ -66,6 +67,9 @@ int main(int argc, char *argv[])
   fmt.setRenderableType(QSurfaceFormat::OpenGL);
   fmt.setProfile(QSurfaceFormat::CoreProfile);
   window.setFormat(fmt);
+
+
+  //AbstractScene aScene(&window);
 
   Scene scene(&window);
   window.setScene(&scene);
