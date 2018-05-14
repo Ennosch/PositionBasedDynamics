@@ -11,6 +11,7 @@
 #include <QOpenGLWindow>
 #include <QTimer>
 #include <QElapsedTimer>
+//#include  <QKeyEvent>
 
 // Project
 #include "AbstractScene.h"
@@ -48,6 +49,8 @@ public:
 protected slots:
     void teardownGL();
     void update();
+    void printVersionInformation();
+    void keyPressEvent(QKeyEvent *event);
 
 protected:
   //////////////////////////////////////////////////////////////////////////////

@@ -42,6 +42,9 @@ public:
   void OpenGLinitialize();
   void update();
 
+ // QTransform *getObject();
+
+
 //private:
   //members
   int u_modelToWorld;

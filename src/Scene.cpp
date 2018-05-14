@@ -73,6 +73,7 @@ void Scene::QtOpenGLinitialize()
     m_model_matrix.setToIdentity();
     m_model_matrix.translate(0.0, 0.0, 0.0);
     m_projection_matrix.setToIdentity();
+    m_transform.reset();
 
     u_modelToWorld = m_program->uniformLocation("ModelMatrix");
     //m_projection_matrix.perspective(45.0f, width / float(height), 0.0f, 1000.0f);
@@ -93,39 +94,11 @@ void Scene::QtOpenGLinitialize()
     m_vvbo.release();
     m_program->release();
 
+    //printVersionInformation();
+
+    //qDebug()<< m_window;
 
 
-    qDebug()<< m_window;
-    //m_window->foo();
-
-    /*
-    qDebug()<<"init 1";
-    m_program = new QOpenGLShaderProgram();
-    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":shader/geom.vert");
-    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/geom.frag");
-    m_program->link();
-
-    GLfloat verts_pos[] ={
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
-    };
-    //QOpenGLBuffer m_vvbo(QOpenGLBuffer::VertexBuffer);
-    m_vao.create();
-    m_vao.bind();
-    m_vvbo.create();
-    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vvbo.bind();
-    m_vvbo.allocate(verts_pos, sizeof(verts_pos));
-    //std::cout<<"log ?: "<< sizeof(verts_pos);
-
-    m_program->enableAttributeArray(0);
-    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3);
-
-    m_vvbo.release();
-    m_vao.release();
-    qDebug()<<"init 2";
-    */
 }
 
 void Scene::OpenGLinitialize()
@@ -262,38 +235,18 @@ void Scene::paint()
     m_vao.release();
   }
   m_program->release();
-
-
-
-  /*
-  // render using the Qt classes
-  m_vao.bind();
-  glDrawArrays(GL_TRIANGLES, 0, 3);
-  m_vao.release();
-  //std::cout<<"spamm"<<std::endl;
-
-
-  // how to purely render a VBO
-
-  m_vvbo.bind();
-  m_program->bind();
-  glDrawArrays(GL_TRIANGLES, 0, 3);
-  m_vvbo.release();
-  m_program->release();
-  */
-
-
-  /*
-  // render using pure OpenGL functions
-  glUseProgram(shaderProgram);
-  glBindVertexArray(VAO);
-  glDrawArrays(GL_TRIANGLES, 0, 3);
-  */
-
 }
+
+/*
+QTransform *Scene::getObject()
+{
+    return &m_transform;
+}*/
 
 void Scene::update()
 {
     // update from Window Qtimer
 
 }
+
+
