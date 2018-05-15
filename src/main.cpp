@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
   QGuiApplication app(argc, argv);
 
   Window window;
+
+
   QSurfaceFormat fmt;
   fmt.setSamples(16);
   fmt.setSwapInterval(1);
@@ -26,6 +28,7 @@ int main(int argc, char *argv[])
   window.setScene(&scene);
 
   window.resize(720, 720);
+
   window.show();
 
   return app.exec();

@@ -6,6 +6,7 @@
 
 // Project
 #include "Window.h"
+//#include "Scene.h"
 
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
@@ -24,26 +25,48 @@ Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
   m_timer.start();
 }
 
-AbstractScene *Window::scene() const
+Scene *Window::scene() const
 {
   return m_scene;
 }
 
+/*
 void Window::setScene(AbstractScene *_scene)
 {
   m_scene = _scene;
 }
+*/
+void Window::setScene(Scene *_scene)
+{
+  m_scene = _scene;
+  qDebug("-------1-------");
+  /*
+  if (scene())
+    scene()->initialize();
+    */
+  //m_scene = _scene;
+}
 
 void Window::initializeGL()
 {
+  qDebug("-------2-------");
+  qDebug()<<m_scene;
+  qDebug()<<scene();
+  //scene()->foo();
+/*
   if (scene())
     scene()->initialize();
+    */
+
 }
+
 
 void Window::paintGL()
 {
+/*
   if (scene())
     scene()->paint();
+*/
 }
 
 void Window::resizeGL(int _w, int _h)
