@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/shader">
+        <file alias="geom.frag">resources/shaders/geom.frag</file>
+        <file alias="geom.vert">resources/shaders/geom.vert</file>
+        <file alias="simple.frag">resources/shaders/simple.frag</file>
+        <file alias="simple.vert">resources/shaders/simple.vert</file>
+    </qresource>
+</RCC>

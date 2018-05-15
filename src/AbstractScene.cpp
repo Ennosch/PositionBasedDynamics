@@ -6,6 +6,13 @@
 
 // Project
 #include "AbstractScene.h"
+#include <Qdebug>
+
+void AbstractScene::foo()
+{
+    qDebug("foo foo ");
+}
+
 
 AbstractScene::AbstractScene(QOpenGLWindow *_window)
 {
@@ -34,6 +41,7 @@ const QOpenGLContext *AbstractScene::context() const
 void AbstractScene::initialize()
 {
   initializeOpenGLFunctions();
+
 }
 
 

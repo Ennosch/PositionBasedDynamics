@@ -5,7 +5,8 @@
 // Qt
 #include <QOpenGLWindow>
 #include <QTimer>
-#include <QDebug>
+#include <QElapsedTimer>
+//#include  <QKeyEvent>
 
 // Project
 #include "AbstractScene.h"
@@ -15,11 +16,18 @@ class Scene;
 
 class Window : public QOpenGLWindow
 {
+  Q_OBJECT
 
 public:
   Window(QWindow *parent = 0);
   Scene* scene() const;
   void setScene(Scene *_scene);
+
+protected slots:
+    void teardownGL();
+    void update();
+    void printVersionInformation();
+    void keyPressEvent(QKeyEvent *event);
 
 protected:
   void initializeGL();
