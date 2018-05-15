@@ -1,12 +1,12 @@
-////////////////////////////////////////////////////////////////////////////////
-/// @file Window.cpp
-/// @author Ramon Blanquer
-/// @version 0.0.1
-////////////////////////////////////////////////////////////////////////////////
-
-// Project hellp
+// Project
 #include "Window.h"
-//#include "Scene.h"
+
+// now include Scene.h, to define Window::initializeGL() which calls things from the scene()
+// class Scene has only been forward declared to this point (?)
+// if not #included we get:
+//      member access into incomlpete type 'Scene' (whereever scene()->something is called)
+
+#include "Scene.h"
 
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
@@ -30,43 +30,23 @@ Scene *Window::scene() const
   return m_scene;
 }
 
-/*
-void Window::setScene(AbstractScene *_scene)
-{
-  m_scene = _scene;
-}
-*/
 void Window::setScene(Scene *_scene)
 {
   m_scene = _scene;
-  qDebug("-------1-------");
-  /*
-  if (scene())
-    scene()->initialize();
-    */
-  //m_scene = _scene;
 }
 
 void Window::initializeGL()
 {
-  qDebug("-------2-------");
-  qDebug()<<m_scene;
-  qDebug()<<scene();
-  //scene()->foo();
-/*
+
   if (scene())
     scene()->initialize();
-    */
-
 }
-
 
 void Window::paintGL()
 {
-/*
+
   if (scene())
     scene()->paint();
-*/
 }
 
 void Window::resizeGL(int _w, int _h)
