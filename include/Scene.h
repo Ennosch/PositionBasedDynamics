@@ -13,6 +13,8 @@
 // Project
 #include "AbstractScene.h"
 #include "Window.h"
+#include "transform.h"
+
 class Scene : public AbstractScene
 {
 
@@ -23,10 +25,7 @@ public:
   void paint();
 
   void QtOpenGLinitialize();
-  void OpenGLinitialize();
   void update();
-
- // QTransform *getObject();
 
   float m_count = 0.0;
 
@@ -44,6 +43,8 @@ public:
   QMatrix4x4 m_view_matrix;
   QMatrix4x4 m_projection_matrix;
   QTransform m_transform;
+
+  Transform m_myTransform;
 
 };
 

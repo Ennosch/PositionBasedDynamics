@@ -18,7 +18,7 @@
 
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
-  connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
+  //connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
 
   qDebug()<< format().swapInterval();
 
