@@ -71,10 +71,10 @@ void Scene::QtOpenGLinitialize()
     m_program->link();
     m_program->bind();
 
-    m_model_matrix.setToIdentity();
-    m_model_matrix.translate(0.0, 0.0, 0.0);
-    m_projection_matrix.setToIdentity();
-    m_transform.reset();
+//    m_model_matrix.setToIdentity();
+//    m_model_matrix.translate(0.0, 0.0, 0.0);
+//    m_projection_matrix.setToIdentity();
+//    m_transform.reset();
 
     u_modelToWorld = m_program->uniformLocation("ModelMatrix");
     //m_projection_matrix.perspective(45.0f, width / float(height), 0.0f, 1000.0f);
@@ -209,8 +209,8 @@ void Scene::OpenGLinitialize()
 
 void Scene::paint()
 {
-  glViewport(0, 0, window()->width(), window()->height());
-  glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+  //glViewport(0, 0, window()->width(), window()->height());
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
   /*
@@ -247,6 +247,7 @@ QTransform *Scene::getObject()
 void Scene::update()
 {
     // update from Window Qtimer
+    qDebug()<<"update";
 
 }
 

@@ -88,7 +88,7 @@ void Window::update()
 
     // handle key press events
     //qDebug("update");
-    //m_scene->update();
+    scene()->update();
 }
 
 void Window::keyPressEvent(QKeyEvent *event)
