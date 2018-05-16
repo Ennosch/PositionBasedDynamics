@@ -99,16 +99,13 @@ void Window::keyPressEvent(QKeyEvent *event)
     }
     else
     {
-      qDebug()<< "keyPressed: "<< event->text();
+      //qDebug()<< "keyPressed: "<< event->text();
       switch(event->key())
       {
-        case Qt::Key_Up: qDebug("it's a up!");
-          //QTransform * test = m_scene->getObject();
-
-          //qDebug()<<"Qt::Key_W "<<int(Qt::Key_W)<<" event->key() "<< event->key();
+        case Qt::Key_Up: qDebug("up key pressed");
+          scene()->m_transform.translate(1 , 1);
         break;
-        case Qt::Key_Down: qDebug("it's a down!");
-            //qDebug()<<"Qt::Key_D "<<int(Qt::Key_D)<<" event->key() "<< event->key();
+        case Qt::Key_Down: qDebug("down key pressed");
         break;
       default: break;
       }

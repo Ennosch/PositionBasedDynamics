@@ -97,9 +97,6 @@ void Scene::QtOpenGLinitialize()
 
     //printVersionInformation();
 
-    //qDebug()<< m_window;
-
-
 }
 
 void Scene::OpenGLinitialize()
@@ -230,24 +227,23 @@ void Scene::paint()
 
     //float tx = sin(m_window->m_timer);
     m_model_matrix.translate(0.0, 0.0, 0.0);
-    //m_program->setUniformValue("ModelMatrix", m_model_matrix);
-    m_program->setUniformValue(u_modelToWorld, m_model_matrix);
+    m_program->setUniformValue("ModelMatrix", m_transform.toAffine());
+    //m_program->setUniformValue(u_modelToWorld, m_model_matrix);
     glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
     m_vao.release();
   }
   m_program->release();
 }
 
-/*
-QTransform *Scene::getObject()
-{
-    return &m_transform;
-}*/
-
 void Scene::update()
 {
     // update from Window Qtimer
-    qDebug()<<"update";
+
+
+    // (?)  adding to QTransform m_transform, moves the
+    m_count += 0.05;
+    m_transform.translate(m_count , 0.0);
+    //qDebug()<<"update";
 
 }
 

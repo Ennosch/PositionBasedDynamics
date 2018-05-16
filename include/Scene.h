@@ -28,6 +28,7 @@ public:
 
  // QTransform *getObject();
 
+  float m_count = 0.0;
 
 //private:
   //members
