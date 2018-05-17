@@ -89,6 +89,7 @@ void Window::update()
     // handle key press events
     //qDebug("update");
     scene()->update();
+    QOpenGLWindow::update();
 }
 
 void Window::keyPressEvent(QKeyEvent *event)

@@ -34,19 +34,21 @@ static const QVector3D myShape[] = {
 
 
 static const QVector3D myShape[] = {
-    QVector3D( 0.0f,  0.75f,  1.0f),
-    QVector3D( 1.0f,  0.0f,  0.0f),
+    QVector3D( 0.5f,  0.5f,  0.5f),
+    QVector3D( -0.5f,  0.5f,  0.5f),
+    QVector3D( -0.5f,  -0.5f,  0.5f),
+    QVector3D( 0.5f,  -0.5f,  0.5f),
 
-    QVector3D( -0.75f,  -0.75f,  1.0f),
-    QVector3D( 0.0f,  1.0f,  0.0f),
-
-    QVector3D( 0.75f,  -0.75f,  1.0f),
-    QVector3D( 0.0f,  0.0f,  1.0f)
+    QVector3D( 0.5f,  0.5f,  -0.5f),
+    QVector3D( -0.5f,  0.5f,  -0.5f),
+    QVector3D( -0.5f,  -0.5f,  -0.5f),
+    QVector3D( 0.5f,  -0.5f,  -0.5f)
 };
 
 
 Scene::Scene(Window *_window) : AbstractScene(_window)
 {
+    m_myTransform.translate(0.0f, 0.0f, 0.0f);
 }
 
 Scene::~Scene()
@@ -62,7 +64,7 @@ void Scene::initialize()
 
 void Scene::QtOpenGLinitialize()
 {
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     m_program = new QOpenGLShaderProgram();
@@ -137,7 +139,6 @@ void Scene::update()
     //m_count += 0.05;
     //m_transform.translate(m_count , 0.0);
     m_myTransform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
-    paint();
     //qDebug()<<"update";
 
 }
