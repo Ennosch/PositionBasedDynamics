@@ -27,6 +27,8 @@ public:
   void QtOpenGLinitialize();
   void update();
 
+  void foo();
+
   float m_count = 0.0;
 
 //private:

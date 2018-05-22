@@ -15,7 +15,7 @@ void main()
 
     //gl_Position = vec4(position, 1.0);
 
-    gl_Position = ProjectionMatrix * ModelMatrix * vec4(position, 1.0);
+    gl_Position = ProjectionMatrix * ProjectionMatrix * ModelMatrix * vec4(position, 1.0);
     vColor = vec4(color, 1.0);
 
     //vColor = vec4(1.0, 0.0, 1.0, 1.0);

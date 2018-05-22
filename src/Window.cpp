@@ -85,31 +85,77 @@ void Window::teardownGL()
 
 void Window::update()
 {
-
+    inputManager::update();
     // handle key press events
     //qDebug("update");
+
+
+    if(inputManager::keyPressed(Qt::Key_Up))
+    {
+        qDebug(" -forward");
+    }
+    if(inputManager::keyPressed(Qt::Key_Down))
+    {
+        qDebug(" -down");
+    }
+    if(inputManager::keyPressed(Qt::Key_Left))
+    {
+        qDebug(" -left");
+    }
+    if(inputManager::keyPressed(Qt::Key_Right))
+    {
+        qDebug(" -right");
+    }
+
     scene()->update();
     QOpenGLWindow::update();
 }
 
 void Window::keyPressEvent(QKeyEvent *event)
 {
+
+    if (event->isAutoRepeat())
+    {
+      event->ignore();
+    }
+    else
+    {
+      inputManager::registerKeyPress(event->key());
+      //inputManager::foo();
+    }
+
+    /*
+    // Simple QKeyEvent switch
     if (event->isAutoRepeat())
     {
       qDebug("event isAutoRepeat");
     }
     else
     {
-      //qDebug()<< "keyPressed: "<< event->text();
+//      qDebug()<< "keyPressed: "<< event->text();
+//      qDebug()<< "keyPressed: "<< event->key();
       switch(event->key())
       {
         case Qt::Key_Up: qDebug("up key pressed");
-          scene()->m_transform.translate(1 , 1);
+          //scene()->m_transform.translate(1 , 1);
+          scene()->m_myTransform.translate(0.0, 0.01, 0.0);
         break;
-        case Qt::Key_Down: qDebug("down key pressed");
+        case Qt::Key_Left: qDebug("down key pressed");
         break;
       default: break;
       }
+    }*/
+}
+
+void Window::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->isAutoRepeat())
+    {
+      event->ignore();
+    }
+    else
+    {
+      inputManager::registerKeyRelease(event->key());
     }
 }
 

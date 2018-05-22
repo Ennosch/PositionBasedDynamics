@@ -10,6 +10,7 @@
 
 // Project
 #include "AbstractScene.h"
+#include "inputManager.h"
 
 // forward declare class Scene, to be Window can be constructed with the Scene null-pointer
 class Scene;
@@ -28,6 +29,7 @@ protected slots:
     void update();
     void printVersionInformation();
     void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
 
 protected:
   void initializeGL();
@@ -38,6 +40,7 @@ private:
   //make m_scene ptr of type *Scene because, to be able to access member of the actual scene.
   Scene *m_scene = nullptr;
   QTimer m_timer;
+  inputManager m_inputManger;
 
 };
 

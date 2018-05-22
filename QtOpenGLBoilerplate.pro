@@ -12,7 +12,8 @@ SOURCES += \
     src/Scene.cpp \
     src/Window.cpp \
     src/vertex.cpp \
-    src/transform.cpp
+    src/transform.cpp \
+    src/inputManager.cpp
 
 
 OBJECTS_DIR = build/obj
@@ -25,7 +26,8 @@ HEADERS += \
     include/Scene.h \
     include/Window.h \
     include/vertex.h \
-    include/transform.h
+    include/transform.h \
+    include/inputManager.h
 
 OTHER_FILES += \
     .gitignore \

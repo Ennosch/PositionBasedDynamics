@@ -115,8 +115,6 @@ void Scene::paint()
     modelToWorld = M
     worldToView = P
    */
-
-
   m_program->bind();
   m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
   {
@@ -143,4 +141,8 @@ void Scene::update()
 
 }
 
+void Scene::foo()
+{
+    qDebug("Scene foo");
+}
 
