@@ -1,4 +1,4 @@
-TARGET = boilerplate
+TARGET = QtOpenGLApp
 TEMPLATE = app
 
 QT += core gui
