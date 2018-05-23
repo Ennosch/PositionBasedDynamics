@@ -93,18 +93,22 @@ void Window::update()
     if(inputManager::keyPressed(Qt::Key_Up))
     {
         qDebug(" -forward");
+        scene()->m_myTransform.translate(0.0, 0.03, 0.0);
     }
     if(inputManager::keyPressed(Qt::Key_Down))
     {
         qDebug(" -down");
+        scene()->m_myTransform.translate(0.0, -0.03, 0.0);
     }
     if(inputManager::keyPressed(Qt::Key_Left))
     {
         qDebug(" -left");
+        scene()->m_myTransform.translate(0.03, 0.0, 0.0);
     }
     if(inputManager::keyPressed(Qt::Key_Right))
     {
         qDebug(" -right");
+        scene()->m_myTransform.translate(-0.03, 0.0, 0.0);
     }
 
     scene()->update();
