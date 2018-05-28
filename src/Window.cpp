@@ -71,6 +71,8 @@ void Window::paintGL()
 void Window::resizeGL(int _w, int _h)
 {
   qDebug("New window size: %d, %d", _w, _h);
+  if (scene())
+    scene()->resize(_w, _h);
 }
 
 void Window::teardownGL()
@@ -85,10 +87,18 @@ void Window::teardownGL()
 
 void Window::update()
 {
+    // register key, add/remove from inputManager containers
     inputManager::update();
     // handle key press events
-    //qDebug("update");
 
+    if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
+    {
+        //scene()->m_arcCamera.rotate(-0.3f * inputManager::mouseDelta().x(), Camera3D::LocalUp);
+        //qDebug()<<Camera3D::LocalUp;
+        //scene()->m_arcCamera.rotate(-0.3f * inputManager::mouseDelta().y(), scene()->m_arcCamera.right());
+        scene()->m_arcCamera.rotateAroundPoint_B(inputManager::mouseDelta().x(), inputManager::mouseDelta().y()) ;
+
+    }
 
     if(inputManager::keyPressed(Qt::Key_Up))
     {
@@ -103,14 +113,33 @@ void Window::update()
     if(inputManager::keyPressed(Qt::Key_Left))
     {
         qDebug(" -left");
-        scene()->m_myTransform.translate(0.03, 0.0, 0.0);
+        scene()->m_myTransform.translate(-0.03, 0.0, 0.0);
     }
     if(inputManager::keyPressed(Qt::Key_Right))
     {
         qDebug(" -right");
-        scene()->m_myTransform.translate(-0.03, 0.0, 0.0);
+        scene()->m_myTransform.translate(0.03, 0.0, 0.0);
     }
-
+    if(inputManager::keyPressed(Qt::Key_W))
+    {
+        qDebug(" -left");
+        scene()->m_camera.translate(0.0, 0.0, 0.03);
+    }
+    if(inputManager::keyPressed(Qt::Key_S))
+    {
+        qDebug(" -right");
+        scene()->m_camera.translate(0.0, 0.0, -0.03);
+    }
+    if(inputManager::keyPressed(Qt::Key_J))
+    {
+        scene()->moveRightFocus();
+        qDebug()<<scene()->m_focus;
+    }
+    if(inputManager::keyPressed(Qt::Key_K))
+    {
+        qDebug(" -right");
+        scene()->foo();
+    }
     scene()->update();
     QOpenGLWindow::update();
 }
@@ -124,6 +153,7 @@ void Window::keyPressEvent(QKeyEvent *event)
     }
     else
     {
+      //qDebug()<<event;
       inputManager::registerKeyPress(event->key());
       //inputManager::foo();
     }
@@ -161,6 +191,17 @@ void Window::keyReleaseEvent(QKeyEvent *event)
     {
       inputManager::registerKeyRelease(event->key());
     }
+}
+
+void Window::mousePressEvent(QMouseEvent *event)
+{
+  qDebug()<<"event:"<< event;
+  inputManager::registerMousePress(event->button());
+}
+
+void Window::mouseReleaseEvent(QMouseEvent *event)
+{
+  inputManager::registerMouseRelease(event->button());
 }
 
 void Window::printVersionInformation()

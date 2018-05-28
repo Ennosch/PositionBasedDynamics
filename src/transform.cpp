@@ -59,6 +59,19 @@ const QMatrix4x4 &Transform::toMatrix()
   return m_world;
 }
 
+const QMatrix4x4 &Transform::toInverseMatrix()
+{
+  if (m_dirty)
+  {
+    m_dirty = false;
+    m_world.setToIdentity();
+    m_world.scale(m_scale);
+    m_world.rotate(m_rotation.conjugate());
+    m_world.translate(-m_translation);
+  }
+  return m_world;
+}
+
 // Qt Streams
 QDebug operator<<(QDebug dbg, const Transform &transform)
 {

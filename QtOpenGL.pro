@@ -13,7 +13,8 @@ SOURCES += \
     src/Window.cpp \
     src/vertex.cpp \
     src/transform.cpp \
-    src/inputManager.cpp
+    src/inputManager.cpp \
+    src/camera.cpp
 
 
 OBJECTS_DIR = build/obj
@@ -27,7 +28,8 @@ HEADERS += \
     include/Window.h \
     include/vertex.h \
     include/transform.h \
-    include/inputManager.h
+    include/inputManager.h \
+    include/camera.h
 
 OTHER_FILES += \
     .gitignore \

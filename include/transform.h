@@ -39,6 +39,14 @@ public:
   const QVector3D& scale() const;
   const QQuaternion& rotation() const;
   const QMatrix4x4& toMatrix();
+  const QMatrix4x4& toInverseMatrix();
+
+  // Queries
+  QVector3D forward() const;
+  QVector3D up() const;
+  QVector3D right() const;
+
+
 
 private:
   bool m_dirty;

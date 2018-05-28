@@ -132,6 +132,7 @@ void inputManager::update()
     // Update Mouse Delta
     sg_mousePrevPosition = sg_mouseCurrPosition;
     sg_mouseCurrPosition = QCursor::pos();
+
     sg_mouseDelta = sg_mouseCurrPosition - sg_mousePrevPosition;
 
     // Update KeyState values

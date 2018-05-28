@@ -15,23 +15,85 @@
 //                   P               V              M               Pos
   gl_Position = cameraToView * worldToCamera * modelToWorld * vec4(position, 1.0);
 
+  red       QVector3D( 1.0f,  0.0f,  0.0f),
+  green     QVector3D( 0.0f,  1.0f,  0.0f),
+  blue      QVector3D( 0.0f,  0.0f,  1.0f),
+  magenta   QVector3D( 1.0f,  0.0f,  1.0f),
+  cyan      QVector3D( 0.0f,  1.0f,  1.0f),
+  yellow    QVector3D( 1.0f,  1.0f,  0.0f),
  */
+
+// Front Verticies
+#define VERTEX_FTR QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 1.0f, 0.0f, 0.0f )
+#define VERTEX_FTL QVector3D(-0.5f,  0.5f,  0.5f), QVector3D( 0.0f, 1.0f, 0.0f )
+#define VERTEX_FBL QVector3D(-0.5f, -0.5f,  0.5f), QVector3D( 0.0f, 0.0f, 1.0f )
+#define VERTEX_FBR QVector3D( 0.5f, -0.5f,  0.5f), QVector3D( 0.0f, 0.0f, 0.0f )
+
+// Back Verticies
+#define VERTEX_BTR QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 0.0f )
+#define VERTEX_BTL QVector3D(-0.5f,  0.5f, -0.5f), QVector3D( 0.0f, 1.0f, 1.0f )
+#define VERTEX_BBL QVector3D(-0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 0.0f, 1.0f )
+#define VERTEX_BBR QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 1.0f )
+
+
+static const QVector3D myShape[] = {
+    // Face 1 (Front)
+      VERTEX_FTR, VERTEX_FTL, VERTEX_FBL,
+      VERTEX_FBL, VERTEX_FBR, VERTEX_FTR,
+    // Face 2 (Back)
+      VERTEX_BBR, VERTEX_BTL, VERTEX_BTR,
+      VERTEX_BTL, VERTEX_BBR, VERTEX_BBL,
+    // Face 3 (Top)
+      VERTEX_FTR, VERTEX_BTR, VERTEX_BTL,
+      VERTEX_BTL, VERTEX_FTL, VERTEX_FTR,
+    // Face 4 (Bottom)
+      VERTEX_FBR, VERTEX_FBL, VERTEX_BBL,
+      VERTEX_BBL, VERTEX_BBR, VERTEX_FBR,
+    // Face 5 (Left)
+      VERTEX_FBL, VERTEX_FTL, VERTEX_BTL,
+      VERTEX_FBL, VERTEX_BTL, VERTEX_BBL,
+    // Face 6 (Right)
+      VERTEX_FTR, VERTEX_FBR, VERTEX_BBR,
+      VERTEX_BBR, VERTEX_BTR, VERTEX_FTR
+};
+
+
+
+static const QVector3D noSHape[] = {
+  QVector3D( 0.0f,  0.0f,  0.0f),
+   QVector3D( 1.0f,  0.0f,  0.0f),
+
+  QVector3D( 2.0f,  5.0f, -15.0f),
+   QVector3D( 0.0f,  1.0f,  0.0f),
+
+  QVector3D(-1.5f, -2.2f, -2.5f),
+   QVector3D( 0.0f,  0.0f,  1.0f),
+
+  QVector3D(-3.8f, -2.0f, -12.3f),
+   QVector3D( 1.0f,  0.0f,  1.0f),
+
+  QVector3D( 2.4f, -0.4f, -3.5f),
+    QVector3D( 0.0f,  1.0f,  1.0f),
+
+  QVector3D(-1.7f,  3.0f, -7.5f),
+    QVector3D( 0.0f,  1.0f,  1.0f),
+
+  QVector3D( 1.3f, -2.0f, -2.5f),
+    QVector3D( 1.0f,  1.0f,  0.0f),
+
+  QVector3D( 1.5f,  2.0f, -2.5f),
+    QVector3D( 1.0f,  5.0f,  2.0f),
+
+  QVector3D( 1.5f,  0.2f, -1.5f),
+    QVector3D( 2.0f,  1.0f,  3.0f),
+
+  QVector3D(-1.3f,  1.0f, -1.5f),
+    QVector3D( 0.3f,  1.0f,  2.0f)
+
+};
 
 
 /*
-static const QVector3D myShape[] = {
-    QVector3D( 0.5f,  0.5f,  0.5f),
-    QVector3D( -0.5f,  0.5f,  0.5f),
-    QVector3D( -0.5f,  -0.5f,  0.5f),
-    QVector3D( 0.5f,  -0.5f,  0.5f),
-
-    QVector3D( 0.5f,  0.5f,  -0.5f),
-    QVector3D( -0.5f,  0.5f,  -0.5f),
-    QVector3D( -0.5f,  -0.5f,  -0.5f),
-    QVector3D( 0.5f,  -0.5f,  -0.5f)
-};*/
-
-
 
 static const QVector3D myShape[] = {
     QVector3D( 0.5f,  0.5f,  0.5f),
@@ -40,11 +102,12 @@ static const QVector3D myShape[] = {
     QVector3D( 0.5f,  -0.5f,  0.5f),
 
     QVector3D( 0.5f,  0.5f,  -0.5f),
-    QVector3D( -0.5f,  0.5f,  -0.5f),
-    QVector3D( -0.5f,  -0.5f,  -0.5f),
-    QVector3D( 0.5f,  -0.5f,  -0.5f)
+    QVector3D( -0.5f,  0.5f,  -0.5f)
+//    QVector3D( -0.5f,  -0.5f,  -0.5f),
+//    QVector3D( 0.5f,  -0.5f,  -0.5f)
 };
 
+*/
 
 Scene::Scene(Window *_window) : AbstractScene(_window)
 {
@@ -62,10 +125,20 @@ void Scene::initialize()
   QtOpenGLinitialize();
 }
 
+void Scene::resize(int width, int height)
+{
+    m_projection_matrix.setToIdentity();
+    m_projection_matrix.perspective(60.0f, width / float(height), 0.1f, 1000.0f);
+}
+
 void Scene::QtOpenGLinitialize()
 {
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
+    //glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    m_camera.translate(0.0, 0.0, -6.0);
+    m_arcCamera.translate(0.0, 0.0, 6.0);
 
     m_program = new QOpenGLShaderProgram();
     m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/simple.vert");
@@ -117,6 +190,11 @@ void Scene::paint()
    */
   m_program->bind();
   m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+  //qDebug()<<m_camera;
+  //m_program->setUniformValue("ViewMatrix", m_camera);
+  m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+
+  //m_program->setUniformValue("ViewMatrix", m_camera);
   {
     m_vao.bind();
 
@@ -136,7 +214,7 @@ void Scene::update()
     // (?)  adding to QTransform m_transform, moves the
     //m_count += 0.05;
     //m_transform.translate(m_count , 0.0);
-    m_myTransform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
+    //m_myTransform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
     //qDebug()<<"update";
 
 }

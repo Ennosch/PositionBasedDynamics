@@ -30,6 +30,8 @@ protected slots:
     void printVersionInformation();
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 
 protected:
   void initializeGL();
