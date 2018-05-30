@@ -23,8 +23,7 @@ public:
   void rotate(float angle, float ax, float ay, float az);
 
   void rotateAroundPoint(float _angle, const QVector3D &_axis);
-  void lookAt();
-  QQuaternion lookAt(int _a);
+  QQuaternion lookAt();
   void reset();
 
   // Transform To (Setters)
@@ -46,13 +45,12 @@ public:
 
 private:
   bool m_dirty;
-  //QVector3D m_right = QVector3D(1,0,0);
+  QVector3D m_right = QVector3D(1,0,0);
   QVector3D m_up = QVector3D(0,1,0);
   QVector3D m_front = QVector3D(0,0,-1);
 
   QVector3D m_translation;
   QVector3D m_worldPos;
-  QVector3D m_right;
   QVector3D m_pivot = QVector3D(0, 0, 0);
 
   QQuaternion m_rotation;

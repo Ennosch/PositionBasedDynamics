@@ -11,7 +11,6 @@ SOURCES += \
     src/AbstractScene.cpp \
     src/Scene.cpp \
     src/Window.cpp \
-    src/vertex.cpp \
     src/transform.cpp \
     src/inputManager.cpp \
     src/camera.cpp
@@ -26,7 +25,6 @@ HEADERS += \
     include/AbstractScene.h \
     include/Scene.h \
     include/Window.h \
-    include/vertex.h \
     include/transform.h \
     include/inputManager.h \
     include/camera.h

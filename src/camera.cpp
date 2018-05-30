@@ -39,40 +39,18 @@ void Camera3D::rotateAroundPoint(float _angle, const QVector3D &_axis)
     m_right = QVector3D::crossProduct(-m_worldPos.normalized(), QVector3D(0,1,0));
 
     float _dot = QVector3D::dotProduct(-m_worldPos.normalized(), QVector3D(0,1,0));
-    //qDebug()<<_dot;
-    //qDebug()<<std::abs(_dot);
-
-    if ( 1 - std::abs(_dot) < 0.01 )
+    
+    if ( 1 - std::abs(_dot) < 0.1 )
     {
         qDebug()<<"critical crossProduct camForward x worldUp cause vector align :( "<<std::abs(_dot);
-        m_right = QVector3D::crossProduct(-m_worldPos, QVector3D(0,1,0));
+        m_right = QVector3D::crossProduct(-m_worldPos, QVector3D(1,0,0));
     }
 
-
-
-//    QMatrix4x4 _world = m_world;
-//    //m_world.lookAt(m_worldPos, QVector3D(0,0,0),  QVector3D(0,1,0) );
-
-//    QVector4D _d = -m_translation * m_world;
-
-
-    //qDebug()<<newRightTest_1;
-//    qDebug()<<d;
-//    qDebug()<<m_world;
-//    qDebug()<<_d;
-    //qDebug()<<m_world;
-
 }
 
-void Camera3D::lookAt()
-{
-    //m_dirty = true;
-    //toMatrix();
-    //qDebug()<<m_worldPos;
-    //m_world.lookAt(m_worldPos, QVector3D(0,0,0), QVector3D(0,1,0));
-}
 
-QQuaternion Camera3D::lookAt(int _a)
+
+QQuaternion Camera3D::lookAt()
 {
     QVector3D _dir = -m_worldPos;
     QVector3D _aim = QVector3D(0,0,1);

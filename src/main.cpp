@@ -13,7 +13,6 @@
 // Project
 #include "Scene.h"
 #include "Window.h"
-#include "vertex.h"
 #include "AbstractScene.h"
 
 #include <iostream>

@@ -99,12 +99,6 @@ static inline void Update(Container &container)
   std::for_each(container.begin(), container.end(), &UpdateStates<TPair>);
 }
 
-
-//inputManager::inputManager()
-//{
-
-//}
-
 inputManager::InputState inputManager::keyState(Qt::Key key)
 {
     KeyContainer::iterator it = FindKey(key);
@@ -138,7 +132,6 @@ void inputManager::update()
     // Update KeyState values
     Update(sg_buttonInstances);
     Update(sg_keyInstances);
-
 }
 
 void inputManager::registerKeyPress(int key)
