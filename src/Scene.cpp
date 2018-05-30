@@ -137,7 +137,7 @@ void Scene::QtOpenGLinitialize()
     //glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_camera.translate(0.0, 0.0, -6.0);
+    m_camera.translate(0.0, 0.0, -0.20);
     m_arcCamera.translate(0.0, 0.0, 6.0);
 
     m_program = new QOpenGLShaderProgram();
@@ -192,6 +192,8 @@ void Scene::paint()
   m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
   //qDebug()<<m_camera;
   //m_program->setUniformValue("ViewMatrix", m_camera);
+  //m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+  //m_arcCamera.reset();
   m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
 
   //m_program->setUniformValue("ViewMatrix", m_camera);

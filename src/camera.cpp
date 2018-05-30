@@ -1,5 +1,7 @@
 #include "camera.h"
+#include <cmath>
 #include <QDebug>
+
 
 const QVector3D Camera3D::LocalForward(0.0f, 0.0f, -1.0f);
 const QVector3D Camera3D::LocalUp(0.0f, 1.0f, 0.0f);
@@ -18,55 +20,101 @@ void Camera3D::rotate(const QQuaternion &dr)
   m_rotation = dr * m_rotation;
 }
 
-void Camera3D::rotateAroundPoint(float _xoffset, float _yoffset)
+void Camera3D::rotateAroundPoint(float _angle, const QVector3D &_axis)
 {
-    m_world.translate(-m_pivot);
-    QQuaternion rotq = QQuaternion::fromAxisAndAngle(0, 1, 0, _xoffset);
-    m_world.rotate(rotq);
+    QQuaternion _rot= QQuaternion::fromAxisAndAngle(_axis, _angle);
+    //manipulate the matrix directly is possible but dont
+    //m_world.rotate(_rot);
+    m_rotation = m_rotation * _rot;
 
-    rotq = QQuaternion::fromAxisAndAngle( -m_right.x(),
-                                          -m_right.y(),
-                                          -m_right.z(),
-                                          _yoffset);
-    m_world.rotate(rotq);
-    m_world.translate(m_pivot);
-    //rotq=createFromAngle(0,1,0,_xoffset);
-    // Update camera orientation vectors
-    m_right.setX(-m_world(0,0));
-    m_right.setY(-m_world(0,1));
-    m_right.setZ(-m_world(0,2));
+    m_dirty = true;
+    toMatrix();
 
-    m_up.setX(-m_world(1,0));
-    m_up.setY(-m_world(1,1));
-    m_up.setZ(-m_world(1,2));
+    // retrive camera world position from m_world 4x4 Matrix
+    QVector4D d(m_world.column(3));
+    QVector4D retVec = -d * m_world;
+    QVector3D _worldPos = QVector3D(retVec.x(), retVec.y(), retVec.z());
+    m_worldPos = _worldPos;
 
-    m_front.setX(-m_world(2,0));
-    m_front.setY(-m_world(2,1));
-    m_front.setZ(-m_world(2,2));
+    m_right = QVector3D::crossProduct(-m_worldPos.normalized(), QVector3D(0,1,0));
+
+    float _dot = QVector3D::dotProduct(-m_worldPos.normalized(), QVector3D(0,1,0));
+    //qDebug()<<_dot;
+    //qDebug()<<std::abs(_dot);
+
+    if ( 1 - std::abs(_dot) < 0.01 )
+    {
+        qDebug()<<"critical crossProduct camForward x worldUp cause vector align :( "<<std::abs(_dot);
+        m_right = QVector3D::crossProduct(-m_worldPos, QVector3D(0,1,0));
+    }
+
+
+
+//    QMatrix4x4 _world = m_world;
+//    //m_world.lookAt(m_worldPos, QVector3D(0,0,0),  QVector3D(0,1,0) );
+
+//    QVector4D _d = -m_translation * m_world;
+
+
+    //qDebug()<<newRightTest_1;
+//    qDebug()<<d;
+//    qDebug()<<m_world;
+//    qDebug()<<_d;
+    //qDebug()<<m_world;
+
 }
 
-void Camera3D::rotateAroundPoint_B(float _xoffset, float _yoffset)
+void Camera3D::lookAt()
 {
-    m_world.translate(-m_pivot);
-    QQuaternion rotX= QQuaternion::fromAxisAndAngle(0, 1, 0, _xoffset);
-    //forward(), QVector3D (0,1,0)
-
-    //QVector3D _right = QVector3D::crossProduct(forward(), QVector3D (0,1,0));
-    //qDebug()<<_right<<right();
-
-
-
-
-
-    QQuaternion rotY = (QQuaternion::fromAxisAndAngle(right(), _yoffset));
-    //QQuaternion rotq = QQuaternion::fromAxisAndAngle(0, 1, 0, _xoffset);
-    //m_rotation = dr * m_rotation;
     //m_dirty = true;
-
-    m_world.rotate(rotY);
-    m_world.rotate(rotX);
-    m_world.translate(-m_pivot);
+    //toMatrix();
+    //qDebug()<<m_worldPos;
+    //m_world.lookAt(m_worldPos, QVector3D(0,0,0), QVector3D(0,1,0));
 }
+
+QQuaternion Camera3D::lookAt(int _a)
+{
+    QVector3D _dir = -m_worldPos;
+    QVector3D _aim = QVector3D(0,0,1);
+
+    QQuaternion _rot1, _rot2, _rot3;
+    _rot1 = QQuaternion::rotationTo(_aim, _dir);
+
+    //_rot2.fromDirection(_dir, QVector3D(0,1,0));
+
+    QVector3D _right, _up, _newUp, _test;
+    _right = QVector3D::crossProduct(_dir, QVector3D(0,1,0));
+    _up = QVector3D::crossProduct(_right, _dir);
+
+    _newUp = _rot1 * QVector3D(0.0f,1.0f,0.0f);
+    //_test = m_rotation * QVector3D(0.0f ,0.0f ,1.0f);
+    _test = _rot1.toEulerAngles();
+
+    _rot2 = QQuaternion::rotationTo(_newUp, _up);
+
+    _rot3 = _rot2 * _rot1;
+
+    //qDebug()<<_test<<_rot1;
+
+//    //apply the correction up rotation
+//    m_rotation = m_rotation * _rot3;
+//    m_dirty = true;
+//    toMatrix();
+//    m_worldPos = -m_translation * m_world;
+
+    return _rot3;
+
+
+}
+
+void Camera3D::reset()
+{
+//    m_world.setToIdentity();
+//    m_world.translate(-m_translation);
+    m_world.lookAt(-m_worldPos, QVector3D(0,0,0),  QVector3D(0,1,0) );
+
+}
+
 
 // Transform To (Setters)
 void Camera3D::setTranslation(const QVector3D &t)
@@ -86,12 +134,13 @@ const QMatrix4x4 &Camera3D::toMatrix()
 {
   if (m_dirty)
   {
-    qDebug("ininin");
     m_dirty = false;
     m_world.setToIdentity();
-    //qDebug()<<m_rotation;
-   m_world.rotate(m_rotation.conjugate());
-   m_world.translate(-m_translation);
+    //if were to rotate about the cameras center call rot.conjugate before translate
+    //m_world.rotate(m_rotation.conjugate());
+    m_world.translate(-m_translation);
+
+    m_world.rotate(m_rotation);
   }
   return m_world;
 }
@@ -109,7 +158,8 @@ QVector3D Camera3D::up() const
 
 QVector3D Camera3D::right() const
 {
-  return m_rotation.rotatedVector(LocalRight);
+  //return m_rotation.rotatedVector(LocalRight);
+    return m_right;
 }
 
 // Qt Streams

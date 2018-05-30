@@ -7,6 +7,8 @@
 #include <Qdebug>
 #include <QTextStream>
 
+//#include <glm/glm.hpp>
+
 
 // Project
 #include "Scene.h"
@@ -51,6 +53,8 @@ int main(int argc, char *argv[])
 {
 
   QGuiApplication app(argc, argv);
+
+  //glm::vec3 position = glm::vec3( 0, 0, 5 );
 
   Window window;
 

@@ -91,54 +91,60 @@ void Window::update()
     inputManager::update();
     // handle key press events
 
-    if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
+    //if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
+    if(inputManager::buttonPressed(Qt::LeftButton))
     {
         //scene()->m_arcCamera.rotate(-0.3f * inputManager::mouseDelta().x(), Camera3D::LocalUp);
         //qDebug()<<Camera3D::LocalUp;
         //scene()->m_arcCamera.rotate(-0.3f * inputManager::mouseDelta().y(), scene()->m_arcCamera.right());
-        scene()->m_arcCamera.rotateAroundPoint_B(inputManager::mouseDelta().x(), inputManager::mouseDelta().y()) ;
+        scene()->m_arcCamera.rotateAroundPoint(0.3*inputManager::mouseDelta().x(), QVector3D(0,1,0)) ;
+        scene()->m_arcCamera.rotateAroundPoint(0.3*inputManager::mouseDelta().y(), scene()->m_arcCamera.right());
+        scene()->m_arcCamera.lookAt(1);
+
+        //scene()->m_arcCamera.rotateAroundPoint_F(0.3*inputManager::mouseDelta().x(), QVector3D(0,1,0)) ;
 
     }
 
     if(inputManager::keyPressed(Qt::Key_Up))
     {
-        qDebug(" -forward");
-        scene()->m_myTransform.translate(0.0, 0.03, 0.0);
+        //scene()->m_myTransform.translate(0.0, 0.03, 0.0);
+        //scene()->m_arcCamera.rotate(2,scene()->m_arcCamera.right());
     }
     if(inputManager::keyPressed(Qt::Key_Down))
     {
-        qDebug(" -down");
-        scene()->m_myTransform.translate(0.0, -0.03, 0.0);
+        //scene()->m_myTransform.translate(0.0, -0.03, 0.0);
+        //scene()->m_arcCamera.rotate(-2,scene()->m_arcCamera.right());
     }
     if(inputManager::keyPressed(Qt::Key_Left))
     {
-        qDebug(" -left");
-        scene()->m_myTransform.translate(-0.03, 0.0, 0.0);
+        //scene()->m_myTransform.translate(-0.03, 0.0, 0.0);
+        //scene()->m_arcCamera.rotate(2,0,1,0);
+        //scene()->m_arcCamera.rotateAroundPoint_F(-15.0, QVector3D(0,1,0));
     }
     if(inputManager::keyPressed(Qt::Key_Right))
     {
-        qDebug(" -right");
-        scene()->m_myTransform.translate(0.03, 0.0, 0.0);
+        //scene()->m_myTransform.translate(0.03, 0.0, 0.0);
+        //scene()->m_arcCamera.rotate(-2,0,1,0);
+        //scene()->m_arcCamera.rotateAroundPoint_F(15.0, QVector3D(0,1,0));
     }
     if(inputManager::keyPressed(Qt::Key_W))
     {
-        qDebug(" -left");
-        scene()->m_camera.translate(0.0, 0.0, 0.03);
+        //scene()->m_camera.translate(0.0, 0.0, 0.03);
+        scene()->m_arcCamera.reset();
     }
     if(inputManager::keyPressed(Qt::Key_S))
     {
-        qDebug(" -right");
-        scene()->m_camera.translate(0.0, 0.0, -0.03);
+        //scene()->m_camera.translate(0.0, 0.0, -0.03);
+        scene()->m_arcCamera.lookAt();
     }
     if(inputManager::keyPressed(Qt::Key_J))
     {
-        scene()->moveRightFocus();
-        qDebug()<<scene()->m_focus;
+        //scene()->m_arcCamera.rotateAroundPoint_G(-15.0, QVector3D(0,1,0));
+
     }
     if(inputManager::keyPressed(Qt::Key_K))
     {
-        qDebug(" -right");
-        scene()->foo();
+        //scene()->m_arcCamera.rotateAroundPoint_G(15.0, QVector3D(0,1,0));
     }
     scene()->update();
     QOpenGLWindow::update();
@@ -158,7 +164,7 @@ void Window::keyPressEvent(QKeyEvent *event)
       //inputManager::foo();
     }
 
-    /*
+
     // Simple QKeyEvent switch
     if (event->isAutoRepeat())
     {
@@ -170,15 +176,34 @@ void Window::keyPressEvent(QKeyEvent *event)
 //      qDebug()<< "keyPressed: "<< event->key();
       switch(event->key())
       {
-        case Qt::Key_Up: qDebug("up key pressed");
+        case Qt::Key_Up:
           //scene()->m_transform.translate(1 , 1);
-          scene()->m_myTransform.translate(0.0, 0.01, 0.0);
-        break;
-        case Qt::Key_Left: qDebug("down key pressed");
-        break;
+          //scene()->m_myTransform.translate(0.0, 0.01, 0.0);
+          //scene()->m_arcCamera.translate(0.0,0.0,0.5);
+          scene()->m_arcCamera.rotateAroundPoint(15.0, scene()->m_arcCamera.right());
+          scene()->m_arcCamera.lookAt(1);
+            break;
+        case Qt::Key_Down:
+          scene()->m_arcCamera.rotateAroundPoint(-15.0, scene()->m_arcCamera.right());
+          scene()->m_arcCamera.lookAt(1);
+          break;
+        case Qt::Key_Left:
+          scene()->m_arcCamera.rotateAroundPoint(-15.0, QVector3D(0,1,0));
+          scene()->m_arcCamera.lookAt(1);
+            break;
+        case Qt::Key_Right:
+          scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
+          scene()->m_arcCamera.lookAt(1);
+            break;
+      case Qt::Key_J:
+          scene()->m_arcCamera.rotateAroundPoint(-15.0, QVector3D(0,1,0));
+          break;
+      case Qt::Key_K:
+          scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
+          break;
       default: break;
       }
-    }*/
+    }
 }
 
 void Window::keyReleaseEvent(QKeyEvent *event)
@@ -195,7 +220,7 @@ void Window::keyReleaseEvent(QKeyEvent *event)
 
 void Window::mousePressEvent(QMouseEvent *event)
 {
-  qDebug()<<"event:"<< event;
+  //qDebug()<<"event:"<< event;
   inputManager::registerMousePress(event->button());
 }
 
