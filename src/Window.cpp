@@ -2,11 +2,15 @@
 // Project
 #include "Window.h"
 #include <iostream>
+#include <algorithm>
 
 #include <QDebug>
 #include <QKeyEvent>
 #include <QString>
 #include <QString>
+#include <QCursor>
+
+#include <typeinfo>
 
 
 // now include Scene.h, to define Window::initializeGL() which calls things from the scene()
@@ -87,19 +91,43 @@ void Window::teardownGL()
 
 void Window::update()
 {
-    // register key, add/remove from inputManager containers
-    inputManager::update();
+    // update() registers keys, add/remove from inputManager containers
+
+    // convert Mouse window coordinates to have origin (0,0) at center of image
+    QPoint _localMousePos = this->mapFromGlobal(QCursor::pos());
+    _localMousePos.setX(_localMousePos.x() - (this->width()/2));
+    _localMousePos.setY((_localMousePos.y() - (this->height()/2)) * -1);
+
+
+    inputManager::update(_localMousePos);
+
     // handle key press events
 
     //if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
+    if(inputManager::buttonTriggered(Qt::LeftButton))
+    {
+        m_inputManger.setMouseTriggeredPosition();
+        scene()->m_arcCamera.setStartRotation();
+    }
+
     if(inputManager::buttonPressed(Qt::LeftButton))
     {
         //scene()->m_arcCamera.rotate(-0.3f * inputManager::mouseDelta().x(), Camera3D::LocalUp);
         //qDebug()<<Camera3D::LocalUp;
         //scene()->m_arcCamera.rotate(-0.3f * inputManager::mouseDelta().y(), scene()->m_arcCamera.right());
-        scene()->m_arcCamera.rotateAroundPoint(0.3*inputManager::mouseDelta().x(), QVector3D(0,1,0)) ;
-        scene()->m_arcCamera.rotateAroundPoint(0.3*inputManager::mouseDelta().y(), scene()->m_arcCamera.right());
+//        scene()->m_arcCamera.rotateAroundPoint(0.3*inputManager::mouseDelta().x(), QVector3D(0,1,0)) ;
+//        scene()->m_arcCamera.rotateAroundPoint(0.3*inputManager::mouseDelta().y(), scene()->m_arcCamera.right());
+
+        //qDebug()<<m_inputManger.mousePosition();
+
+        int _radius = std::min(this->width(), this->height()) / 2;
+        scene()->m_arcCamera.rotateArcBall(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition(), _radius);
     }
+    if(inputManager::buttonReleased(Qt::LeftButton))
+    {
+
+    }
+
 
     if(inputManager::keyPressed(Qt::Key_Up))
     {

@@ -1,9 +1,10 @@
 #include "inputManager.h"
 
-#include <QCursor>
+
 #include <vector>
 #include <algorithm>
 #include <QDebug>
+#include <QCursor>
 
 
 
@@ -33,9 +34,12 @@ typedef std::vector<ButtonInstance> ButtonContainer;
 // Globals
 static KeyContainer sg_keyInstances;
 static ButtonContainer sg_buttonInstances;
+
 static QPoint sg_mouseCurrPosition;
 static QPoint sg_mousePrevPosition;
+static QPoint sg_mouseTriggeredPosition;
 static QPoint sg_mouseDelta;
+static QPoint sg_mouseTriggeredDelta;
 
 
 /*******************************************************************************
@@ -113,25 +117,38 @@ inputManager::InputState inputManager::buttonState(Qt::MouseButton button)
 
 QPoint inputManager::mousePosition()
 {
-  return QCursor::pos();
+  //return QCursor::pos();
+    return sg_mouseCurrPosition;
+}
+
+QPoint inputManager::mouseTriggeredPosition()
+{
+    return sg_mouseTriggeredPosition;
 }
 
 QPoint inputManager::mouseDelta()
 {
-  return sg_mouseDelta;
+    return sg_mouseDelta;
 }
 
-void inputManager::update()
+void inputManager::setMouseTriggeredPosition()
+{
+    sg_mouseTriggeredPosition = sg_mouseCurrPosition;
+}
+
+void inputManager::update(const QPoint &_localMousePos)
 {
     // Update Mouse Delta
     sg_mousePrevPosition = sg_mouseCurrPosition;
-    sg_mouseCurrPosition = QCursor::pos();
+    sg_mouseCurrPosition = _localMousePos;
 
     sg_mouseDelta = sg_mouseCurrPosition - sg_mousePrevPosition;
+    sg_mouseTriggeredDelta = sg_mouseCurrPosition - sg_mouseTriggeredPosition;
 
     // Update KeyState values
     Update(sg_buttonInstances);
     Update(sg_keyInstances);
+
 }
 
 void inputManager::registerKeyPress(int key)

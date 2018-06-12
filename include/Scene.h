@@ -45,10 +45,6 @@ private:
 
   Camera3D m_arcCamera;
   Transform m_myTransform;
-
-
-
-
 };
 
 #endif // SCENE_H

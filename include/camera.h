@@ -1,7 +1,10 @@
 #ifndef QCAMERA_H
 #define QCAMERA_H
 
+#include <QPoint>
+
 #include "transform.h"
+
 
 class Camera3D
 {
@@ -22,8 +25,9 @@ public:
   void rotate(float angle, const QVector3D &axis);
   void rotate(float angle, float ax, float ay, float az);
 
-  void rotateAroundPoint(float _angle, const QVector3D &_axis);
-  QQuaternion lookAt();
+  void rotateAroundPoint(const float _angle, const QVector3D &_axis);
+  void rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggeredPos, const int _radius); //--------WIP--------
+  QQuaternion lookAt();// -----WIP------
   void reset();
 
   // Transform To (Setters)
@@ -32,6 +36,7 @@ public:
   void setRotation(const QQuaternion &r);
   void setRotation(float angle, const QVector3D &axis);
   void setRotation(float angle, float ax, float ay, float az);
+  void setStartRotation();
 
   // Accessors
   const QVector3D& translation() const;
@@ -49,11 +54,14 @@ private:
   QVector3D m_up = QVector3D(0,1,0);
   QVector3D m_front = QVector3D(0,0,-1);
 
+  QVector3D m_worldUp = QVector3D(0,1,0);
+
   QVector3D m_translation;
   QVector3D m_worldPos;
   QVector3D m_pivot = QVector3D(0, 0, 0);
 
   QQuaternion m_rotation;
+  QQuaternion m_startRotation;
   QMatrix4x4 m_world;
 
 

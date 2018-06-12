@@ -106,9 +106,7 @@ void Scene::QtOpenGLinitialize()
     m_vao.release();
     m_vvbo.release();
     m_program->release();
-
     //printVersionInformation();
-
 }
 
 void Scene::paint()

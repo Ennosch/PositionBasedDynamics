@@ -32,10 +32,13 @@ public:
     static inline void foo(){ qDebug("---- inputManager Foo-----"); };
 
     static QPoint mousePosition();
+    static QPoint mouseTriggeredPosition();
     static QPoint mouseDelta();
 
+    void setMouseTriggeredPosition();
+
 private:
-    static void update();
+    static void update(const QPoint &_localMousePos);
     static void registerKeyPress(int key);
     static void registerKeyRelease(int key);
     static void registerMousePress(Qt::MouseButton button);
