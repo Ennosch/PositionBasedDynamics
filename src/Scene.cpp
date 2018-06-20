@@ -67,7 +67,7 @@ Scene::~Scene()
 
 void Scene::initialize()
 {
-  AbstractScene::initialize();
+  AbstractScene::initialize();  
   QtOpenGLinitialize();
 }
 
@@ -79,6 +79,15 @@ void Scene::resize(int width, int height)
 
 void Scene::QtOpenGLinitialize()
 {
+    //make a cube shape
+    Shape a;
+    a = Shape();
+    Shape b = Shape(10);
+
+
+//    m_SceneObjects.push_back(_Cube);
+//    m_SceneObjects.push_back(_Sphere);
+
     glEnable(GL_CULL_FACE);
     //glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -92,9 +101,13 @@ void Scene::QtOpenGLinitialize()
     m_program->bind();
 
     m_vvbo.create();
+    //instead of m_vvbo.create(); does the same, but for ebo the only way
+    //m_vvbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+
     m_vvbo.bind();
     m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
     m_vvbo.allocate(myShape, sizeof(myShape));
+
 
     m_vao.create();
     m_vao.bind();

@@ -13,7 +13,9 @@ SOURCES += \
     src/Window.cpp \
     src/transform.cpp \
     src/inputManager.cpp \
-    src/camera.cpp
+    src/camera.cpp \
+    src/sceneobject.cpp \
+    src/shape.cpp
 
 
 OBJECTS_DIR = build/obj
@@ -27,7 +29,9 @@ HEADERS += \
     include/Window.h \
     include/transform.h \
     include/inputManager.h \
-    include/camera.h
+    include/camera.h \
+    include/sceneobject.h \
+    include/shape.h
 
 OTHER_FILES += \
     .gitignore \

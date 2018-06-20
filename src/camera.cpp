@@ -22,65 +22,14 @@ void Camera3D::rotate(const QQuaternion &dr)
   m_rotation = dr * m_rotation;
 }
 
-void Camera3D::rotateAroundPoint(const float _angle, const QVector3D &_axis)
-{
-    QQuaternion _rot= QQuaternion::fromAxisAndAngle(_axis, _angle);
-    //manipulate the matrix directly is possible but dont
-    //m_world.rotate(_rot);
-    m_rotation = m_rotation * _rot;
-
-    m_dirty = true;
-    toMatrix();
-
-    // retrive camera world position from m_world 4x4 Matrix
-    QVector4D d(m_world.column(3));
-    QVector4D retVec = -d * m_world;
-    QVector3D _worldPos = QVector3D(retVec.x(), retVec.y(), retVec.z());
-    m_worldPos = _worldPos;
-    m_front = -m_worldPos.normalized();
-//    float _dot = QVector3D::dotProduct(-m_worldPos.normalized(), m_worldUp);
-    
-//    if ( 1 - std::abs(_dot) < 0.1 )
-//    {
-//        qDebug()<<"critical crossProduct camForward x worldUp cause vector align :( "<<std::abs(_dot) << "Gramm Schmidt kicking in ";
-        QVector3D _right = QVector3D::crossProduct(-m_worldPos, QVector3D(1,0,0));
-        //qDebug()<<"newRight: "<<_right<<" oldRight: "<<m_right;
-
-        // Gramm Schmidt orthogonlise local m_right, m_forwad, m_up
-        QVector3D x1, x2, x3, v1, v2, v3;
-        x1 = m_front;
-        x2 = m_right;
-        x3 = m_up;
-
-        v1 = x1;
-        v2 = x2 - ((QVector3D::dotProduct(x2,v1) / QVector3D::dotProduct(v1,v1)) * v1);
-
-        v3 = x3 - ((QVector3D::dotProduct(x3,v1) / QVector3D::dotProduct(v1,v1)) * v1)
-                - ((QVector3D::dotProduct(x3,v2) / QVector3D::dotProduct(v2,v2)) * v2);
-
-        m_right = v2;
-        m_worldUp *= -1;
-//    }
-//    else
-//    {
-//        // if not critial compute normal local right vector with cross product
-//        m_right = QVector3D::crossProduct(-m_worldPos.normalized(), QVector3D(0,1,0));
-//        m_up = QVector3D::crossProduct(m_front, m_right);
-//    }
-
-}
-
 void Camera3D::rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggeredPos, const int _radius)
 {
 
     //https://pixeladventuresweb.wordpress.com/2016/10/04/arcball-controller/
     //qDebug()<<_mousePos<<_mouseTriggeredPos;
 
-
-
     QVector3D P1, P2, _axis;
     QQuaternion _rot;
-
 
     float scale = 1;
     float _x2 = std::abs(_mousePos.x());
@@ -121,10 +70,6 @@ void Camera3D::rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggere
 
     m_rotation = _rot * m_startRotation;
     m_dirty = true;
-
-    //qDebug()<<m_rotation<<_length;
-
-
 }
 
 

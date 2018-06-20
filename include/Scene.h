@@ -2,6 +2,11 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+// STL
+#include <vector>
+#include <memory>
+#include <unordered_map>
+
 //Qt
 #include <QMatrix4x4>
 #include <QVector3D>
@@ -15,7 +20,8 @@
 #include "Window.h"
 #include "transform.h"
 #include "camera.h"
-#include "vector"
+#include "sceneobject.h"
+#include "shape.h"
 
 class Scene : public AbstractScene
 {
@@ -45,6 +51,21 @@ private:
 
   Camera3D m_arcCamera;
   Transform m_myTransform;
+
+  std::vector <std::shared_ptr <SceneObject>> m_SceneObjects;
+  std::unordered_map <std::string, std::shared_ptr <Shape>> m_ShapePool;
+
+
 };
 
 #endif // SCENE_H
+
+/*
+ *
+ * WIP for Obejct pool
+/// @brief A container for all the objs we can draw
+std::unordered_map<std::string, ngl::Obj* > m_nglObjPool;
+
+/// @brief A container for all the VAOs we can draw
+std::unordered_map<std::string, std::shared_ptr<ngl::AbstractVAO> > m_nglVAOPool;
+*/

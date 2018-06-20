@@ -12,7 +12,7 @@
 #include "AbstractScene.h"
 #include "inputManager.h"
 
-// forward declare class Scene, to be Window can be constructed with the Scene null-pointer
+// forward declare class Scene, so Window can be constructed with the Scene null-pointer
 class Scene;
 
 class Window : public QOpenGLWindow

@@ -14,7 +14,7 @@
 #include "Scene.h"
 #include "Window.h"
 #include "AbstractScene.h"
-
+#include "shape.h"
 #include <iostream>
 
 QString getString(QString Filename)
@@ -50,13 +50,8 @@ void Read(QString Filename)
 
 int main(int argc, char *argv[])
 {
-
   QGuiApplication app(argc, argv);
-
-  //glm::vec3 position = glm::vec3( 0, 0, 5 );
-
   Window window;
-
 
   QSurfaceFormat fmt;
   fmt.setMinorVersion(3);
@@ -67,9 +62,6 @@ int main(int argc, char *argv[])
   fmt.setRenderableType(QSurfaceFormat::OpenGL);
   fmt.setProfile(QSurfaceFormat::CoreProfile);
   window.setFormat(fmt);
-
-
-  //AbstractScene aScene(&window);
 
   Scene scene(&window);
   window.setScene(&scene);
