@@ -35,6 +35,7 @@ public:
 
   void QtOpenGLinitialize();
   void update();
+  void addShape();
 
 private:
   friend class Window;

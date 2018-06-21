@@ -9,6 +9,12 @@
 class Shape
 {
 public:
+    enum ShapeType
+    {
+        CUBE,
+        SHPERE,
+        OBJ
+    };
     // ctor
     Shape();
     Shape(int _id): m_Id(_id){ qDebug()<<"Ctor 2 Shape";};
@@ -24,20 +30,15 @@ public:
     note: copy assignment operator of 'Shape' is implicitly deleted because field 'm_vao' has a deleted copy assignment operator
      */
     Shape& operator=(const Shape& _rhs);
-
     /*similiar problem as above
      implicit copy constructor has been deleted for QOpenGLVertexArrayObject
      */
     Shape(const Shape& _rhs) :m_Id(_rhs.m_Id){};
 
     void foo(){qDebug("foo");};
-    enum ShapeType
-    {
-        CUBE,
-        SHPERE,
-        OBJ
-    };
 
+
+//-----members-------
     ShapeType type;
     int m_Id;
     QOpenGLBuffer m_vvbo;
