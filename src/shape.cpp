@@ -16,5 +16,17 @@ Shape& Shape::operator=(const Shape &_rhs)
     return *this;
 }
 
+void Shape::initialize()
+{
+
+}
+
+void Shape::release()
+{
+    m_vao.release();
+    m_vvbo.release();
+}
+
+
 
 

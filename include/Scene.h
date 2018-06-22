@@ -23,6 +23,7 @@
 #include "sceneobject.h"
 #include "shape.h"
 
+
 class Scene : public AbstractScene
 {
 
@@ -35,12 +36,18 @@ public:
 
   void QtOpenGLinitialize();
   void update();
-  void addShape();
+  static void addShape(Scene *_scene, std::string _name);
+
+  void QtOpenGLinitialize_debug();
+  void paint_debug();
 
 private:
   friend class Window;
 
   // to cache location the uniform vars
+
+  int m_Id = 5;
+  static int m_ShapeCount;
 
   QOpenGLShaderProgram* m_program;
   QOpenGLBuffer m_vvbo;
@@ -55,9 +62,11 @@ private:
 
   std::vector <std::shared_ptr <SceneObject>> m_SceneObjects;
   std::unordered_map <std::string, std::shared_ptr <Shape>> m_ShapePool;
-
-
 };
+
+//-------------scene Utils------------------
+
+void addShape();
 
 #endif // SCENE_H
 

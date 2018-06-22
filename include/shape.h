@@ -4,6 +4,7 @@
 
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#include <QVector3D>
 
 
 class Shape
@@ -34,15 +35,23 @@ public:
      implicit copy constructor has been deleted for QOpenGLVertexArrayObject
      */
     Shape(const Shape& _rhs) :m_Id(_rhs.m_Id){};
-
-    void foo(){qDebug("foo");};
-
+    // creates buffer, add a name
+    void initialize();
+    void release();
+    inline void foo(){qDebug("foo");};
 
 //-----members-------
-    ShapeType type;
+//private:
     int m_Id;
+    ShapeType type;
     QOpenGLBuffer m_vvbo;
     QOpenGLVertexArrayObject m_vao;
+    std::string m_name;
+    const QVector3D *m_vertices;
+    int m_verticesSize;
+
 
 };
+
+
 #endif // SHAPE_H

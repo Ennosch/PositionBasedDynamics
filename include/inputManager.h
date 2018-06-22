@@ -51,6 +51,7 @@ private:
 
 };
 
+
 inline bool inputManager::keyTriggered(Qt::Key key)
 {
   return keyState(key) == InputTriggered;

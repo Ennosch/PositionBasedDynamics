@@ -131,6 +131,7 @@ void Window::update()
 
     if(inputManager::keyPressed(Qt::Key_Up))
     {
+        qDebug("keyUp");
         //scene()->m_myTransform.translate(0.0, 0.03, 0.0);
         //scene()->m_arcCamera.rotate(2,scene()->m_arcCamera.right());
     }

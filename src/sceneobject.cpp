@@ -31,5 +31,6 @@ void SceneObject::draw()
 void SceneObject::release()
 {
     pShape->m_vao.release();
+    pShape->m_vvbo.release();
 }
 
