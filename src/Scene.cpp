@@ -183,13 +183,84 @@ void Scene::QtOpenGLinitialize()
 
 void Scene::QtOpenGLinitialize_debug()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //make a cube shape
+//    Shape a;
+//    a = Shape();
+//    Shape b = Shape(10);
+
+
+//    m_SceneObjects.push_back(_Cube);
+//    m_SceneObjects.push_back(_Sphere);
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    m_arcCamera.translate(0.0, 0.0, 6.0);
+
+    m_program = new QOpenGLShaderProgram();
+    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/simple.vert");
+    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/simple.frag");
+    m_program->link();
+    m_program->bind();
+
+    m_vvbo.create();
+    //instead of m_vvbo.create(); does the same, but for ebo the only way
+    //m_vvbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+
+    m_vvbo.bind();
+    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vvbo.allocate(myShape, sizeof(myShape));
+
+
+    m_vao.create();
+    m_vao.bind();
+    m_program->enableAttributeArray(0);
+    m_program->enableAttributeArray(1);
+    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 2*sizeof(QVector3D));
+    m_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 2*sizeof(QVector3D));
+
+    m_vao.release();
+    m_vvbo.release();
+    m_program->release();
+    //printVersionInformation();
+
 }
 
 void Scene::paint()
 {
+    //glViewport(0, 0, window()->width(), window()->height());
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_program->bind();
+    m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+    m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+    {
+      m_vao.bind();
+      //float tx = sin(m_window->m_timer);
+      m_model_matrix.translate(0.0, 0.0, 0.0);
+      m_myTransform.setTranslation(QVector3D(0.0f, 0.0f, 0.0f));
+      m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
+      glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
+      m_vao.release();
+    }
+
+    m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+    {
+      m_vao.bind();
+      //float tx = sin(m_window->m_timer);
+      m_model_matrix.translate(0.0, 0.0, 0.0);
+      m_myTransform.setTranslation(QVector3D(0.0f, 1.5f, 0.0f));
+      m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
+      glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
+      m_vao.release();
+    }
+
+
+
+
+    m_program->release();
 }
 
 void Scene::paint_debug()
