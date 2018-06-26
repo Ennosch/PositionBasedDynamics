@@ -4,5 +4,8 @@
         <file alias="geom.vert">resources/shaders/geom.vert</file>
         <file alias="simple.frag">resources/shaders/simple.frag</file>
         <file alias="simple.vert">resources/shaders/simple.vert</file>
+        <file alias="screen.vert">resources/shaders/screen.vert</file>
+        <file alias="screen.frag">resources/shaders/screen.frag</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

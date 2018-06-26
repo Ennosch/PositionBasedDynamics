@@ -198,6 +198,14 @@ void Scene::QtOpenGLinitialize_debug()
 
     m_arcCamera.translate(0.0, 0.0, 6.0);
 
+
+    m_lighting_program = new QOpenGLShaderProgram;
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/screen.vert");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/screen.frag");
+    m_lighting_program->link();
+    m_lighting_program->bind();
+
+
     m_program = new QOpenGLShaderProgram();
     m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/simple.vert");
     m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/simple.frag");
@@ -217,11 +225,76 @@ void Scene::QtOpenGLinitialize_debug()
     m_vao.bind();
     m_program->enableAttributeArray(0);
     m_program->enableAttributeArray(1);
+    // (?) set how this shader should interpret the vertex data coming in ? (vert attrs)
     m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 2*sizeof(QVector3D));
     m_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 2*sizeof(QVector3D));
 
     m_vao.release();
     m_vvbo.release();
+
+    // prepare a QuadPlane
+    static const float quad[] = {
+      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+       1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+       1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+       1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+      -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f
+    };
+    m_quad_vao = new QOpenGLVertexArrayObject(window());
+    m_quad_vao->create();
+    m_quad_vbo.create();
+    m_quad_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_quad_vao->bind();
+    m_quad_vbo.bind();
+    m_quad_vbo.allocate(quad, 30 * sizeof(GLfloat));
+
+    // tell simple shader how to interpret the quadPlane
+    m_lighting_program->setAttributeBuffer("position", GL_FLOAT, 0, 3, 5 * sizeof(GLfloat));
+    m_lighting_program->enableAttributeArray("position");
+    m_lighting_program->setAttributeBuffer("uv", GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
+    m_lighting_program->enableAttributeArray("uv");
+    m_quad_vbo.release();
+    m_quad_vao->release();
+
+    // create a framebuffer
+    m_gbuffer_fbo = new QOpenGLFramebufferObject(window()->width(), window()->height());
+    m_gbuffer_fbo->bind();
+    m_gbuffer_fbo->addColorAttachment(window()->width(), window()->height(), GL_RGB);
+
+    // create a texture the fb can render to
+    m_view_position_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
+    m_view_position_texture->setSize(window()->width(), window()->height());
+    m_view_position_texture->setMinificationFilter(QOpenGLTexture::Nearest);
+    m_view_position_texture->setMagnificationFilter(QOpenGLTexture::Nearest);
+    m_view_position_texture->setFormat(QOpenGLTexture::RGB32F);
+    m_view_position_texture->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::Float32);
+
+
+    //bind the texture to the framebuffer
+    glBindTexture(GL_TEXTURE_2D, m_view_position_texture->textureId());
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_view_position_texture->textureId(), 0);
+
+    //create a render buffer
+    GLuint rbo_depth;
+    glGenRenderbuffers(1, &rbo_depth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo_depth);
+    glRenderbufferStorage(
+      GL_RENDERBUFFER,     // Target
+      GL_DEPTH_COMPONENT,  // Internal Format
+      window()->width(), window()->height()    // Dimensions
+    );
+    glFramebufferRenderbuffer(
+      GL_FRAMEBUFFER,       // Target
+      GL_DEPTH_ATTACHMENT,  // Attachment
+      GL_RENDERBUFFER,      // Renderbuffer Target
+      rbo_depth             // Renderbuffer
+    );
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      qCritical("gBuffer FBO not complete!");
+
+    m_gbuffer_fbo->release();
+
     m_program->release();
     //printVersionInformation();
 
@@ -229,7 +302,45 @@ void Scene::QtOpenGLinitialize_debug()
 
 void Scene::paint()
 {
-    //glViewport(0, 0, window()->width(), window()->height());
+//    // draw to the framebuffer (offline)
+//    m_gbuffer_fbo->bind();
+//      glEnable(GL_DEPTH_TEST);
+//      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//      m_program->bind();
+//      m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+//      m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//      {
+//        m_vao.bind();
+//        //float tx = sin(m_window->m_timer);
+//        m_model_matrix.translate(0.0, 0.0, 0.0);
+//        m_myTransform.setTranslation(QVector3D(0.0f, 0.0f, 0.0f));
+//        m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
+//        glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
+//        m_vao.release();
+//      }
+
+//      m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//      {
+//        m_vao.bind();
+//        //float tx = sin(m_window->m_timer);
+//        m_model_matrix.translate(0.0, 0.0, 0.0);
+//        m_myTransform.setTranslation(QVector3D(0.0f, 1.5f, 0.0f));
+//        m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
+//        glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
+//        m_vao.release();
+//      }
+//    m_gbuffer_fbo->release();
+
+//    // finally draw a quad to the screen
+//    m_lighting_program->bind();
+//    m_view_position_texture->bind(0);
+//    m_quad_vao->bind();
+//    glDrawArrays(GL_TRIANGLES, 0, 6);
+//    m_quad_vao->release();
+//    m_lighting_program->release();
+
+    glViewport(0, 0, window()->width(), window()->height());
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -256,11 +367,7 @@ void Scene::paint()
       glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
       m_vao.release();
     }
-
-
-
-
-    m_program->release();
+//    m_program->release();
 }
 
 void Scene::paint_debug()

@@ -42,3 +42,5 @@ OTHER_FILES += \
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES +=

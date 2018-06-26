@@ -14,6 +14,9 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QtGui/QOpenGLShaderProgram>
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLFramebufferObjectFormat>
+#include <QOpenGLTexture>
 
 // Project
 #include "AbstractScene.h"
@@ -50,8 +53,21 @@ private:
   static int m_ShapeCount;
 
   QOpenGLShaderProgram* m_program;
+  // to simply render the QuadPlane texture
+  QOpenGLShaderProgram* m_lighting_program;
+
   QOpenGLBuffer m_vvbo;
   QOpenGLVertexArrayObject m_vao;
+
+  QOpenGLFramebufferObject* m_gbuffer_fbo;
+  QOpenGLTexture* m_view_position_texture;
+
+  QOpenGLVertexArrayObject* m_quad_vao;
+  QOpenGLBuffer m_quad_vbo;
+
+
+
+
 
   QMatrix4x4 m_model_matrix;
   QMatrix4x4 m_view_matrix;
