@@ -1,26 +1,14 @@
-
-// Project
-#include <Qdebug>
-#include "Scene.h"
 #include <array>
 #include <iostream>
 #include <math.h>
+#include <stdlib.h>
 
+#include <Qdebug>
 #include <QFile>
 #include <QDebug>
 #include <QString>
 
-/*
-//                   P               V              M               Pos
-  gl_Position = cameraToView * worldToCamera * modelToWorld * vec4(position, 1.0);
-
-  red       QVector3D( 1.0f,  0.0f,  0.0f),
-  green     QVector3D( 0.0f,  1.0f,  0.0f),
-  blue      QVector3D( 0.0f,  0.0f,  1.0f),
-  magenta   QVector3D( 1.0f,  0.0f,  1.0f),
-  cyan      QVector3D( 0.0f,  1.0f,  1.0f),
-  yellow    QVector3D( 1.0f,  1.0f,  0.0f),
- */
+#include "Scene.h"
 
 // Front Verticies
 #define VERTEX_FTR QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 1.0f, 0.0f, 0.0f )
@@ -34,6 +22,15 @@
 #define VERTEX_BBL QVector3D(-0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 0.0f, 1.0f )
 #define VERTEX_BBR QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 1.0f )
 
+
+static const float quad[] = {
+  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+   1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+   1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+   1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+  -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f
+};
 
 static const QVector3D myShape[] = {
     // Face 1 (Front)
@@ -58,7 +55,7 @@ static const QVector3D myShape[] = {
 
 Scene::Scene(Window *_window) : AbstractScene(_window)
 {
-    m_myTransform.translate(0.0f, 0.0f, 0.0f);
+
 }
 
 Scene::~Scene()
@@ -68,8 +65,7 @@ Scene::~Scene()
 void Scene::initialize()
 {
   AbstractScene::initialize();  
-//  QtOpenGLinitialize();
-  QtOpenGLinitialize_debug();
+  QtOpenGLinitialize();
 }
 
 void Scene::resize(int width, int height)
@@ -85,31 +81,53 @@ void Scene::addShape(Scene *_scene, std::string _name)
         qDebug()<<_name.data()<<" already exists in ShapePool";
         return;
     }
-    auto _Cube1 = std::make_shared<Shape>(5);
-
-    //qDebug()<<_Cube1->m_Id;
-    _Cube1->m_vao.create();
-    _Cube1->m_vao.bind();
-    _Cube1->m_vvbo.create();
-    //_Cube1->m_vvbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    _Cube1->m_vvbo.bind();
-    _Cube1->m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    _Cube1->m_vertices = &myShape[0];
-    _Cube1->m_verticesSize = sizeof(myShape);
-    _Cube1->m_vvbo.allocate(_Cube1->m_vertices, _Cube1->m_verticesSize);
-    //_Cube1->m_vvbo.allocate(myShape, sizeof(myShape));
-    //m_ShapeCount++;
-    //_Cube1->m_Id = m_ShapeCount;
-    _scene->m_ShapePool[_name] = _Cube1;
+    // create new smart pointer + instanciate new Shape
+    auto pShape = std::make_shared<Shape>();
+    // allocate data on the GPU
+    pShape->allocate(&myShape[0], sizeof(myShape));
+    // add Shape to Pool
+    _scene->m_ShapePool[_name] = pShape;
 }
 
+float Scene::rand(int _mod)
+{
+    float r10 = std::rand() % _mod;
+    float r1 = (std::rand() % _mod) / 10.0;
+    //qDebug()<<"rand is: "<< r10<<"rand1 is: "<< r1 <<" result: "<<r10 * r1;
+    return r10 * r1;
+}
+
+void Scene::addSceneObject(std::string _shape, const QVector3D &_pos)
+{
+    auto pShape = getShapeFromPool(_shape);
+    if(pShape == NULL)
+    {
+        qDebug()<<"WARNING: COULD NOT ADD SceneObject";
+        return;
+    }
+
+    auto pSO = std::make_shared<SceneObject>(this, pShape, _pos);
+    m_SceneObjects.push_back(pSO);
+    return;
+}
+
+std::shared_ptr<Shape> Scene::getShapeFromPool(std::string _key)
+{
+    ShapeMap::const_iterator got = m_ShapePool.find(_key);
+    if ( got == m_ShapePool.end())
+    {
+        qDebug()<< "WARNING: NO SHAPE WERE FOUND";
+    }
+    else
+    {
+        auto _pShape = got->second;
+        return _pShape;
+    }
+    return 0;
+}
 
 void Scene::QtOpenGLinitialize()
 {
-    // create GL Buffer with SceneObject
-//    Shape a;
-//    a = Shape();
-//    Shape b = Shape(10);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -117,130 +135,27 @@ void Scene::QtOpenGLinitialize()
 
     m_arcCamera.translate(0.0, 0.0, 6.0);
 
-    // -------------create GL Shader
-    m_program = new QOpenGLShaderProgram();
-    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/simple.vert");
-    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/simple.frag");
-    m_program->link();
-    m_program->bind();
-
-
-    // -------------create GL Buffers
-//    m_vao.create();
-//    m_vao.bind();
-//    m_vvbo.create();
-//    //instead of m_vvbo.create(); does the same, but for ebo the only way
-//    //m_vvbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-//    m_vvbo.bind();
-//    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-//    m_vvbo.allocate(myShape, sizeof(myShape));
-
-
-    //-------------create OO GL Buffers
-    Scene::addShape(this, "cube");
-
-    m_program->enableAttributeArray(0);
-    m_program->enableAttributeArray(1);
-    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 2*sizeof(QVector3D));
-    m_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 2*sizeof(QVector3D));
-
-    // --------------Unbind and release all GL Shaders and GL Buffers
-//    m_vao.release();
-//    m_vvbo.release();
-
-//    _Cube1->m_vao.release();
-//    _Cube1->m_vvbo.release();
-
-
-    for(uint i = 0; i < m_ShapePool.size() ; i++)
-    {
-        qDebug()<<"---hi";
-//        m_ShapePool[i]->release();
-    }
-    for ( auto it = m_ShapePool.begin(); it != m_ShapePool.end(); ++it )
-    {
-        it->second->release();
-    }
-    m_program->release();
-
-    //m_ShapePool[0]->release();
-    qDebug()<<m_ShapePool.size();
-//    m_ShapePool["cube"]->foo();
-
-    // maybe exception here
-    auto _test = m_ShapePool["cube"];
-
-
-    //----init SceneObjects-------
-    auto _first = std::make_shared<SceneObject>(this, _test);
-    auto _second = std::make_shared<SceneObject>(this, _test);
-    m_SceneObjects.push_back(_first);
-    m_SceneObjects.push_back(_second);
-    m_SceneObjects[1]->setTranslation(QVector3D(1.5f, 1.0f, 0.0f));
-
-    //printVersionInformation();
-}
-
-void Scene::QtOpenGLinitialize_debug()
-{
-    //make a cube shape
-//    Shape a;
-//    a = Shape();
-//    Shape b = Shape(10);
-
-
-//    m_SceneObjects.push_back(_Cube);
-//    m_SceneObjects.push_back(_Sphere);
-
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    m_arcCamera.translate(0.0, 0.0, 6.0);
-
-
+//----build, compline and link shaders
     m_lighting_program = new QOpenGLShaderProgram;
     m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/screen.vert");
     m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/screen.frag");
     m_lighting_program->link();
-    m_lighting_program->bind();
-
 
     m_program = new QOpenGLShaderProgram();
     m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/simple.vert");
     m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/simple.frag");
     m_program->link();
-    m_program->bind();
-
-    m_vvbo.create();
-    //instead of m_vvbo.create(); does the same, but for ebo the only way
-    //m_vvbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-
-    m_vvbo.bind();
-    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vvbo.allocate(myShape, sizeof(myShape));
 
 
-    m_vao.create();
-    m_vao.bind();
+//----add some shape to the ShapePool
+    Scene::addShape(this, "cube");
     m_program->enableAttributeArray(0);
     m_program->enableAttributeArray(1);
-    // (?) set how this shader should interpret the vertex data coming in ? (vert attrs)
     m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 2*sizeof(QVector3D));
     m_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 2*sizeof(QVector3D));
 
-    m_vao.release();
-    m_vvbo.release();
 
-    // prepare a QuadPlane
-    static const float quad[] = {
-      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-       1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-       1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-       1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-      -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f
-    };
+//----prepare a QuadPlane
     m_quad_vao = new QOpenGLVertexArrayObject(window());
     m_quad_vao->create();
     m_quad_vbo.create();
@@ -248,7 +163,6 @@ void Scene::QtOpenGLinitialize_debug()
     m_quad_vao->bind();
     m_quad_vbo.bind();
     m_quad_vbo.allocate(quad, 30 * sizeof(GLfloat));
-
     // tell simple shader how to interpret the quadPlane
     m_lighting_program->setAttributeBuffer("position", GL_FLOAT, 0, 3, 5 * sizeof(GLfloat));
     m_lighting_program->enableAttributeArray("position");
@@ -257,19 +171,36 @@ void Scene::QtOpenGLinitialize_debug()
     m_quad_vbo.release();
     m_quad_vao->release();
 
+//----Fill SceneObjects array
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+    addSceneObject("cube", QVector3D(rand(), rand(),rand()));
+
     // create a framebuffer
-    m_gbuffer_fbo = new QOpenGLFramebufferObject(window()->width(), window()->height());
+    m_gbuffer_fbo = new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2);
     m_gbuffer_fbo->bind();
-    m_gbuffer_fbo->addColorAttachment(window()->width(), window()->height(), GL_RGB);
+    m_gbuffer_fbo->addColorAttachment(window()->width()*2, window()->height()*2, GL_RGB);
 
     // create a texture the fb can render to
     m_view_position_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
-    m_view_position_texture->setSize(window()->width(), window()->height());
+    m_view_position_texture->setSize(window()->width()*2, window()->height()*2);
     m_view_position_texture->setMinificationFilter(QOpenGLTexture::Nearest);
     m_view_position_texture->setMagnificationFilter(QOpenGLTexture::Nearest);
     m_view_position_texture->setFormat(QOpenGLTexture::RGB32F);
     m_view_position_texture->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::Float32);
-
 
     //bind the texture to the framebuffer
     glBindTexture(GL_TEXTURE_2D, m_view_position_texture->textureId());
@@ -282,7 +213,7 @@ void Scene::QtOpenGLinitialize_debug()
     glRenderbufferStorage(
       GL_RENDERBUFFER,     // Target
       GL_DEPTH_COMPONENT,  // Internal Format
-      window()->width(), window()->height()    // Dimensions
+      window()->width()*2, window()->height()*2    // Dimensions
     );
     glFramebufferRenderbuffer(
       GL_FRAMEBUFFER,       // Target
@@ -295,115 +226,43 @@ void Scene::QtOpenGLinitialize_debug()
 
     m_gbuffer_fbo->release();
 
-    m_program->release();
     //printVersionInformation();
 
 }
 
 void Scene::paint()
 {
-//    // draw to the framebuffer (offline)
-//    m_gbuffer_fbo->bind();
-//      glEnable(GL_DEPTH_TEST);
-//      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // draw to the framebuffer (off-screen render)
+//    glViewport(0,0, m_gbuffer_fbo->width(), m_gbuffer_fbo->height());
+    m_gbuffer_fbo->bind();
+      glEnable(GL_DEPTH_TEST);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
+      m_program->bind();
+      m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+      m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+      for(uint i = 0; i < m_SceneObjects.size() ; i++)
+      {
+        m_SceneObjects[i]->bind();
+        m_program->setUniformValue("ModelMatrix", m_SceneObjects[i]->getMatrix());
+        glDrawArrays(GL_TRIANGLES, 0, m_SceneObjects[i]->shape()->getVertsSize() /
+                     sizeof(m_SceneObjects[i]->shape()->getData()[0]));
+        m_SceneObjects[i]->release();
+      }
+      m_program->release();
+    m_gbuffer_fbo->release();
 
-//      m_program->bind();
-//      m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-//      m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-//      {
-//        m_vao.bind();
-//        //float tx = sin(m_window->m_timer);
-//        m_model_matrix.translate(0.0, 0.0, 0.0);
-//        m_myTransform.setTranslation(QVector3D(0.0f, 0.0f, 0.0f));
-//        m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
-//        glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
-//        m_vao.release();
-//      }
-
-//      m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-//      {
-//        m_vao.bind();
-//        //float tx = sin(m_window->m_timer);
-//        m_model_matrix.translate(0.0, 0.0, 0.0);
-//        m_myTransform.setTranslation(QVector3D(0.0f, 1.5f, 0.0f));
-//        m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
-//        glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
-//        m_vao.release();
-//      }
-//    m_gbuffer_fbo->release();
-
-//    // finally draw a quad to the screen
-//    m_lighting_program->bind();
-//    m_view_position_texture->bind(0);
-//    m_quad_vao->bind();
-//    glDrawArrays(GL_TRIANGLES, 0, 6);
-//    m_quad_vao->release();
-//    m_lighting_program->release();
-
-    glViewport(0, 0, window()->width(), window()->height());
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    // draw to screen
+    glViewport ( 0, 0, window()->width()*2, window()->height()*2);
+    glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    m_program->bind();
-    m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-    m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-    {
-      m_vao.bind();
-      //float tx = sin(m_window->m_timer);
-      m_model_matrix.translate(0.0, 0.0, 0.0);
-      m_myTransform.setTranslation(QVector3D(0.0f, 0.0f, 0.0f));
-      m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
-      glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
-      m_vao.release();
-    }
-
-    m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-    {
-      m_vao.bind();
-      //float tx = sin(m_window->m_timer);
-      m_model_matrix.translate(0.0, 0.0, 0.0);
-      m_myTransform.setTranslation(QVector3D(0.0f, 1.5f, 0.0f));
-      m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
-      glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
-      m_vao.release();
-    }
-//    m_program->release();
-}
-
-void Scene::paint_debug()
-{
-  //glViewport(0, 0, window()->width(), window()->height());
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//  glClear(GL_COLOR_BUFFER_BIT);
-
-  m_program->bind();
-  m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-  m_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-  {
-    //-------GL draw
-//    m_vao.bind();
-//    //float tx = sin(m_window->m_timer);
-//    m_model_matrix.translate(0.0, 0.0, 0.0);
-//    m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
-//    glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
-//    m_vao.release();
-    //-------GL OO draw
-    for(uint i = 0; i < m_SceneObjects.size() ; i++)
-    {
-//      qDebug()<<"enter :"<< m_SceneObjects[i]->m_Id;
-
-      m_SceneObjects[i]->bind();
-
-      //glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
-      m_model_matrix.translate(0.0, 0.0, 0.0);
-//      m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
-      m_program->setUniformValue("ModelMatrix", m_SceneObjects[i]->getMatrix());
-      glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
-      m_SceneObjects[i]->release();
-    }
-  }
-  m_program->release();
+    // finally draw a quad to the screen
+    m_lighting_program->bind();
+    m_view_position_texture->bind(0);
+    m_quad_vao->bind();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    m_quad_vao->release();
+    m_lighting_program->release();
 }
 
 void Scene::update()

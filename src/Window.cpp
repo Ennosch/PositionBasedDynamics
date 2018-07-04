@@ -201,20 +201,15 @@ void Window::keyPressEvent(QKeyEvent *event)
       switch(event->key())
       {
         case Qt::Key_Up:
-          scene()->m_myTransform.translate(0.0, 0.01, 0.0);
-
           //scene()->m_arcCamera.rotateAroundPoint(15.0, scene()->m_arcCamera.right());
             break;
         case Qt::Key_Down:
-          scene()->m_myTransform.translate(0.0, -0.01, 0.0);
           //scene()->m_arcCamera.rotateAroundPoint(-15.0, scene()->m_arcCamera.right());
           break;
         case Qt::Key_Left:
-          scene()->m_myTransform.translate(0.1, 0.0, 0.0);
           //scene()->m_arcCamera.rotateAroundPoint(-15.0, QVector3D(0,1,0));
             break;
         case Qt::Key_Right:
-          scene()->m_myTransform.translate(-0.1, 0.0, 0.0);
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
             break;
       case Qt::Key_J:

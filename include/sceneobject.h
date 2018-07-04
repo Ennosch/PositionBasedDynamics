@@ -15,12 +15,15 @@ class SceneObject
 public:
     SceneObject();
     SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape);
+    SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape, const QVector3D &_pos);
 
     void bind();
     void draw();
     void release();
     void setTranslation(const QVector3D &_dt);
     const QMatrix4x4 getMatrix();
+
+    std::shared_ptr<Shape> shape();
     int m_Id = 33;
 
 private:
@@ -32,5 +35,6 @@ private:
 
 inline const QMatrix4x4 SceneObject::getMatrix(){return m_Transform.toMatrix();};
 inline void SceneObject::setTranslation(const QVector3D &_dt){m_Transform.translate(_dt);};
+inline std::shared_ptr<Shape> SceneObject::shape(){return pShape; };
 
 #endif // SCENEOBJECT_H

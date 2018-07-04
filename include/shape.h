@@ -20,7 +20,6 @@ public:
     Shape();
     Shape(int _id): m_Id(_id){ qDebug()<<"Ctor 2 Shape";};
 
-
     /*
      * user def copy assigment, copy assigment for QOpenGLVertexArrayObject has been deleted
     // C++11 rule, if T has member cannot be copy-assigned, = is implicitly delted
@@ -36,12 +35,15 @@ public:
      */
     Shape(const Shape& _rhs) :m_Id(_rhs.m_Id){};
     // creates buffer, add a name
-    void initialize();
+    void allocate(const QVector3D *_data, int _size);
     void release();
+    void bind();
     inline void foo(){qDebug("foo");};
+    inline int getVertsSize(){return m_verticesSize;};
+    inline const QVector3D* getData(){return m_vertices; };
 
 //-----members-------
-//private:
+private:
     int m_Id;
     ShapeType type;
     QOpenGLBuffer m_vvbo;
@@ -52,6 +54,8 @@ public:
 
 
 };
+
+inline void Shape::bind(){m_vao.bind(); };
 
 
 #endif // SHAPE_H

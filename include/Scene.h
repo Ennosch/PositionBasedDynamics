@@ -27,6 +27,8 @@
 #include "shape.h"
 
 
+typedef std::unordered_map <std::string, std::shared_ptr <Shape>> ShapeMap;
+
 class Scene : public AbstractScene
 {
 
@@ -36,13 +38,17 @@ public:
   void initialize();
   void resize(int width, int height);
   void paint();
+  void update();
 
   void QtOpenGLinitialize();
-  void update();
-  static void addShape(Scene *_scene, std::string _name);
 
-  void QtOpenGLinitialize_debug();
-  void paint_debug();
+  void addSceneObject(std::string _shape);
+  void addSceneObject(std::string _shape, const QVector3D &_pos);
+  static void addShape(Scene *_scene, std::string _name);
+  float rand(int _mod = 10);
+
+  std::shared_ptr<Shape> getShapeFromPool(std::string _key);
+
 
 private:
   friend class Window;
@@ -53,11 +59,10 @@ private:
   static int m_ShapeCount;
 
   QOpenGLShaderProgram* m_program;
-  // to simply render the QuadPlane texture
   QOpenGLShaderProgram* m_lighting_program;
 
-  QOpenGLBuffer m_vvbo;
-  QOpenGLVertexArrayObject m_vao;
+//  QOpenGLBuffer m_vvbo;
+//  QOpenGLVertexArrayObject m_vao;
 
   QOpenGLFramebufferObject* m_gbuffer_fbo;
   QOpenGLTexture* m_view_position_texture;
@@ -65,33 +70,21 @@ private:
   QOpenGLVertexArrayObject* m_quad_vao;
   QOpenGLBuffer m_quad_vbo;
 
-
-
-
-
-  QMatrix4x4 m_model_matrix;
+//  QMatrix4x4 m_model_matrix;
   QMatrix4x4 m_view_matrix;
   QMatrix4x4 m_projection_matrix;
 
   Camera3D m_arcCamera;
-  Transform m_myTransform;
+//  Transform m_myTransform;
 
   std::vector <std::shared_ptr <SceneObject>> m_SceneObjects;
-  std::unordered_map <std::string, std::shared_ptr <Shape>> m_ShapePool;
+  ShapeMap m_ShapePool;
 };
 
-//-------------scene Utils------------------
+void inline Scene::addSceneObject(std::string _shape){ addSceneObject(_shape, QVector3D(0.0f, 0.0f, 0.0f)); };
 
+//-------------scene Utils------------------
 void addShape();
 
+
 #endif // SCENE_H
-
-/*
- *
- * WIP for Obejct pool
-/// @brief A container for all the objs we can draw
-std::unordered_map<std::string, ngl::Obj* > m_nglObjPool;
-
-/// @brief A container for all the VAOs we can draw
-std::unordered_map<std::string, std::shared_ptr<ngl::AbstractVAO> > m_nglVAOPool;
-*/

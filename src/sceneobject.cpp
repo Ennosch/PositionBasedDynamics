@@ -6,21 +6,25 @@ SceneObject::SceneObject()
 {
     qDebug()<<"dtor: initScene Object";
 }
-//std::shared_ptr<Shape>
+
 SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape) :
     pScene(_scene),
     pShape(_Shape)
 {
     qDebug()<<"ctor: initScene Object";
-//    auto pShape = std::make_shared<Shape>(7);
-//    //pShape->m_Id = 5;
-//    qDebug()<<pShape->m_Id;
-
 }
+
+SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape, const QVector3D &_pos) :
+    pScene(_scene),
+    pShape(_Shape)
+{
+    m_Transform.setTranslation(_pos);
+}
+
 
 void SceneObject::bind()
 {
-    pShape->m_vao.bind();
+    pShape->bind();
 }
 
 void SceneObject::draw()
@@ -30,7 +34,5 @@ void SceneObject::draw()
 
 void SceneObject::release()
 {
-    pShape->m_vao.release();
-    pShape->m_vvbo.release();
+    pShape->release();
 }
-
