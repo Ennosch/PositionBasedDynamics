@@ -36,7 +36,9 @@ public:
   void setRotation(const QQuaternion &r);
   void setRotation(float angle, const QVector3D &axis);
   void setRotation(float angle, float ax, float ay, float az);
-  void setStartRotation();
+  void arcBallStart();
+
+  void inline foo(){qDebug("foo");}
 
   // Accessors
   const QVector3D& translation() const;
@@ -47,6 +49,7 @@ public:
   QVector3D forward() const;
   QVector3D up() const;
   QVector3D right() const;
+  QVector3D worldPos() const;
 
 private:
   bool m_dirty;
@@ -58,12 +61,13 @@ private:
 
   QVector3D m_translation;
   QVector3D m_worldPos;
-  QVector3D m_pivot = QVector3D(0, 0, 0);
+  QVector3D m_PreWorldPos;
+
+  QVector3D m_pivot;
 
   QQuaternion m_rotation;
   QQuaternion m_startRotation;
   QMatrix4x4 m_world;
-
 
 #ifndef QT_NO_DATASTREAM
   friend QDataStream &operator<<(QDataStream &out, const Camera3D &transform);

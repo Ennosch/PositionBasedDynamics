@@ -6,6 +6,11 @@
         <file alias="simple.vert">resources/shaders/simple.vert</file>
         <file alias="screen.vert">resources/shaders/screen.vert</file>
         <file alias="screen.frag">resources/shaders/screen.frag</file>
+        <file alias="tmp.vert">resources/shaders/tmp.vert</file>
+        <file alias="tmp.frag">resources/shaders/tmp.frag</file>
+        <file alias="flat.vert">resources/shaders/flat.vert</file>
+        <file alias="flat.frag">resources/shaders/flat.frag</file>
+
     </qresource>
     <qresource prefix="/"/>
 </RCC>
