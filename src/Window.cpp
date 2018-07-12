@@ -98,9 +98,7 @@ void Window::update()
     _localMousePos.setX(_localMousePos.x() - (this->width()/2));
     _localMousePos.setY((_localMousePos.y() - (this->height()/2)) * -1);
 
-
     inputManager::update(_localMousePos);
-
     // handle key press events
 
     //if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
@@ -117,71 +115,53 @@ void Window::update()
         int _radius = std::min(this->width(), this->height()) / 2;
         scene()->m_arcCamera.rotateArcBall(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition(), _radius);
     }
-    if(inputManager::buttonReleased(Qt::LeftButton))
-    {
-
-    }
 
     // RightButton
     if(inputManager::buttonTriggered(Qt::RightButton))
     {
-
+        scene()->m_arcCamera.trackStart(m_inputManger.mousePosition());
     }
 
     if(inputManager::buttonPressed(Qt::RightButton))
     {
-
+        scene()->m_arcCamera.dolly(m_inputManger.mousePosition());
     }
-    if(inputManager::buttonReleased(Qt::RightButton))
-    {
 
-    // MiddleButton
-    }
     if(inputManager::buttonTriggered(Qt::MidButton))
     {
-
+        scene()->m_arcCamera.trackStart(m_inputManger.mousePosition());
     }
 
     if(inputManager::buttonPressed(Qt::MidButton))
     {
-
-    }
-    if(inputManager::buttonReleased(Qt::MidButton))
-    {
-
+        scene()->m_arcCamera.track(m_inputManger.mousePosition());
     }
 
     // handle Keyboard key states
     if(inputManager::keyPressed(Qt::Key_Up))
     {
-        auto a = scene()->getShapeFromIndex(0);
-        a->translate(QVector3D(0,0.4,0));
+//          scene()->m_arcCamera.translate(QVector3D(0,0,1));
     }
 
     if(inputManager::keyPressed(Qt::Key_Down))
     {
-        auto a = scene()->getShapeFromIndex(0);
-        a->translate(QVector3D(0,-0.4,0));
+
     }
     if(inputManager::keyPressed(Qt::Key_Left))
     {
-        auto a = scene()->getShapeFromIndex(0);
-        a->translate(QVector3D(0,0,0.4));
+
     }
     if(inputManager::keyPressed(Qt::Key_Right))
     {
-        auto a = scene()->getShapeFromIndex(0);
-        a->translate(QVector3D(0,0,-0.4));
+
     }
     if(inputManager::keyPressed(Qt::Key_0))
     {
-        auto a = scene()->getShapeFromIndex(0);
-        a->translate(QVector3D(-0.4,0,0));
+
     }
     if(inputManager::keyPressed(Qt::Key_1))
     {
-        auto a = scene()->getShapeFromIndex(0);
-        a->translate(QVector3D(0.4,0,0));
+
     }
     if(inputManager::keyPressed(Qt::Key_W))
     {
@@ -223,7 +203,7 @@ void Window::keyPressEvent(QKeyEvent *event)
     }
     else
     {
-      qDebug()<<event;
+//      qDebug()<<event;
       inputManager::registerKeyPress(event->key());
       //inputManager::foo();
     }
@@ -241,32 +221,62 @@ void Window::keyPressEvent(QKeyEvent *event)
       switch(event->key())
       {
         case Qt::Key_Up:
-          //scene()->m_arcCamera.rotateAroundPoint(15.0, scene()->m_arcCamera.right());
+          scene()->m_arcCamera.rotate(15,1,0,0);
             break;
         case Qt::Key_Down:
-          //scene()->m_arcCamera.rotateAroundPoint(-15.0, scene()->m_arcCamera.right());
+          scene()->m_arcCamera.rotate(-15,1,0,0);
           break;
         case Qt::Key_Left:
-          //scene()->m_arcCamera.rotateAroundPoint(-15.0, QVector3D(0,1,0));
+          scene()->m_arcCamera.rotate(-15,0,1,0);
             break;
         case Qt::Key_Right:
-          //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
+          scene()->m_arcCamera.rotate(15,0,1,0);
             break;
       case Qt::Key_J:
-          scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), 10.0));
+          scene()->m_arcCamera.rotate(15,0,0,1);
           //scene()->m_arcCamera.rotateAroundPoint(-15.0, QVector3D(0,1,0));
           break;
       case Qt::Key_K:
-           scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), -10.0));
+//           scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), -10.0));
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
+          scene()->m_arcCamera.rotate(-15,0,0,1);
           break;
       case Qt::Key_I:
-           scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(0,1,0), 10.0));
+//           scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(0,1,0), 10.0));
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
+          scene()->m_arcCamera.info();
           break;
       case Qt::Key_M:
-           scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(0,1,0), -10.0));
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
+          break;
+      case Qt::Key_F:
+           scene()->m_arcCamera.reset(m_inputManger.mousePosition());
+          break;
+
+      case Qt::Key_7:
+           scene()->m_arcCamera.translatePivot(QVector3D(1,0,0));
+           scene()->m_arcCamera.translate(QVector3D(1,0,0));
+          break;
+
+      case Qt::Key_8:
+           scene()->m_arcCamera.translatePivot(QVector3D(-1,0,0));
+           scene()->m_arcCamera.translate(QVector3D(-1,0,0));
+          break;
+      case Qt::Key_4:
+          scene()->m_arcCamera.translatePivot(QVector3D(0,1,0));
+           scene()->m_arcCamera.translate(QVector3D(0,1,0));
+        break;
+      case Qt::Key_5:
+           scene()->m_arcCamera.translatePivot(QVector3D(0,-1,0));
+           scene()->m_arcCamera.translate(QVector3D(0,-1,0));
+        break;
+      case Qt::Key_1:
+           scene()->m_arcCamera.translatePivot(QVector3D(0,0,1));
+           scene()->m_arcCamera.translate(QVector3D(0,0,1));
+        break;
+      case Qt::Key_2:
+           scene()->m_arcCamera.translatePivot(QVector3D(0,0,-1));
+           scene()->m_arcCamera.translate(QVector3D(0,0,-1));
           break;
       default: break;
       }
@@ -287,7 +297,7 @@ void Window::keyReleaseEvent(QKeyEvent *event)
 
 void Window::mousePressEvent(QMouseEvent *event)
 {
-  qDebug()<<"event:"<< event;
+//  qDebug()<<"event:"<< event;
   inputManager::registerMousePress(event->button());
 }
 

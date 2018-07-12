@@ -209,7 +209,11 @@ void Scene::QtOpenGLinitialize()
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_arcCamera.translate(0.0, 0.0, 6.0);
+    m_arcCamera.translate(0.0f, 0.0f, 6.0f);
+    m_arcCamera.SetWorldPos(QVector3D(0.0f, 0.0f, 6.0f));
+    m_arcCamera.SetPivot(QVector3D(0.0f, 0.0f, 0.0f));
+    m_arcCamera.SetPivotToCam(QVector3D(0,0,6));
+    m_arcCamera.arcBallStart();
 
 
 //----build, compline and link shaders
@@ -240,7 +244,6 @@ void Scene::QtOpenGLinitialize()
 //    m_program->enableAttributeArray(1);
 //    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 2*sizeof(QVector3D));
 //    m_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 2*sizeof(QVector3D));
-
 
 //----add some shape to the ShapePool
 //    BufferSpec cubeSpec;
@@ -348,15 +351,30 @@ void Scene::paint()
       glEnable(GL_DEPTH_TEST);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
+
       m_lighting_program->bind();
       m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
       m_lighting_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
 
-      m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
-      m_lighting_program->setUniformValue("lightColor", 1.0f, 1.0f, 1.0f);
-      m_lighting_program->setUniformValue("lightPos", m_SceneObjects[0]->getPos());
       m_lighting_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+      m_lighting_program->setUniformValue("material.diffuse", QVector3D(0.6f, 0.3f, 0.1f));
+      m_lighting_program->setUniformValue("material.ambient", QVector3D(1.0f, 0.1f, 0.1f));
+      m_lighting_program->setUniformValue("material.specular", QVector3D(0.0f, 1.0f, 0.0f));
+      m_lighting_program->setUniformValue("material.shininess", 20);
 
+      // set light uniforms
+      for(uint i = 0; i < m_lights.size(); i++)
+      {
+          std::string uniFName = "dirLights[" + std::to_string(i) +"]";
+          m_lighting_program->setUniformValue((uniFName+".direction").c_str(), m_lights[i].direction);
+          m_lighting_program->setUniformValue((uniFName+".specular").c_str(), m_lights[i].specular);
+          m_lighting_program->setUniformValue((uniFName+".diffuse").c_str(), m_lights[i].diffuse);
+          m_lighting_program->setUniformValue((uniFName+".ambient").c_str(), m_lights[i].ambient);
+      }
+
+      int i = 1;
+      std::string uniFName = "dirLights[" + std::to_string(i) +"]";
+      m_lighting_program->setUniformValue((uniFName+".diffuse").c_str(), m_lights[i].diffuse);
 
       // draw cube with phong shader
       for(uint i = 1; i < m_SceneObjects.size(); i++)
@@ -376,10 +394,12 @@ void Scene::paint()
       m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
 
       m_SceneObjects[0]->bind();
-      m_lighting_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
+      m_SceneObjects[0]->setTranslation(m_arcCamera.pivot());
+      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
       glDrawArrays(GL_TRIANGLES, 0, m_SceneObjects[0]->shape()->getVertsSize() /
                    sizeof(m_SceneObjects[0]->shape()->getData()[0]));
       m_SceneObjects[0]->release();
+      m_flat_program->release();
 
 //      m_lighting_program->release();
     m_gbuffer_fbo->release();
@@ -437,17 +457,17 @@ void Scene::initLights()
 
     lightA.direction = QVector3D(0.0, 0.2, -1.0);
     lightA.ambient = QVector3D(0.1, 0.1, 0.1);
-    lightA.diffuse = QVector3D(0.2, 0.2, 0.2);
+    lightA.diffuse = QVector3D(1.0, 0.0, 0.0);
     lightA.specular = QVector3D(0.4, 0.4, 0.4);
 
-    lightB.direction = QVector3D(1.0, 0.8, 0.0);
-    lightB.ambient = QVector3D(0.0, 0.0, 0.0);
-    lightB.diffuse = QVector3D(0.1, 0.1, 0.1);
-    lightB.specular = QVector3D(0.3, 0.3, 0.3);
+    lightB.direction = QVector3D(1.0, 0.8, 0.2);
+    lightB.ambient = QVector3D(0.2, 0.2, 0.2);
+    lightB.diffuse = QVector3D(1.0, 1.0, 1.0);
+    lightB.specular = QVector3D(0.0, 1.0, 0.0);
 
     lightC.direction = QVector3D(-0.3, 0.5, 1.0);
     lightC.ambient = QVector3D(0.0, 0.0, 0.0);
-    lightC.diffuse = QVector3D(0.0, 0.0, 0.6);
+    lightC.diffuse = QVector3D(0.0, 0.0, 0.0);
     lightC.specular = QVector3D(0.1, 0.1, 0.4);
 
     m_lights.push_back(lightA);

@@ -5,6 +5,7 @@
 
 #include "transform.h"
 
+#define myqDebug() qDebug() << fixed << qSetRealNumberPrecision(3)
 
 class Camera3D
 {
@@ -20,6 +21,7 @@ public:
 
   // Transform By (Add/Scale)
   void translate(const QVector3D &dt);
+  void translatePivot(const QVector3D &dt);
   void translate(float dx, float dy, float dz);
   void rotate(const QQuaternion &dr);
   void rotate(float angle, const QVector3D &axis);
@@ -27,8 +29,17 @@ public:
 
   void rotateAroundPoint(const float _angle, const QVector3D &_axis);
   void rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggeredPos, const int _radius); //--------WIP--------
+  void arcBallStart();
+
+  void dolly(const QPoint &_mousePos);
+  void dollyStart(const QPoint &_mousePos);
+
+  void track(const QPoint &_mousePos);
+  void trackStart(const QPoint &_mousePos);
+  void info();
+
   QQuaternion lookAt();// -----WIP------
-  void reset();
+  void reset(const QPoint &_mousePos);
 
   // Transform To (Setters)
   void setTranslation(const QVector3D &t);
@@ -36,7 +47,10 @@ public:
   void setRotation(const QQuaternion &r);
   void setRotation(float angle, const QVector3D &axis);
   void setRotation(float angle, float ax, float ay, float az);
-  void arcBallStart();
+  void SetPivot(const QVector3D &_pivot);
+  void SetWorldPos(const QVector3D &_pos);
+  void SetPivotToCam(const QVector3D &_pivot);
+
 
   void inline foo(){qDebug("foo");}
 
@@ -45,28 +59,29 @@ public:
   const QQuaternion& rotation() const;
   const QMatrix4x4& toMatrix();
 
+
+
   // Queries
   QVector3D forward() const;
   QVector3D up() const;
   QVector3D right() const;
   QVector3D worldPos() const;
+  QVector3D pivot() const;
 
 private:
   bool m_dirty;
-  QVector3D m_right = QVector3D(1,0,0);
-  QVector3D m_up = QVector3D(0,1,0);
-  QVector3D m_front = QVector3D(0,0,-1);
 
-  QVector3D m_worldUp = QVector3D(0,1,0);
+  QVector3D m_translation,
+            m_worldPos,
+            m_PreWorldPos,
+            m_pivot,
+            m_pivotToCam,
+            m_PrePivotToCam;
 
-  QVector3D m_translation;
-  QVector3D m_worldPos;
-  QVector3D m_PreWorldPos;
+  QPoint m_mousePos, m_prevMousePos;
 
-  QVector3D m_pivot;
+  QQuaternion m_rotation, m_deltaRotation, m_startRotation;
 
-  QQuaternion m_rotation;
-  QQuaternion m_startRotation;
   QMatrix4x4 m_world;
 
 #ifndef QT_NO_DATASTREAM
@@ -77,11 +92,22 @@ private:
 
 Q_DECLARE_TYPEINFO(Camera3D, Q_MOVABLE_TYPE);
 
+
+inline void Camera3D::info()
+{
+
+    myqDebug()<<"WP: "<<m_worldPos<<" m_pivotToCam :"<<m_pivotToCam;
+
+};
+
+inline QVector3D Camera3D::pivot() const { return m_pivot; };
+inline void Camera3D::SetPivotToCam(const QVector3D &_pivot) { m_pivotToCam = _pivot; };
+
 // Constructors
-inline Camera3D::Camera3D() : m_dirty(true), m_worldPos(m_translation) {}
 
 // Transform By (Add/Scale)
 inline void Camera3D::translate(float dx, float dy,float dz) { translate(QVector3D(dx, dy, dz)); }
+inline void Camera3D::translatePivot(const QVector3D &dt) { m_pivot += dt; };
 inline void Camera3D::rotate(float angle, const QVector3D &axis) { rotate(QQuaternion::fromAxisAndAngle(axis, angle)); }
 inline void Camera3D::rotate(float angle, float ax, float ay,float az) { rotate(QQuaternion::fromAxisAndAngle(ax, ay, az, angle)); }
 
@@ -89,6 +115,9 @@ inline void Camera3D::rotate(float angle, float ax, float ay,float az) { rotate(
 inline void Camera3D::setTranslation(float x, float y, float z) { setTranslation(QVector3D(x, y, z)); }
 inline void Camera3D::setRotation(float angle, const QVector3D &axis) { setRotation(QQuaternion::fromAxisAndAngle(axis, angle)); }
 inline void Camera3D::setRotation(float angle, float ax, float ay, float az) { setRotation(QQuaternion::fromAxisAndAngle(ax, ay, az, angle)); }
+inline void Camera3D::SetPivot(const QVector3D &_pivot){ m_pivot = _pivot; };
+
+inline void Camera3D::SetWorldPos(const QVector3D &_pos){ m_worldPos = _pos; };
 
 // Accessors
 inline const QVector3D& Camera3D::translation() const { return m_translation; }

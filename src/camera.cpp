@@ -3,7 +3,7 @@
 #include <QDebug>
 
 
-#define myqDebug() qDebug() << fixed << qSetRealNumberPrecision(3)
+
 
 const QVector3D Camera3D::LocalForward(0.0f, 0.0f, -1.0f);
 const QVector3D Camera3D::LocalUp(0.0f, 1.0f, 0.0f);
@@ -11,32 +11,31 @@ const QVector3D Camera3D::LocalRight(1.0f, 0.0f, 0.0f);
 
 const float m_pi = 3.14159265;
 
+
+Camera3D::Camera3D()
+    : m_dirty(true), m_worldPos(m_translation)
+{
+    m_pivot = QVector3D(0.0, 0.0, 0.0);
+}
+
+
 // Transform By (Add/Scale)
 void Camera3D::translate(const QVector3D &dt)
 {
   m_dirty = true;
   m_translation += dt;
-  m_worldPos += dt;
 }
 
 void Camera3D::rotate(const QQuaternion &dr)
 {
   m_dirty = true;
   m_rotation = dr * m_rotation;
-
-//  m_worldPos = dr.rotatedVector(m_worldPos);
-
-
-  qDebug()<<"---------";
-//  myqDebug()<<_test;
-//  qDebug()<<m_worldPos.length();
 }
 
 void Camera3D::rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggeredPos, const int _radius)
 {
     //https://pixeladventuresweb.wordpress.com/2016/10/04/arcball-controller/
-    //qDebug()<<_mousePos<<_mouseTriggeredPos;
-
+    //qDebug()<<_mousePos<<_mouseTriggeredPos;    
     QVector3D P1, P2, _axis;
     QQuaternion _rot;
 
@@ -68,7 +67,6 @@ void Camera3D::rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggere
     {
         _z1 = 0.0;
     }
-
     P1 = QVector3D(_mouseTriggeredPos.x(), _mouseTriggeredPos.y(), _z1);
     //P2 = QVector3D(_x2,_y2,_z2);
     P2 = QVector3D(_mousePos.x(), _mousePos.y(), _z2);
@@ -77,11 +75,189 @@ void Camera3D::rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggere
     _angle = std::acos(_dot) * (180 / m_pi);
     _rot = QQuaternion::fromAxisAndAngle(_axis, _angle);
 
-//    QMatrix3x3 _rotMat = _rot.toRotationMatrix()
-//    m_worldPos = _rot.rotatedVector(m_PreWorldPos);
+//    qDebug()<<"_rot: "<<_rot;
 
     m_rotation = _rot * m_startRotation;
+    m_deltaRotation = _rot;
+
     m_dirty = true;
+}
+
+void Camera3D::track(const QPoint &_mousePos)
+{
+    // (T) move delta cal in to input manager
+    QPoint deltaMouse = _mousePos - m_prevMousePos;
+    m_prevMousePos = _mousePos;
+    QVector3D dx = -0.01f * deltaMouse.x() * right();
+    QVector3D dy = -0.01f * deltaMouse.y() * up();
+    translate(dx + dy);
+    m_pivot +=  (dx + dy);
+    m_dirty = true;
+}
+
+void Camera3D::trackStart(const QPoint &_mousePos)
+{
+    m_prevMousePos = _mousePos;
+}
+
+void Camera3D::reset(const QPoint &_mousePos)
+{
+    m_world.setToIdentity();
+    m_translation = QVector3D(0,0,6);
+    m_rotation.setVector(0,0,0);
+    m_rotation.setScalar(1);
+    m_pivot = QVector3D(0,0,0);
+    m_prevMousePos = QPoint(0,0);
+    m_dirty = true;
+}
+
+// Transform To (Setters)
+void Camera3D::setTranslation(const QVector3D &t)
+{
+  m_dirty = true;
+  m_translation = t;
+}
+
+void Camera3D::setRotation(const QQuaternion &r)
+{
+  m_dirty = true;
+  m_rotation = r;
+}
+
+void Camera3D::arcBallStart()
+{
+    m_startRotation = m_rotation;
+    m_PreWorldPos = m_worldPos;
+    m_PrePivotToCam = m_pivotToCam;
+    //    qDebug()<<"GE PWP: "<<m_PreWorldPos;
+}
+
+void Camera3D::dolly(const QPoint &_mousePos)
+{
+    QPoint deltaMouse = _mousePos - m_prevMousePos;
+    m_prevMousePos = _mousePos;
+    QVector3D dz = -0.01f * deltaMouse.x() * forward();
+    translate(dz);
+    m_pivot +=  (-0.01f * deltaMouse.x() * forward());
+    m_dirty = true;
+}
+
+// Accessors
+const QMatrix4x4 &Camera3D::toMatrix()
+{
+  if (m_dirty)
+  {
+    m_dirty = false;
+    m_world.setToIdentity();
+    m_world.translate(m_pivot);
+    m_world.translate(-m_translation);
+    m_world.rotate(m_rotation);
+    m_world.translate(-m_pivot);
+
+    // calc WP
+//    m_worldPos = m_rotation.rotatedVector(m_PreWorldPos);
+//    m_pivotToCam = m_rotation.rotatedVector(m_PrePivotToCam);
+    QMatrix3x3 tmp = m_rotation.toRotationMatrix();
+    float *m = tmp.data();
+        const float data[16]  = {
+                m[0],m[1],m[2],0,
+                m[3],m[4],m[5],0,
+                m[6],m[7],m[8],0,
+                   0, 0, 0, 1
+        };
+    const float *ptr = data;
+    QMatrix4x4 my4 = QMatrix4x4(ptr);
+    QVector4D testRight = QVector4D(m_PrePivotToCam.x(),m_PrePivotToCam.y(),m_PrePivotToCam.z(),1);
+    QVector4D up = my4 * testRight;
+    m_pivotToCam = QVector3D(up.x(),up.y(),up.z());
+
+    m_worldPos = m_pivot + m_pivotToCam;
+  }
+  return m_world;
+}
+
+// Queries
+QVector3D Camera3D::forward() const
+{
+//  return m_rotation.rotatedVector(LocalForward);
+    QMatrix3x3 tmp = m_rotation.toRotationMatrix();
+    float *m = tmp.data();
+    const float data[16]  = {
+            m[0],m[1],m[2],0,
+            m[3],m[4],m[5],0,
+            m[6],m[7],m[8],0,
+               0, 0, 0, 1
+    };
+    const float *ptr = data;
+    QMatrix4x4 my4 = QMatrix4x4(ptr);
+    QVector4D testRight = QVector4D(0,0,1,1);
+    QVector4D up = my4 * testRight;
+    return QVector3D(up.x(), up.y(), up.z());
+}
+
+QVector3D Camera3D::up() const
+{
+//  return m_rotation.rotatedVector(LocalUp);
+    QMatrix3x3 tmp = m_rotation.toRotationMatrix();
+    float *m = tmp.data();
+    const float data[16]  = {
+            m[0],m[1],m[2],0,
+            m[3],m[4],m[5],0,
+            m[6],m[7],m[8],0,
+               0, 0, 0, 1
+    };
+    const float *ptr = data;
+    QMatrix4x4 my4 = QMatrix4x4(ptr);
+    QVector4D testRight = QVector4D(0,1,0,1);
+    QVector4D up = my4 * testRight;
+    return QVector3D(up.x(), up.y(), up.z());
+}
+
+QVector3D Camera3D::right() const
+{
+//    return m_rotation.rotatedVector(LocalRight);
+    QMatrix3x3 tmp = m_rotation.toRotationMatrix();
+    float *m = tmp.data();
+    const float data[16]  = {
+            m[0],m[1],m[2],0,
+            m[3],m[4],m[5],0,
+            m[6],m[7],m[8],0,
+               0, 0, 0, 1
+    };
+    const float *ptr = data;
+    QMatrix4x4 my4 = QMatrix4x4(ptr);
+    QVector4D testRight = QVector4D(1,0,0,1);
+    QVector4D right = my4 * testRight;
+    return QVector3D(right.x(), right.y(), right.z());
+}
+
+QVector3D Camera3D::worldPos() const
+{
+    return m_worldPos;
+}
+
+// Qt Streams
+QDebug operator<<(QDebug dbg, const Camera3D &transform)
+{
+  dbg << "Camera3D\n{\n";
+  dbg << "Position: <" << transform.translation().x() << ", " << transform.translation().y() << ", " << transform.translation().z() << ">\n";
+  dbg << "Rotation: <" << transform.rotation().x() << ", " << transform.rotation().y() << ", " << transform.rotation().z() << " | " << transform.rotation().scalar() << ">\n}";
+  return dbg;
+}
+
+QDataStream &operator<<(QDataStream &out, const Camera3D &transform)
+{
+  out << transform.m_translation;
+  out << transform.m_rotation;
+  return out;
+}
+
+QDataStream &operator>>(QDataStream &in, Camera3D &transform)
+{
+  in >> transform.m_translation;
+  in >> transform.m_rotation;
+  transform.m_dirty = true;
+  return in;
 }
 
 QQuaternion Camera3D::lookAt()
@@ -116,94 +292,5 @@ QQuaternion Camera3D::lookAt()
 ////    m_worldPos = -m_translation * m_world;
 
 //    return _rot3;
-}
-
-void Camera3D::reset()
-{
-
-//    m_world.setToIdentity();
-//    m_world.translate(-m_translation);
-//    m_world.lookAt(-m_worldPos, QVector3D(0,0,0),  QVector3D(0,1,0) );
-}
-
-// Transform To (Setters)
-void Camera3D::setTranslation(const QVector3D &t)
-{
-  m_dirty = true;
-  m_translation = t;
-}
-
-void Camera3D::setRotation(const QQuaternion &r)
-{
-  m_dirty = true;
-  m_rotation = r;
-}
-
-void Camera3D::arcBallStart()
-{
-    m_startRotation = m_rotation;
-    m_PreWorldPos = m_worldPos;
-}
-
-// Accessors
-const QMatrix4x4 &Camera3D::toMatrix()
-{
-  if (m_dirty)
-  {
-    m_dirty = false;
-    m_world.setToIdentity();
-    //if were to rotate about the cameras center call rot.conjugate before translate
-    //m_world.rotate(m_rotation.conjugate());
-    m_world.translate(-m_translation);
-    m_world.rotate(m_rotation);
-    m_worldPos = m_rotation.rotatedVector(m_PreWorldPos);
-  }
-  return m_world;
-}
-
-// Queries
-QVector3D Camera3D::forward() const
-{
-  return m_rotation.rotatedVector(LocalForward);
-}
-
-QVector3D Camera3D::up() const
-{
-  return m_rotation.rotatedVector(LocalUp);
-}
-
-QVector3D Camera3D::right() const
-{
-  //return m_rotation.rotatedVector(LocalRight);
-    return m_right;
-}
-
-QVector3D Camera3D::worldPos() const
-{
-    return m_worldPos;
-}
-
-// Qt Streams
-QDebug operator<<(QDebug dbg, const Camera3D &transform)
-{
-  dbg << "Camera3D\n{\n";
-  dbg << "Position: <" << transform.translation().x() << ", " << transform.translation().y() << ", " << transform.translation().z() << ">\n";
-  dbg << "Rotation: <" << transform.rotation().x() << ", " << transform.rotation().y() << ", " << transform.rotation().z() << " | " << transform.rotation().scalar() << ">\n}";
-  return dbg;
-}
-
-QDataStream &operator<<(QDataStream &out, const Camera3D &transform)
-{
-  out << transform.m_translation;
-  out << transform.m_rotation;
-  return out;
-}
-
-QDataStream &operator>>(QDataStream &in, Camera3D &transform)
-{
-  in >> transform.m_translation;
-  in >> transform.m_rotation;
-  transform.m_dirty = true;
-  return in;
 }
 
