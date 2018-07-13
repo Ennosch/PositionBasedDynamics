@@ -57,6 +57,7 @@ public:
   // Accessors
   const QVector3D& translation() const;
   const QQuaternion& rotation() const;
+//  const QMatrix4x4& rotationMat4() const;
   const QMatrix4x4& toMatrix();
 
 
@@ -95,8 +96,28 @@ Q_DECLARE_TYPEINFO(Camera3D, Q_MOVABLE_TYPE);
 
 inline void Camera3D::info()
 {
+    // rotate 90 deg around the y-axis (clockwise)
+    QQuaternion myQuat = QQuaternion(0.707, 0, 0.707, 0);
+    QVector3D myVec = QVector3D(0, 0, 6);
+    QVector3D r = myQuat.rotatedVector(myVec);
 
-    myqDebug()<<"WP: "<<m_worldPos<<" m_pivotToCam :"<<m_pivotToCam;
+    QMatrix3x3 tmp = m_rotation.toRotationMatrix();
+    float *m = tmp.data();
+        const float data[16]  = {
+                m[0],m[1],m[2],0,
+                m[3],m[4],m[5],0,
+                m[6],m[7],m[8],0,
+                   0, 0, 0, 1
+        };
+    const float *ptr = data;
+    QMatrix4x4 myRotMat = QMatrix4x4(ptr);
+
+// only works in 1 axis ?
+//    m_worldPos = -(m_rotation.rotatedVector(-m_translation));
+//    m_worldPos = myRotMat * m_translation;
+     m_worldPos = myRotMat * (m_translation - m_pivot) + m_pivot;
+
+    myqDebug()<<"WP: "<<m_worldPos<<" translation :"<<m_translation<< "pivot: "<<m_pivot<<" rot: "<<m_rotation;
 
 };
 

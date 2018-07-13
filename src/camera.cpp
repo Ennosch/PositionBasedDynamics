@@ -147,6 +147,7 @@ const QMatrix4x4 &Camera3D::toMatrix()
 {
   if (m_dirty)
   {
+
     m_dirty = false;
     m_world.setToIdentity();
     m_world.translate(m_pivot);
@@ -166,12 +167,12 @@ const QMatrix4x4 &Camera3D::toMatrix()
                    0, 0, 0, 1
         };
     const float *ptr = data;
-    QMatrix4x4 my4 = QMatrix4x4(ptr);
-    QVector4D testRight = QVector4D(m_PrePivotToCam.x(),m_PrePivotToCam.y(),m_PrePivotToCam.z(),1);
-    QVector4D up = my4 * testRight;
-    m_pivotToCam = QVector3D(up.x(),up.y(),up.z());
+    QMatrix4x4 myRotMat = QMatrix4x4(ptr);
 
-    m_worldPos = m_pivot + m_pivotToCam;
+// only works in 1 axis ?
+//    m_worldPos = -(m_rotation.rotatedVector(-m_translation));
+//    m_worldPos = myRotMat * m_translation;
+     m_worldPos = myRotMat * (m_translation - m_pivot) + m_pivot;
   }
   return m_world;
 }

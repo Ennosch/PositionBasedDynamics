@@ -30,9 +30,9 @@ public:
 
     std::shared_ptr<Shape> shape();
     int m_Id = 33;
-
-private:
     Transform m_Transform;
+private:
+
     Scene *pScene;
     //std::shared_ptr<Shape>
     std::shared_ptr<Shape> pShape;

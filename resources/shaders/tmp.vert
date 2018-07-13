@@ -16,6 +16,7 @@ void main()
     gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(position, 1.0);
     vFragPos = vec3(ModelMatrix * vec4(position, 1.0) );
     vColor = color;
-    vNormal = normal;
+//    vNormal = normal;
+    vNormal = mat3(transpose(inverse( ModelMatrix ))) * normal;
     //vec4 test = mat3(transpose(inverse(ModelMatrix))) * normal;
 }

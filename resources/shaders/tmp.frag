@@ -1,9 +1,9 @@
 #version 330
-in highp vec3 vFragPos;
-in highp vec3 vColor;
-in highp vec3 vNormal;
+in vec3 vFragPos;
+in vec3 vColor;
+in vec3 vNormal;
 
-out highp vec4 fColor;
+out vec4 fColor;
 
 struct Material {
     vec3 ambient;
@@ -35,55 +35,39 @@ vec3 CalcDirLight(Light light, vec3 normal, vec3 viewDir);
 
 void main()
 {
-//    vec3 normal = normalize(vNormal);
-//    vec3 lightDir = normalize(lightPos - vFragPos);
-//    float diff = max(dot(normal, lightDir), 0.0);
-////    vec3 diffuse = diff * lightColor;
-////    vec3 ambient = lightColor * objectColor;
+        vec3 lightDir = normalize(lightPos - vFragPos);
+        vec3 normal = normalize(vNormal);
+        float diff = max(dot(normal, lightDir), 0.0);
 
-//    vec3 diffuse = diff * dirLights[1].diffuse;
-//    vec3 ambient = dirLights[1].diffuse * objectColor;
+        vec3 diffuse = diff * (vec3(1,0,0));
+        vec3 ambient = lightColor * objectColor;
+        float specularStrength = 0.5;
+        vec3 viewDir = normalize(viewPos - vFragPos);
+        vec3 reflectDir = reflect(-lightDir, normal);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 20);
+        vec3 specular = specularStrength * spec * lightColor;
+//        fColor = vec4((lightColor + diffuse + specular) * objectColor, 1.0);
+        fColor = vec4((diffuse + specular), 1);
+//        fColor = vec4(vFragPos * pow(1,3), 1);
 
-//    float specularStrength = 0.5;
-//    vec3 viewDir = normalize(viewPos - vFragPos);
-//    vec3 reflectDir = reflect(-lightDir, normal);
-//    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-////    vec3 specular = specularStrength * spec * lightColor;
-////    fColor = vec4((lightColor + diffuse + specular) * objectColor, 1.0);
 
-//    vec3 specular = specularStrength * spec * dirLights[1].diffuse;
-//    fColor = vec4((dirLights[1].diffuse + diffuse + specular) * objectColor, 1.0);
 
-//-----------newCOde------A----
+// -------------Fresh Code------------
+    //---ambient
+//    vec3 result;
 
-//    // ambient
-//    vec3 ambient = light.ambient * material.ambient;
-
-//    vec3 norm = normalize(vNormal);
-//    vec3 lightDir = normalize(light.position - vFragPos);
-//    float diff = max(dot(norm, lightDir), 0.0);
-//    vec3 diffuse = light.diffuse * (diff * material.diffuse);
-
-//    // specular
-//    vec3 viewDir = normalize(viewPos - vFragPos);
-//    vec3 reflectDir = reflect(-lightDir, norm);
-//    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-//    vec3 specular = light.specular * (spec * material.specular);
-
-//    vec3 result = ambient + diffuse + specular;
-//    fColor = vec4(result, 1.0);
-
-//-----------newCOde------B----
-
-//     properties
-    vec3 norm = normalize(vNormal);
-    vec3 viewDir = normalize(viewPos - vFragPos);
-
-    vec3 result = vec3(0.0f, 0.0f, 0.0f);
 //    for(int i = 0; i < NR_DIR_LIGHTS; i++)
-    result += CalcDirLight(dirLights[1], norm, viewDir);
+//    {
+//        vec3 normal = normalize(vNormal);
 
-    fColor = vec4(result , 1.0);
+//        // ambient
+//        vec3 ambient = dirLights[i].ambient * material.ambient;
+//        // diffuse
+//        float diff = max(dot(normal, dirLights[i].direction), 0.0);
+//        vec3 diffuse = diff * dirLights[i].diffuse * material.diffuse;
+//        result += diffuse;
+//    }
+//    fColor = vec4(result, 1);
 }
 
 vec3 CalcDirLight(Light light, vec3 normal, vec3 viewDir)

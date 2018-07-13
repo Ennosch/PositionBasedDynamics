@@ -155,34 +155,49 @@ void Window::update()
     {
 
     }
-    if(inputManager::keyPressed(Qt::Key_0))
+    if(inputManager::keyPressed(Qt::Key_7))
     {
-
+        scene()->m_SceneObjects[1]->rotate(QQuaternion::fromAxisAndAngle(1,0,0,15));
+    }
+    if(inputManager::keyPressed(Qt::Key_8))
+    {
+        scene()->m_SceneObjects[1]->rotate(QQuaternion::fromAxisAndAngle(1,0,0,-15));
+    }
+    if(inputManager::keyPressed(Qt::Key_4))
+    {
+        scene()->m_SceneObjects[1]->rotate(QQuaternion::fromAxisAndAngle(0,1,0,15));
+    }
+    if(inputManager::keyPressed(Qt::Key_5))
+    {
+        scene()->m_SceneObjects[1]->rotate(QQuaternion::fromAxisAndAngle(0,1,0,-15));
     }
     if(inputManager::keyPressed(Qt::Key_1))
+    {
+        scene()->m_SceneObjects[1]->translate(QVector3D(0,0,0.5));
+    }
+    if(inputManager::keyPressed(Qt::Key_2))
+    {
+        scene()->m_SceneObjects[1]->translate(QVector3D(0,0,-0.5));
+    }
+    if(inputManager::keyPressed(Qt::Key_0))
     {
 
     }
     if(inputManager::keyPressed(Qt::Key_W))
     {
-        //scene()->m_camera.translate(0.0, 0.0, 0.03);
-        // QQuaternion::fromAxisAndAngle(_axis, _angle);
-//        QQuaternion _a = QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), 10.0);
-//        scene()->m_arcCamera.rotate(_a);
+        scene()->m_SceneObjects[0]->translate(QVector3D(0,0.5,0));
     }
     if(inputManager::keyPressed(Qt::Key_S))
     {
-//        QQuaternion _a = QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), -10.0);
-//        scene()->m_arcCamera.rotate(_a);
+        scene()->m_SceneObjects[0]->translate(QVector3D(0,-0.5,0));
     }
     if(inputManager::keyPressed(Qt::Key_A))
     {
-        //scene()->m_arcCamera.rotateAroundPoint_G(-15.0, QVector3D(0,1,0));
-
+        scene()->m_SceneObjects[0]->translate(QVector3D(-0.5,0,0));
     }
     if(inputManager::keyPressed(Qt::Key_D))
     {
-        //scene()->m_arcCamera.rotateAroundPoint_G(15.0, QVector3D(0,1,0));
+       scene()->m_SceneObjects[0]->translate(QVector3D(0.5,0,0));
     }
     if(inputManager::keyPressed(Qt::Key_Q))
     {
@@ -221,19 +236,22 @@ void Window::keyPressEvent(QKeyEvent *event)
       switch(event->key())
       {
         case Qt::Key_Up:
-          scene()->m_arcCamera.rotate(15,1,0,0);
+//          scene()->m_arcCamera.rotate(15,1,0,0);
+            scene()->m_SceneObjects[1]->translate(QVector3D(0,0.5,0));
             break;
         case Qt::Key_Down:
-          scene()->m_arcCamera.rotate(-15,1,0,0);
+          scene()->m_SceneObjects[1]->translate(QVector3D(0,-0.5,0));
           break;
         case Qt::Key_Left:
-          scene()->m_arcCamera.rotate(-15,0,1,0);
+//          scene()->m_arcCamera.rotate(-15,0,1,0);
+          scene()->m_SceneObjects[1]->translate(QVector3D(0.5,0,0));
             break;
         case Qt::Key_Right:
-          scene()->m_arcCamera.rotate(15,0,1,0);
+//          scene()->m_arcCamera.rotate(15,0,1,0);
+            scene()->m_SceneObjects[1]->translate(QVector3D(-0.5,0,0));
             break;
       case Qt::Key_J:
-          scene()->m_arcCamera.rotate(15,0,0,1);
+//          scene()->m_arcCamera.rotate(15,0,0,1);
           //scene()->m_arcCamera.rotateAroundPoint(-15.0, QVector3D(0,1,0));
           break;
       case Qt::Key_K:
@@ -244,7 +262,8 @@ void Window::keyPressEvent(QKeyEvent *event)
       case Qt::Key_I:
 //           scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(0,1,0), 10.0));
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
-          scene()->m_arcCamera.info();
+//          scene()->m_arcCamera.info();
+          qDebug()<<"transform[0]: "<<scene()->m_SceneObjects[0]->m_Transform.toMatrix()<<"transform[1]: "<<scene()->m_SceneObjects[1]->m_Transform.toMatrix();;
           break;
       case Qt::Key_M:
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
@@ -254,29 +273,30 @@ void Window::keyPressEvent(QKeyEvent *event)
           break;
 
       case Qt::Key_7:
-           scene()->m_arcCamera.translatePivot(QVector3D(1,0,0));
-           scene()->m_arcCamera.translate(QVector3D(1,0,0));
+//           scene()->m_arcCamera.translatePivot(QVector3D(1,0,0));
+//           scene()->m_arcCamera.translate(QVector3D(1,0,0));
+//             scene()->m_SceneObjects[0]->translate(QVector3D(1,0,0));
           break;
 
       case Qt::Key_8:
-           scene()->m_arcCamera.translatePivot(QVector3D(-1,0,0));
-           scene()->m_arcCamera.translate(QVector3D(-1,0,0));
+//           scene()->m_arcCamera.translatePivot(QVector3D(-1,0,0));
+//           scene()->m_arcCamera.translate(QVector3D(-1,0,0));
           break;
       case Qt::Key_4:
-          scene()->m_arcCamera.translatePivot(QVector3D(0,1,0));
-           scene()->m_arcCamera.translate(QVector3D(0,1,0));
+//          scene()->m_arcCamera.translatePivot(QVector3D(0,1,0));
+//           scene()->m_arcCamera.translate(QVector3D(0,1,0));
         break;
       case Qt::Key_5:
-           scene()->m_arcCamera.translatePivot(QVector3D(0,-1,0));
-           scene()->m_arcCamera.translate(QVector3D(0,-1,0));
+//           scene()->m_arcCamera.translatePivot(QVector3D(0,-1,0));
+//           scene()->m_arcCamera.translate(QVector3D(0,-1,0));
         break;
       case Qt::Key_1:
-           scene()->m_arcCamera.translatePivot(QVector3D(0,0,1));
-           scene()->m_arcCamera.translate(QVector3D(0,0,1));
+//           scene()->m_arcCamera.translatePivot(QVector3D(0,0,1));
+//           scene()->m_arcCamera.translate(QVector3D(0,0,1));
         break;
       case Qt::Key_2:
-           scene()->m_arcCamera.translatePivot(QVector3D(0,0,-1));
-           scene()->m_arcCamera.translate(QVector3D(0,0,-1));
+//           scene()->m_arcCamera.translatePivot(QVector3D(0,0,-1));
+//           scene()->m_arcCamera.translate(QVector3D(0,0,-1));
           break;
       default: break;
       }
