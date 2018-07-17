@@ -1,24 +1,22 @@
 #version 330 core
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 color;
+layout(location = 2) in vec3 normal;
 
-// Uniforms
+out vec3 vFragPos;
+out vec3 vColor;
+out vec3 vNormal;
+
 uniform mat4 ProjectionMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ModelMatrix;
 
-// Ins
-in vec3 position;
-in vec4 instances; // Each instance will have x,y,z and w (radius)
-
-// Outs
-out vec3 vWorldPosition;
-out vec3 vViewPosition;
-out vec3 vWorldNormal;
-
-void main(void)
+void main()
 {
-    vWorldPosition = instances.w * position + instances.xyz;
-    vViewPosition = vec4(ViewMatrix * ModelMatrix * vec4(vWorldPosition, 1.0)).xyz;
-    vWorldNormal = normalize(position);
-
-    gl_Position = ProjectionMatrix * vec4(vViewPosition, 1.0);
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(position, 1.0);
+    vFragPos = vec3(ModelMatrix * vec4(position, 1.0) );
+    vColor = color;
+//    vNormal = normal;
+    vNormal = mat3(transpose(inverse( ModelMatrix ))) * normal;
+    //vec4 test = mat3(transpose(inverse(ModelMatrix))) * normal;
 }

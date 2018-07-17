@@ -54,6 +54,22 @@ static const QVector3D myShape[] = {
       VERTEX_BBR, VERTEX_BTR, VERTEX_FTR
 };
 
+static const GLfloat X = 0.525731112119133606;
+static const GLfloat Z = 0.850650808352039932;
+
+static const  GLfloat vdata[12][3] = {
+    {-X, 0.0f, Z}, {X, 0.0f, Z}, {-X, 0.0f, -Z}, {X, 0.0f, -Z},
+    {0.0f, Z, X}, {0.0f, Z, -X}, {0.0f, -Z, X}, {0.0f, -Z, -X},
+    {Z, X, 0.0}, {-Z, X, 0.0f}, {Z, -X, 0.0f}, {-Z, -X, 0.0f}
+ };
+
+static const GLuint tindices[20][3] = {
+    {0,  4,  1}, {0, 9,  4}, {9,  5, 4}, { 4, 5, 8}, {4, 8,  1},
+    {8, 10,  1}, {8, 3, 10}, {5,  3, 8}, { 5, 2, 3}, {2, 7,  3},
+    {7, 10,  3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1,  6},
+    {6,  1, 10}, {9, 0, 11}, {9, 11, 2}, { 9, 2, 5}, {7, 2, 11}};
+
+
 //static const QVector3D myShapeNormals[] = {
 //    // Face 1 (Front)
 //      VERTEX_FTR, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_FTL, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_FBL, QVector3D(0.0f, 0.0f, -1.0f),
@@ -203,6 +219,8 @@ std::shared_ptr<Shape> Scene::getShapeFromPool(std::string _key)
     return 0;
 }
 
+
+
 void Scene::QtOpenGLinitialize()
 {
 //    glEnable(GL_CULL_FACE);
@@ -223,11 +241,6 @@ void Scene::QtOpenGLinitialize()
     m_screen_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/screen.frag");
     m_screen_program->link();
 
-    m_program = new QOpenGLShaderProgram();
-    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/simple.vert");
-    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/simple.frag");
-    m_program->link();
-
     m_lighting_program = new QOpenGLShaderProgram();
     m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/tmp.vert");
     m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/tmp.frag");
@@ -238,21 +251,40 @@ void Scene::QtOpenGLinitialize()
     m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
     m_flat_program->link();
 
+// sphere buffer creation
+    m_sphere_vao = new QOpenGLVertexArrayObject(window());
+    m_sphere_vao->create();
+    m_sphere_vao->bind();
 
-//----add some shape to the ShapePool
-//    Scene::addShape(this, "cube");
-//    m_program->enableAttributeArray(0);
-//    m_program->enableAttributeArray(1);
-//    m_program->setAttributeBuffer(0, GL_FLOAT, 0, 3, 2*sizeof(QVector3D));
-//    m_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 2*sizeof(QVector3D));
+    m_sphere_vbo.create();
+    m_sphere_vbo.bind();
+    m_sphere_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_sphere_vbo.allocate(vdata, sizeof(vdata));
 
-//----add some shape to the ShapePool
-//    BufferSpec cubeSpec;
-//    cubeSpec.index =
+    m_sphere_ebo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+    m_sphere_ebo.create();
+    m_sphere_ebo.bind();
+    m_sphere_ebo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    m_sphere_ebo.allocate(tindices, sizeof(tindices));
 
-    Scene::addShape(this, "cubeLit", &myShapeNormals[0], sizeof(myShapeNormals));
-    auto ptr = getShapeFromPool("cubeLit");
-    //ptr->release();
+
+    m_flat_program->enableAttributeArray(0);
+    m_flat_program->setAttributeBuffer(
+                            0,                     // shader location
+                            GL_FLOAT,             // type of elements
+                            0,                    // attr offset
+                            3);
+
+    // before unbinding EBO do
+    m_sphere_vao->release();
+
+
+    // interpret sphere
+//    static const  GLfloat vdata[12][3]
+//    static const GLuint tindices[20][3]
+
+
+//    Scene::addShape(this, "cubeLit", &myShapeNormals[0], sizeof(myShapeNormals));
 
     /* GL equivalent
      * glVertexAttribPointer(
@@ -263,25 +295,28 @@ void Scene::QtOpenGLinitialize()
      *                   6 * sizeof(float), //  stride -byte offset between consecutive generic vertex attributes
      *                   (void*)0));        //  pointer to the first component of data
      */
-    m_lighting_program->enableAttributeArray(0);
-    m_lighting_program->setAttributeBuffer(
-                            0,                     // shader location
-                            GL_FLOAT,             // type of elements
-                            0,                    // attr offset
-                            3,                    // components per vertex attr
-                            3*sizeof(QVector3D)); // stride - size of all buffer attrs together
-    m_lighting_program->enableAttributeArray(1);
-    m_lighting_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 3*sizeof(QVector3D));
-    m_lighting_program->enableAttributeArray(2);
-    m_lighting_program->setAttributeBuffer(2, GL_FLOAT, 2*sizeof(QVector3D), 3, 3*sizeof(QVector3D));
+// ---INterpret CUbe-----
+//    m_lighting_program->enableAttributeArray(0);
+//    m_lighting_program->setAttributeBuffer(
+//                            0,                     // shader location
+//                            GL_FLOAT,             // type of elements
+//                            0,                    // attr offset
+//                            3,                    // components per vertex attr
+//                            3*sizeof(QVector3D)); // stride - size of all buffer attrs together
+//    m_lighting_program->enableAttributeArray(1);
+//    m_lighting_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 3*sizeof(QVector3D));
+//    m_lighting_program->enableAttributeArray(2);
+//    m_lighting_program->setAttributeBuffer(2, GL_FLOAT, 2*sizeof(QVector3D), 3, 3*sizeof(QVector3D));
 
-    m_flat_program->enableAttributeArray(0);
-    m_flat_program->setAttributeBuffer(
-                            0,                     // shader location
-                            GL_FLOAT,             // type of elements
-                            0,                    // attr offset
-                            3,                    // components per vertex attr
-                            3*sizeof(QVector3D));
+
+    // interpret myCubeNormals
+//    m_flat_program->enableAttributeArray(0);
+//    m_flat_program->setAttributeBuffer(
+//                            0,                     // shader location
+//                            GL_FLOAT,             // type of elements
+//                            0,                    // attr offset
+//                            3,                    // components per vertex attr
+//                            3*sizeof(QVector3D));
 
 //----prepare a QuadPlane
     m_quad_vao = new QOpenGLVertexArrayObject(window());
@@ -338,7 +373,7 @@ void Scene::QtOpenGLinitialize()
     m_gbuffer_fbo->release();
 
 
-    SceneInitialize();
+//    SceneInitialize();
     initLights();
     //printVersionInformation();
 }
@@ -362,7 +397,25 @@ void Scene::paint()
       // set light properties for single pointLight (doent exist on client side)
       m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
       m_lighting_program->setUniformValue("lightColor", 1.0f, 1.0f, 1.0f);
-      m_lighting_program->setUniformValue("lightPos", m_SceneObjects[0]->getPos());
+//      m_lighting_program->setUniformValue("lightPos", m_SceneObjects[0]->getPos());
+       m_lighting_program->setUniformValue("lightPos", QVector3D(0,0,0));
+
+
+
+       //------------------test sphere Code--------------------------------------------------------------------------
+      m_flat_program->bind();
+      m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+      m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+      m_sphere_vao->bind();
+      m_sphere_Mmatrix.setToIdentity();
+      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+//      glDrawArrays(GL_TRIANGLES, 0, 120);
+      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
+
+      m_sphere_vao->release();
+      m_flat_program->release();
+
+       //-------------------end Sphere Code------------------------------------------------------------------------------
 
     // set light properties for single Material (doent exist on client side)
 //      m_lighting_program->setUniformValue("material.diffuse", QVector3D(1.0f, 0.0f, 0.0f));
@@ -385,28 +438,28 @@ void Scene::paint()
 //      m_lighting_program->setUniformValue((uniFName+".diffuse").c_str(), m_lights[i].diffuse);
 
       // draw cube with phong shader
-      for(uint i = 1; i < m_SceneObjects.size(); i++)
-      {
-        m_SceneObjects[i]->bind();
-        m_lighting_program->setUniformValue("ModelMatrix", m_SceneObjects[i]->getMatrix());
-        glDrawArrays(GL_TRIANGLES, 0, m_SceneObjects[i]->shape()->getVertsSize() /
-                     sizeof(m_SceneObjects[i]->shape()->getData()[0]));
-        m_SceneObjects[i]->release();
-      }
+//      for(uint i = 1; i < m_SceneObjects.size(); i++)
+//      {
+//        m_SceneObjects[i]->bind();
+//        m_lighting_program->setUniformValue("ModelMatrix", m_SceneObjects[i]->getMatrix());
+//        glDrawArrays(GL_TRIANGLES, 0, m_SceneObjects[i]->shape()->getVertsSize() /
+//                     sizeof(m_SceneObjects[i]->shape()->getData()[0]));
+//        m_SceneObjects[i]->release();
+//      }
       m_lighting_program->release();
 
       // draw light with flat shader
-      m_flat_program->bind();
-      m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-      m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-      m_SceneObjects[0]->bind();
-//      m_SceneObjects[0]->setTranslation(m_arcCamera.pivot());
-//      m_SceneObjects[0]->setTranslation(QVector3D(0,2,0));
-      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
-      glDrawArrays(GL_TRIANGLES, 0, m_SceneObjects[0]->shape()->getVertsSize() /
-                   sizeof(m_SceneObjects[0]->shape()->getData()[0]));
-      m_SceneObjects[0]->release();
-      m_flat_program->release();
+//      m_flat_program->bind();
+//      m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+//      m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//      m_SceneObjects[0]->bind();
+////      m_SceneObjects[0]->setTranslation(m_arcCamera.pivot());
+////      m_SceneObjects[0]->setTranslation(QVector3D(0,2,0));
+//      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
+//      glDrawArrays(GL_TRIANGLES, 0, m_SceneObjects[0]->shape()->getVertsSize() /
+//                   sizeof(m_SceneObjects[0]->shape()->getData()[0]));
+//      m_SceneObjects[0]->release();
+//      m_flat_program->release();
 
 //      m_lighting_program->release();
     m_gbuffer_fbo->release();
@@ -454,7 +507,6 @@ void Scene::SceneInitialize()
 //        w = randfinRange(90,90);
 //        pSO1->rotate(QQuaternion::fromAxisAndAngle(x, y, z, w));
 //    }
-
 }
 
 void Scene::initLights()

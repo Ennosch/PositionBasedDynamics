@@ -112,6 +112,12 @@ private:
 //  QOpenGLVertexArrayObject m_vao;
   QVector3D m_lightPos = QVector3D(0.0f, 5.0f, 0.0f);
 
+  QOpenGLVertexArrayObject* m_sphere_vao;
+  QOpenGLBuffer m_sphere_vbo;
+  QOpenGLBuffer m_sphere_ebo;
+  QMatrix4x4 m_sphere_Mmatrix;
+
+
 
 
 };
