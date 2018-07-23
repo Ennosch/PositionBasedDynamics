@@ -32,6 +32,11 @@ SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape,
     m_Transform.rotate(_rot);
 }
 
+SceneObject::SceneObject(std::string _path)
+{
+
+}
+
 void SceneObject::bind()
 {
     pShape->bind();

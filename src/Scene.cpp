@@ -69,7 +69,6 @@ static const GLuint tindices[20][3] = {
     {7, 10,  3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1,  6},
     {6,  1, 10}, {9, 0, 11}, {9, 11, 2}, { 9, 2, 5}, {7, 2, 11}};
 
-
 //static const QVector3D myShapeNormals[] = {
 //    // Face 1 (Front)
 //      VERTEX_FTR, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_FTL, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_FBL, QVector3D(0.0f, 0.0f, -1.0f),
@@ -126,6 +125,8 @@ void Scene::initialize()
 {
   AbstractScene::initialize();  
   QtOpenGLinitialize();
+
+//  Scene::addModel(this, "model", "resources/objects/rock/Cube.obj");
 }
 
 void Scene::resize(int width, int height)
@@ -149,6 +150,21 @@ void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, i
     _scene->m_ShapePool[_name] = pShape;
 }
 
+void Scene::addModel(Scene *_scene, std::string _name, std::string _path)
+{
+    if(_scene->m_ModelPool[_name])
+    {
+        qDebug()<<_name.data()<<" already exists in ModelPool";
+        return;
+    }
+    auto pModel = std::make_shared<Model>();
+
+    // load the model using assimp
+     pModel->loadModel(_path);
+
+    _scene->m_ModelPool[_name] = pModel;
+}
+
 pSceneOb Scene::addSceneObject(std::string _shape)
 {
     pSceneOb newPtr= addSceneObject(_shape, QVector3D(0.0f, 0.0f, 0.0f), QQuaternion::fromAxisAndAngle(0,1,0,0));
@@ -162,8 +178,6 @@ pSceneOb Scene::addSceneObject(std::string _shape, const QVector3D &_pos)
     if(newPtr == NULL){qDebug()<<"ptr to NULL returned";};
     return newPtr;
 }
-
-
 
 pSceneOb Scene::addSceneObject(std::string _shape, const QVector3D &_pos, const QQuaternion &_rot)
 {
@@ -219,6 +233,20 @@ std::shared_ptr<Shape> Scene::getShapeFromPool(std::string _key)
     return 0;
 }
 
+std::shared_ptr<Model> Scene::getShapeFromModelPool(std::string _key)
+{
+    ModelMap::const_iterator got = m_ModelPool.find(_key);
+    if ( got == m_ModelPool.end())
+    {
+        qDebug()<< "WARNING: NO SHAPE WERE FOUND";
+    }
+    else
+    {
+        auto _pShape = got->second;
+        return _pShape;
+    }
+    return 0;
+}
 
 
 void Scene::QtOpenGLinitialize()
@@ -268,24 +296,44 @@ void Scene::QtOpenGLinitialize()
     m_sphere_ebo.allocate(tindices, sizeof(tindices));
 
 
+
     m_flat_program->enableAttributeArray(0);
     m_flat_program->setAttributeBuffer(
                             0,                     // shader location
                             GL_FLOAT,             // type of elements
                             0,                    // attr offset
-                            3);
+                            3,                   // components per vertex attr
+                            sizeof(Vertex));                  // stride - size of all buffer attrs together
 
     // before unbinding EBO do
     m_sphere_vao->release();
 
+   // MAKE MODEL TO RENDER
+   auto pModel = std::make_shared<Model>();
+   pModel->loadModel("resources/objects/rock/Cube.obj");
+   m_ModelPool["model"] = pModel;
 
-    // interpret sphere
-//    static const  GLfloat vdata[12][3]
-//    static const GLuint tindices[20][3]
+   m_flat_program->release();
 
+// interpret new Model layout
+//    m_lighting_program->enableAttributeArray(0);
+//        m_lighting_program->setAttributeBuffer(
+//                                0,                     // shader location
+//                                GL_FLOAT,             // type of elements
+//                                0,                    // attr offset
+//                                3,                    // components per vertex attr
+//                                sizeof(Vertex)); // stride - size of all buffer attrs together
+
+//    m_flat_program->enableAttributeArray(0);
+//    m_flat_program->setAttributeBuffer(
+//                            0,                     // shader location
+//                            GL_FLOAT,             // type of elements
+//                            0,                    // attr offset
+//                            3,                    // components per vertex attr
+//                            sizeof(Vertex));
+//    qDebug()<<sizeof(Vertex);
 
 //    Scene::addShape(this, "cubeLit", &myShapeNormals[0], sizeof(myShapeNormals));
-
     /* GL equivalent
      * glVertexAttribPointer(
      *                   0,                  // index - shader location
@@ -372,7 +420,6 @@ void Scene::QtOpenGLinitialize()
 
     m_gbuffer_fbo->release();
 
-
 //    SceneInitialize();
     initLights();
     //printVersionInformation();
@@ -400,22 +447,33 @@ void Scene::paint()
 //      m_lighting_program->setUniformValue("lightPos", m_SceneObjects[0]->getPos());
        m_lighting_program->setUniformValue("lightPos", QVector3D(0,0,0));
 
+       //------------------------draw Model-----------------------------------------------------------------------------
 
+       //------------------------end draw Model-----------------------------------------------------------------------------
+       m_lighting_program->release();
 
-       //------------------test sphere Code--------------------------------------------------------------------------
+//       ------------------test sphere Code--------------------------------------------------------------------------
       m_flat_program->bind();
       m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
       m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-      m_sphere_vao->bind();
+
+      auto ptr = getShapeFromModelPool("model");
       m_sphere_Mmatrix.setToIdentity();
-      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
-//      glDrawArrays(GL_TRIANGLES, 0, 120);
-      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
+      m_lighting_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+      ptr->draw();
+
+//      m_sphere_vao->bind();
+//      m_sphere_Mmatrix.setToIdentity();
+//      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+////      glDrawArrays(GL_TRIANGLES, 0, 120);
+//      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
 
       m_sphere_vao->release();
-      m_flat_program->release();
 
-       //-------------------end Sphere Code------------------------------------------------------------------------------
+
+      m_flat_program->release();
+//       -------------------end Sphere Code------------------------------------------------------------------------------
+
 
     // set light properties for single Material (doent exist on client side)
 //      m_lighting_program->setUniformValue("material.diffuse", QVector3D(1.0f, 0.0f, 0.0f));
@@ -446,7 +504,7 @@ void Scene::paint()
 //                     sizeof(m_SceneObjects[i]->shape()->getData()[0]));
 //        m_SceneObjects[i]->release();
 //      }
-      m_lighting_program->release();
+//      m_lighting_program->release();
 
       // draw light with flat shader
 //      m_flat_program->bind();

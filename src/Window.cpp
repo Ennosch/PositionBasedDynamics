@@ -263,7 +263,7 @@ void Window::keyPressEvent(QKeyEvent *event)
 //           scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(0,1,0), 10.0));
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
 //          scene()->m_arcCamera.info();
-          qDebug()<<"transform[0]: "<<scene()->m_SceneObjects[0]->m_Transform.toMatrix()<<"transform[1]: "<<scene()->m_SceneObjects[1]->m_Transform.toMatrix();;
+//          qDebug()<<"transform[0]: "<<scene()->m_SceneObjects[0]->m_Transform.toMatrix()<<"transform[1]: "<<scene()->m_SceneObjects[1]->m_Transform.toMatrix();;
           break;
       case Qt::Key_M:
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));

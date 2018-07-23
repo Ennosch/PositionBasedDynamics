@@ -7,15 +7,13 @@
 #include <Qdebug>
 #include <QTextStream>
 
-//#include <glm/glm.hpp>
-
-
 // Project
 #include "Scene.h"
 #include "Window.h"
 #include "AbstractScene.h"
 #include "shape.h"
 #include <iostream>
+#include <vector>
 
 QString getString(QString Filename)
 {
@@ -72,11 +70,6 @@ int main(int argc, char *argv[])
 
   QString mFilename = "/Users/ennoschlunder/Dev/QtOpenGLBoilerplate/test.txt";
   QString shader = ":/shader/simple.vert";
-
-  //:/shader/simple.vert
-  //:/shaders/simple.vert
-  //Write(mFilename);
-  //Read(shader);
 
   return app.exec();
 

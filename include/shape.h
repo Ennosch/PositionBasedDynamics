@@ -5,7 +5,16 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QVector3D>
+#include <vector>
 
+
+
+struct Vertex {
+    // position
+    QVector3D Position;
+    // normal
+    QVector3D Normal;
+};
 
 class Shape
 {
@@ -19,6 +28,7 @@ public:
     // ctor
     Shape();
     Shape(int _id): m_Id(_id){ qDebug()<<"Ctor 2 Shape";};
+    Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices);
 
     /*
      * user def copy assigment, copy assigment for QOpenGLVertexArrayObject has been deleted
@@ -38,6 +48,9 @@ public:
     void allocate(const QVector3D *_data, int _size);
     void release();
     void bind();
+    void setupMesh();
+    void draw();
+
     inline void foo(){qDebug("foo");};
     inline int getVertsSize(){return m_verticesSize;};
     inline const QVector3D* getData(){return m_vertices; };
@@ -47,11 +60,15 @@ private:
     int m_Id;
     ShapeType type;
     QOpenGLBuffer m_vvbo;
+    QOpenGLBuffer m_ebo;
     QOpenGLVertexArrayObject m_vao;
-    std::string m_name;
+    std::string m_name, directory;
     const QVector3D *m_vertices;
     int m_verticesSize;
 
+    // WIP model loading
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
 
 };
 

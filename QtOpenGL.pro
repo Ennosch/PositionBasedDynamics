@@ -15,13 +15,19 @@ SOURCES += \
     src/inputManager.cpp \
     src/camera.cpp \
     src/sceneobject.cpp \
-    src/shape.cpp
-
+    src/shape.cpp \
+    src/model.cpp
 
 OBJECTS_DIR = build/obj
 MOC_DIR = build/moc
 
 INCLUDEPATH += include
+
+# to include assimp. Not sure if that's the right way
+# WIP make it portable
+unix: LIBS += -L/usr/local/lib/ -lassimp.3.1.1
+INCLUDEPATH += /usr/local/include
+DEPENDPATH += /usr/local/include
 
 HEADERS += \
     include/AbstractScene.h \
@@ -31,7 +37,10 @@ HEADERS += \
     include/inputManager.h \
     include/camera.h \
     include/sceneobject.h \
-    include/shape.h
+    include/shape.h \
+    include/model.h \
+    include/model.h
+
 
 OTHER_FILES += \
     .gitignore \
@@ -43,4 +52,10 @@ OTHER_FILES += \
 RESOURCES += \
     resources.qrc
 
-DISTFILES +=
+
+
+
+
+
+
+

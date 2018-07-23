@@ -17,6 +17,7 @@ public:
     SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape);
     SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape, const QVector3D &_pos);
     SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape, const QVector3D &_pos, const QQuaternion &_rot);
+    SceneObject(std::string _path);
 
     void bind();
     void draw();
@@ -30,12 +31,13 @@ public:
 
     std::shared_ptr<Shape> shape();
     int m_Id = 33;
-    Transform m_Transform;
+
 private:
 
     Scene *pScene;
     //std::shared_ptr<Shape>
     std::shared_ptr<Shape> pShape;
+    Transform m_Transform;
 };
 
 inline const QMatrix4x4 SceneObject::getMatrix(){return m_Transform.toMatrix();};

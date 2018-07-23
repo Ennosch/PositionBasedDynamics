@@ -25,9 +25,11 @@
 #include "camera.h"
 #include "sceneobject.h"
 #include "shape.h"
+#include "model.h"
 
 
 typedef std::unordered_map <std::string, std::shared_ptr <Shape>> ShapeMap;
+typedef std::unordered_map <std::string, std::shared_ptr <Model>> ModelMap;
 typedef std::shared_ptr <SceneObject> pSceneOb;
 
 struct Light
@@ -64,6 +66,8 @@ public:
   void initLights();
 
   static void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);
+  void addModel(Scene *_scene, std::string _name, std::string _path);
+
   pSceneOb addSceneObject(std::string _shape);
   pSceneOb addSceneObject(std::string _shape, const QVector3D &_pos);
   pSceneOb addSceneObject(std::string _shape, const QVector3D &_pos, const QQuaternion &_rot);
@@ -73,7 +77,11 @@ public:
   float randfinRange(int a, int b);
 
   std::shared_ptr<Shape> getShapeFromPool(std::string _key);
+  std::shared_ptr<Model> getShapeFromModelPool(std::string _key);
+
+  // rename this (not a shape!)
   pSceneOb getShapeFromIndex(int _index);
+
 
 
 private:
@@ -105,6 +113,7 @@ private:
 
   std::vector <pSceneOb> m_SceneObjects;
   ShapeMap m_ShapePool;
+  ModelMap m_ModelPool;
 
   //-----tmp and Wip------
 //  QMatrix4x4 m_model_matrix;
@@ -114,12 +123,8 @@ private:
 
   QOpenGLVertexArrayObject* m_sphere_vao;
   QOpenGLBuffer m_sphere_vbo;
-  QOpenGLBuffer m_sphere_ebo;
+  QOpenGLBuffer m_sphere_ebo;  
   QMatrix4x4 m_sphere_Mmatrix;
-
-
-
-
 };
 
 
