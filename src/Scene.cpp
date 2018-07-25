@@ -245,7 +245,12 @@ std::shared_ptr<Model> Scene::getShapeFromModelPool(std::string _key)
         auto _pShape = got->second;
         return _pShape;
     }
-    return 0;
+    return nullptr;
+}
+
+void Scene::bar()
+{
+    qDebug()<<"bar";
 }
 
 
@@ -279,12 +284,13 @@ void Scene::QtOpenGLinitialize()
     m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
     m_flat_program->link();
 
+
 // sphere buffer creation
-    m_sphere_vao = new QOpenGLVertexArrayObject(window());
+    m_sphere_vao = new QOpenGLVertexArrayObject();
     m_sphere_vao->create();
     m_sphere_vao->bind();
 
-    m_sphere_vbo.create();
+    m_sphere_vbo.create();    
     m_sphere_vbo.bind();
     m_sphere_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
     m_sphere_vbo.allocate(vdata, sizeof(vdata));
@@ -295,25 +301,77 @@ void Scene::QtOpenGLinitialize()
     m_sphere_ebo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     m_sphere_ebo.allocate(tindices, sizeof(tindices));
 
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(Vertex),
+                          nullptr);
 
+     m_sphere_vao->release();
+    m_flat_program->bind();
+
+//    MAKE MODEL TO RENDER
+   pModel = std::make_shared<Model>(this, m_flat_program);
+   pModel->loadModel("resources/objects/rock/Cube.obj");
+//    pModel->loadModel("resources/objects/nanosuit/nanosuit.obj");
+   m_ModelPool["model"] = pModel;
+
+   auto indices = pModel->meshes[0].indices;
+   auto vertices = pModel->meshes[0].vertices;
+
+//   qDebug()<<"sizeOf Vert"<<sizeof(unsigned int);
+//   qDebug()<<"sizeOf Vert"<<sizeof(vertices[0]);
+//   qDebug()<<"size vector"<<vertices.size();
+//   qDebug()<<"size IndexVector"<<indices.size();
+
+
+
+
+    m_CubeModel_vao = new QOpenGLVertexArrayObject(window());
+    m_CubeModel_vao->create();
+    m_CubeModel_vao->bind();
+
+    m_CubeModel_vbo.create();
+    m_CubeModel_vbo.bind();
+    m_CubeModel_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_CubeModel_vbo.allocate(vertices.data(), vertices.size() * 24);
+
+    m_CubeModel_ebo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+    m_CubeModel_ebo.create();
+    m_CubeModel_ebo.bind();
+    m_CubeModel_ebo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    m_CubeModel_ebo.allocate(indices.data(), indices.size()*4);
+
+
+//    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(0,
+//                          3,
+//                          GL_FLOAT,
+//                          GL_FALSE,
+//                          sizeof(Vertex),
+//                          nullptr);
 
     m_flat_program->enableAttributeArray(0);
     m_flat_program->setAttributeBuffer(
                             0,                     // shader location
                             GL_FLOAT,             // type of elements
                             0,                    // attr offset
-                            3,                   // components per vertex attr
-                            sizeof(Vertex));                  // stride - size of all buffer attrs together
+                            3,                 // components per vertex attr
+                            sizeof(Vertex));               // stride - size of all buffer attrs together
+
+//        m_flat_program->enableAttributeArray(0);
+//        m_flat_program->setAttributeBuffer(
+//                                0,                     // shader location
+//                                GL_FLOAT,             // type of elements
+//                                0,                    // attr offset
+//                                3);                // components per vertex attr
 
     // before unbinding EBO do
-    m_sphere_vao->release();
 
-   // MAKE MODEL TO RENDER
-   auto pModel = std::make_shared<Model>();
-   pModel->loadModel("resources/objects/rock/Cube.obj");
-   m_ModelPool["model"] = pModel;
 
-   m_flat_program->release();
+    m_flat_program->release();
 
 // interpret new Model layout
 //    m_lighting_program->enableAttributeArray(0);
@@ -448,52 +506,75 @@ void Scene::paint()
        m_lighting_program->setUniformValue("lightPos", QVector3D(0,0,0));
 
        //------------------------draw Model-----------------------------------------------------------------------------
+ //      pModel->meshes[0].draw();
+//       pModel->meshes[0].m_vao.bind();
+//       glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+//       pModel->meshes[0].m_vao.release();
 
-       //------------------------end draw Model-----------------------------------------------------------------------------
        m_lighting_program->release();
+       //------------------------end draw Model-----------------------------------------------------------------------------
+
+
 
 //       ------------------test sphere Code--------------------------------------------------------------------------
       m_flat_program->bind();
       m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
       m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
 
-      auto ptr = getShapeFromModelPool("model");
-      m_sphere_Mmatrix.setToIdentity();
-      m_lighting_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
-      ptr->draw();
 
 //      m_sphere_vao->bind();
 //      m_sphere_Mmatrix.setToIdentity();
 //      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
 ////      glDrawArrays(GL_TRIANGLES, 0, 120);
 //      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
+//      m_sphere_vao->release();
 
-      m_sphere_vao->release();
+      m_CubeModel_vao->bind();
+////      glBindVertexArray( m_CubeModel_vao->objectId());
+////      glBindVertexArray(pModel->meshes[0].m_pVao->objectId());
+      m_sphere_Mmatrix.setToIdentity();
+      m_sphere_Mmatrix.translate(QVector3D(0,-2,0));
+      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
+      m_CubeModel_vao->release();
+//      glBindVertexArray( 0);
 
+      pModel->bind();
+      pModel->meshes[0].m_pVao->bind();
+      m_sphere_Mmatrix.setToIdentity();
+      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+//      glDrawElements(GL_LINES, 59, GL_UNSIGNED_INT, 0);
+      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
+      pModel->meshes[0].m_pVao->release();
+
+//      auto id1 = pModel->meshes[0].m_pVao->objectId();
+//      auto id2 = m_CubeModel_vao->objectId();
+
+//      m_CubeModel_vao->bind();
+//      m_sphere_Mmatrix.setToIdentity();
+//      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+//      glDrawElements(GL_LINES, 59, GL_UNSIGNED_INT, 0);
+//      m_CubeModel_vao->release();
 
       m_flat_program->release();
 //       -------------------end Sphere Code------------------------------------------------------------------------------
 
 
     // set light properties for single Material (doent exist on client side)
-//      m_lighting_program->setUniformValue("material.diffuse", QVector3D(1.0f, 0.0f, 0.0f));
-//      m_lighting_program->setUniformValue("material.ambient", QVector3D(1.0f, 0.1f, 0.1f));
-//      m_lighting_program->setUniformValue("material.specular", QVector3D(0.0f, 1.0f, 0.0f));
-//      m_lighting_program->setUniformValue("material.shininess", 20);
+      m_lighting_program->setUniformValue("material.diffuse", QVector3D(1.0f, 0.0f, 0.0f));
+      m_lighting_program->setUniformValue("material.ambient", QVector3D(1.0f, 0.1f, 0.1f));
+      m_lighting_program->setUniformValue("material.specular", QVector3D(0.0f, 1.0f, 0.0f));
+      m_lighting_program->setUniformValue("material.shininess", 20);
 
-      // set light uniforms
-//      for(uint i = 0; i < m_lights.size(); i++)
-//      {
-//          std::string uniFName = "dirLights[" + std::to_string(i) +"]";
-//          m_lighting_program->setUniformValue((uniFName+".direction").c_str(), m_lights[i].direction);
-//          m_lighting_program->setUniformValue((uniFName+".specular").c_str(), m_lights[i].specular);
-//          m_lighting_program->setUniformValue((uniFName+".diffuse").c_str(), m_lights[i].diffuse);
-//          m_lighting_program->setUniformValue((uniFName+".ambient").c_str(), m_lights[i].ambient);
-//      }
-
-//      int i = 1;
-//      std::string uniFName = "dirLights[" + std::to_string(i) +"]";
-//      m_lighting_program->setUniformValue((uniFName+".diffuse").c_str(), m_lights[i].diffuse);
+//       set light uniforms
+      for(uint i = 0; i < m_lights.size(); i++)
+      {
+          std::string uniFName = "dirLights[" + std::to_string(i) +"]";
+          m_lighting_program->setUniformValue((uniFName+".direction").c_str(), m_lights[i].direction);
+          m_lighting_program->setUniformValue((uniFName+".specular").c_str(), m_lights[i].specular);
+          m_lighting_program->setUniformValue((uniFName+".diffuse").c_str(), m_lights[i].diffuse);
+          m_lighting_program->setUniformValue((uniFName+".ambient").c_str(), m_lights[i].ambient);
+      }
 
       // draw cube with phong shader
 //      for(uint i = 1; i < m_SceneObjects.size(); i++)

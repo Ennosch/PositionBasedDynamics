@@ -2,6 +2,9 @@
 #include <iostream>
 #include <QDebug>
 
+#include "Scene.h"
+
+
 Shape::Shape()
 {
     qDebug()<<"ctor 1 Shape";
@@ -9,34 +12,35 @@ Shape::Shape()
 }
 
 Shape::Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices)
-        :  indices(_indices)
+        :  indices(_indices), vertices(_vertices)
 {
-//        for(std::vector<unsigned int>::reverse_iterator it = indices.rbegin(); it != indices.rend(); ++it)
-//        {
-//            std::cout << *it <<std::endl;
-//        }
-//    vertices = _vertices;
-
-
-    for(int i = 0; i < indices.size(); i+=3)
-    {
-
-        auto f1 = indices[i]+1;
-        auto f2 = indices[i]+2;
-        auto f3 = indices[i]+3;
-
-//        auto v11 = vertices[i].Position;
-//        auto v12 = vertices[i+1].Position;
-//        auto v13 = vertices[i+2].Position;
-
-//        qDebug()<<"f"<<f1<<f2<<f3<<"v:"<<v11<<"|"<<v12<<"|"<<v13;
-    }
-//    qDebug()<<indices.size() / 3;
-
-//    qDebug()<<_vertices[0];
-//    setupMesh();
+    // No parent, no automatic deletion ?!
+    // The parent of an object may be viewed as the object's owner
+    m_pVao = new QOpenGLVertexArrayObject();
+    setupMesh();
 }
 
+Shape::Shape(std::vector<Vertex> &_vertices,
+             std::vector<unsigned int> &_indices,
+             Scene *_scene,
+             QOpenGLShaderProgram *_shaderProgram)
+        :  indices(_indices), vertices(_vertices)
+{
+    // No parent, no automatic deletion ?!
+    // The parent of an object may be viewed as the object's owner
+    qDebug()<<"construct Shape with Scene and Shader";
+
+    pScene = _scene;
+    pShader = _shaderProgram;
+
+
+    auto win = pScene->window();
+    auto context = pScene->context();
+
+
+//    auto test = pScene->bar();
+    setupMesh();
+}
 
 Shape& Shape::operator=(const Shape &_rhs)
 {
@@ -45,16 +49,28 @@ Shape& Shape::operator=(const Shape &_rhs)
     return *this;
 }
 
+Shape::Shape(const Shape &_rhs)
+                    :m_Id(_rhs.m_Id),
+                      vertices(_rhs.vertices),
+                      indices(_rhs.indices)
+{
+    qDebug()<<"copy constructor Shape";
+    m_pVao = _rhs.m_pVao;
+    m_ebo = _rhs.m_ebo;
+    m_vvbo = _rhs.m_vvbo;
+
+}
+
 void Shape::allocate(const QVector3D* _data, int _size)
 {
-    m_vao.create();
-    m_vao.bind();
-    m_vvbo.create();
-    m_vvbo.bind();
-    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vvbo.allocate(_data, _size);
-    m_vertices = _data;
-    m_verticesSize = _size;
+//    m_vao.create();
+//    m_vao.bind();
+//    m_vvbo.create();
+//    m_vvbo.bind();
+//    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+//    m_vvbo.allocate(_data, _size);
+//    m_vertices = _data;
+//    m_verticesSize = _size;
 }
 
 void Shape::release()
@@ -65,34 +81,69 @@ void Shape::release()
 
 void Shape::setupMesh()
 {
+//    m_vao.create();
+//    m_vao.bind();
+//    pScene->bar();
 
-    m_vao.create();
-    m_vao.bind();
+    pScene->bar();
+    qDebug()<<pShader->programId();
+
+//    pShader->bind();
+
+    m_pVao = new QOpenGLVertexArrayObject(pScene->window());
+    m_pVao->create();
+    m_pVao->bind();
 
     m_vvbo.create();
     m_vvbo.bind();
-    m_vvbo.allocate(vertices.data(), sizeof(vertices));
+    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vvbo.allocate(vertices.data(), vertices.size() * 24);
 
     m_ebo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
     m_ebo.create();
     m_ebo.bind();
-    m_ebo.allocate(indices.data(), sizeof(indices));
+    m_ebo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    m_ebo.allocate(indices.data(), indices.size()*4);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+    // theory this call is not setting this in the shader/ or doesn't reacht the GL context
+//    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(0,
+//                          3,
+//                          GL_FLOAT,
+//                          GL_FALSE,
+//                          sizeof(Vertex),
+//                          nullptr);
+//    glEnableVertexAttribArray(1);
+//    glVertexAttribPointer(1,
+//                          3,
+//                          GL_FLOAT,
+//                          GL_FALSE,
+//                          sizeof(Vertex),
+//                          (void*)offsetof(Vertex, Normal));
+    pShader->enableAttributeArray(0);
+    pShader->setAttributeBuffer(
+                            0,                     // shader location
+                            GL_FLOAT,             // type of elements
+                            0,                    // attr offset
+                            3,                 // components per vertex attr
+                            sizeof(Vertex));
 
+//    qDebug()<<offsetof(Vertex, Normal);
 
-    m_ebo.release();
-    m_vvbo.release();
-    m_vao.release();
+//    m_ebo.release();
+//    m_vvbo.release();
+//    m_pVao->release();
+
+//    pShader->release();
+
 }
 
 void Shape::draw()
 {
 //    qDebug()<<"enter Draw";
-    m_vao.bind();
+//    m_vao.bind();
+       m_pVao->bind();
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    m_vao.release();
+//    m_vao.release();
+       m_pVao->release();
 }

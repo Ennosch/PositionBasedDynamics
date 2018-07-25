@@ -7,7 +7,11 @@
 #include <QVector3D>
 #include <vector>
 
+#include <QtGui/QOpenGLShaderProgram>
 
+
+
+class Scene;
 
 struct Vertex {
     // position
@@ -29,6 +33,10 @@ public:
     Shape();
     Shape(int _id): m_Id(_id){ qDebug()<<"Ctor 2 Shape";};
     Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices);
+    Shape(std::vector<Vertex> &_vertices,
+          std::vector<unsigned int> &_indices,
+          Scene *_scene,
+          QOpenGLShaderProgram *_shaderProgram);
 
     /*
      * user def copy assigment, copy assigment for QOpenGLVertexArrayObject has been deleted
@@ -43,7 +51,7 @@ public:
     /*similiar problem as above
      implicit copy constructor has been deleted for QOpenGLVertexArrayObject
      */
-    Shape(const Shape& _rhs) :m_Id(_rhs.m_Id){};
+    Shape(const Shape& _rhs);
     // creates buffer, add a name
     void allocate(const QVector3D *_data, int _size);
     void release();
@@ -51,17 +59,19 @@ public:
     void setupMesh();
     void draw();
 
-    inline void foo(){qDebug("foo");};
+    void inline foo(){qDebug()<<"hello shape";};
+
     inline int getVertsSize(){return m_verticesSize;};
     inline const QVector3D* getData(){return m_vertices; };
 
 //-----members-------
-private:
-    int m_Id;
+//private:
+    int m_Id = 5;
     ShapeType type;
     QOpenGLBuffer m_vvbo;
     QOpenGLBuffer m_ebo;
     QOpenGLVertexArrayObject m_vao;
+    QOpenGLVertexArrayObject* m_pVao;
     std::string m_name, directory;
     const QVector3D *m_vertices;
     int m_verticesSize;
@@ -70,9 +80,12 @@ private:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
+    Scene *pScene;
+    QOpenGLShaderProgram *pShader;
+
 };
 
-inline void Shape::bind(){m_vao.bind(); };
+inline void Shape::bind(){m_pVao->bind(); };
 
 
 #endif // SHAPE_H
