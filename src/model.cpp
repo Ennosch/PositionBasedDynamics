@@ -28,6 +28,8 @@ void Model::loadModel(std::string _path)
                                              aiProcess_JoinIdenticalVertices |
                                              aiProcess_GenNormals);
 
+
+
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
             {
                 std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;

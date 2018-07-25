@@ -267,7 +267,6 @@ void Scene::QtOpenGLinitialize()
     m_arcCamera.SetPivotToCam(QVector3D(0,0,6));
     m_arcCamera.arcBallStart();
 
-
 //----build, compline and link shaders
     m_screen_program = new QOpenGLShaderProgram;
     m_screen_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/screen.vert");
@@ -310,12 +309,12 @@ void Scene::QtOpenGLinitialize()
                           nullptr);
 
      m_sphere_vao->release();
-    m_flat_program->bind();
+//    m_flat_program->bind();
 
 //    MAKE MODEL TO RENDER
    pModel = std::make_shared<Model>(this, m_flat_program);
-   pModel->loadModel("resources/objects/rock/Cube.obj");
-//    pModel->loadModel("resources/objects/nanosuit/nanosuit.obj");
+//   pModel->loadModel("resources/objects/rock/3Cube_gn.obj");
+    pModel->loadModel("resources/objects/nanosuit/nanosuit.obj");
    m_ModelPool["model"] = pModel;
 
    auto indices = pModel->meshes[0].indices;
@@ -529,23 +528,27 @@ void Scene::paint()
 //      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
 //      m_sphere_vao->release();
 
-      m_CubeModel_vao->bind();
-////      glBindVertexArray( m_CubeModel_vao->objectId());
-////      glBindVertexArray(pModel->meshes[0].m_pVao->objectId());
-      m_sphere_Mmatrix.setToIdentity();
-      m_sphere_Mmatrix.translate(QVector3D(0,-2,0));
-      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
-      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
-      m_CubeModel_vao->release();
+//      m_CubeModel_vao->bind();
+//////      glBindVertexArray( m_CubeModel_vao->objectId());
+//////      glBindVertexArray(pModel->meshes[0].m_pVao->objectId());
+//      m_sphere_Mmatrix.setToIdentity();
+//      m_sphere_Mmatrix.translate(QVector3D(0,-2,0));
+//      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+//      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
+//      m_CubeModel_vao->release();
 //      glBindVertexArray( 0);
 
-      pModel->bind();
-      pModel->meshes[0].m_pVao->bind();
+//      pModel->bind();
+//      pModel->meshes[0].m_pVao->bind();
+//      m_sphere_Mmatrix.setToIdentity();
+//      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+////      glDrawElements(GL_LINES, 59, GL_UNSIGNED_INT, 0);
+//      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
+//      pModel->meshes[0].m_pVao->release();
+
       m_sphere_Mmatrix.setToIdentity();
       m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
-//      glDrawElements(GL_LINES, 59, GL_UNSIGNED_INT, 0);
-      glDrawElements(GL_TRIANGLES, 59, GL_UNSIGNED_INT, 0);
-      pModel->meshes[0].m_pVao->release();
+      pModel->draw();
 
 //      auto id1 = pModel->meshes[0].m_pVao->objectId();
 //      auto id2 = m_CubeModel_vao->objectId();
