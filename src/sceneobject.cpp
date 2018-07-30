@@ -44,7 +44,8 @@ void SceneObject::bind()
 
 void SceneObject::draw()
 {
-
+//    pShape->draw();
+    pShape->drawOld();
 }
 
 void SceneObject::release()

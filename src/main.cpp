@@ -4,7 +4,7 @@
 #include <QPropertyAnimation>
 
 #include <QFile>
-#include <Qdebug>
+#include <QDebug>
 #include <QTextStream>
 
 // Project

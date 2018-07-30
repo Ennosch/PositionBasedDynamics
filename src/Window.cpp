@@ -185,25 +185,27 @@ void Window::update()
     }
     if(inputManager::keyPressed(Qt::Key_W))
     {
-        scene()->m_SceneObjects[0]->translate(QVector3D(0,0.5,0));
+        scene()->m_SceneObjects[0]->translate(QVector3D(0,0.1,0));
     }
     if(inputManager::keyPressed(Qt::Key_S))
     {
-        scene()->m_SceneObjects[0]->translate(QVector3D(0,-0.5,0));
+        scene()->m_SceneObjects[0]->translate(QVector3D(0,-0.1,0));
     }
     if(inputManager::keyPressed(Qt::Key_A))
     {
-        scene()->m_SceneObjects[0]->translate(QVector3D(-0.5,0,0));
+        scene()->m_SceneObjects[0]->translate(QVector3D(-0.1,0,0));
     }
     if(inputManager::keyPressed(Qt::Key_D))
     {
-       scene()->m_SceneObjects[0]->translate(QVector3D(0.5,0,0));
+       scene()->m_SceneObjects[0]->translate(QVector3D(0.1,0,0));
     }
     if(inputManager::keyPressed(Qt::Key_Q))
     {
+        scene()->m_SceneObjects[0]->translate(QVector3D(0,0,0.1));
     }
-    if(inputManager::keyPressed(Qt::Key_A))
+    if(inputManager::keyPressed(Qt::Key_E))
     {
+        scene()->m_SceneObjects[0]->translate(QVector3D(0,0,-0.1));
     }
     scene()->update();
     QOpenGLWindow::update();

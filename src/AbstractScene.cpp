@@ -1,7 +1,7 @@
 
 // Project
 #include "AbstractScene.h"
-#include <Qdebug>
+#include <QDebug>
 
 void AbstractScene::foo()
 {

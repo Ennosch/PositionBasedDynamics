@@ -7,7 +7,7 @@
 
 Shape::Shape()
 {
-    qDebug()<<"ctor 1 Shape";
+    qDebug()<<"ctor 1.1 Shape";
     //m_vao.create();
 }
 
@@ -16,7 +16,9 @@ Shape::Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices
 {
     // No parent, no automatic deletion ?!
     // The parent of an object may be viewed as the object's owner
-    m_pVao = new QOpenGLVertexArrayObject();
+//    m_pVao = new QOpenGLVertexArrayObject();
+
+    qDebug()<<"ctor 2 shape. indecies vertices ";
     setupMesh();
 }
 
@@ -64,13 +66,15 @@ Shape::Shape(const Shape &_rhs)
 void Shape::allocate(const QVector3D* _data, int _size)
 {
 //    m_vao.create();
-//    m_vao.bind();
-//    m_vvbo.create();
-//    m_vvbo.bind();
-//    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-//    m_vvbo.allocate(_data, _size);
-//    m_vertices = _data;
-//    m_verticesSize = _size;
+    m_pVao = new QOpenGLVertexArrayObject();
+    m_pVao->create();
+    m_pVao->bind();
+    m_vvbo.create();
+    m_vvbo.bind();
+    m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vvbo.allocate(_data, _size);
+    m_vertices = _data;
+    m_verticesSize = _size;
 }
 
 void Shape::release()
@@ -84,12 +88,9 @@ void Shape::setupMesh()
 //    m_vao.create();
 //    m_vao.bind();
 //    pScene->bar();
-
-
-
 //    pShader->bind();
-
 //    m_pVao = new QOpenGLVertexArrayObject(pScene->window());
+
     m_pVao = new QOpenGLVertexArrayObject();
     m_pVao->create();
     m_pVao->bind();
@@ -113,13 +114,14 @@ void Shape::setupMesh()
                           GL_FALSE,
                           sizeof(Vertex),
                           nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1,
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,
                           3,
                           GL_FLOAT,
                           GL_FALSE,
                           sizeof(Vertex),
                           (void*)offsetof(Vertex, Normal));
+
 //    pShader->enableAttributeArray(0);
 //    pShader->setAttributeBuffer(
 //                            0,                     // shader location
@@ -143,8 +145,19 @@ void Shape::draw()
 //    qDebug()<<"enter Draw";
 //    m_vao.bind();
        m_pVao->bind();
-       unsigned int count= indices.size();
-    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+       unsigned int count = indices.size();
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
 //    m_vao.release();
-       m_pVao->release();
+        m_pVao->release();
 }
+
+void Shape::drawOld()
+{
+    m_pVao->bind();
+    unsigned int count= indices.size();
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+//    m_vao.release();
+    m_pVao->release();
+}
+
+

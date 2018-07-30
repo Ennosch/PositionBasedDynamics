@@ -31,6 +31,7 @@
 typedef std::unordered_map <std::string, std::shared_ptr <Shape>> ShapeMap;
 typedef std::unordered_map <std::string, std::shared_ptr <Model>> ModelMap;
 typedef std::shared_ptr <SceneObject> pSceneOb;
+typedef std::shared_ptr <Shape> ShapePtr;
 
 struct Light
 {

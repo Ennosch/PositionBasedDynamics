@@ -20,15 +20,25 @@ void Model::loadModel(std::string _path)
     Assimp::Importer importer;
 //    std::cout<<_path<<std::endl;
 
-
     const aiScene* scene = importer.ReadFile(_path,
                                              aiProcess_Triangulate |
                                              aiProcess_FlipUVs |
                                              aiProcess_CalcTangentSpace |
                                              aiProcess_JoinIdenticalVertices |
-                                             aiProcess_GenNormals);
+                                             aiProcess_FlipWindingOrder |
+                                             aiProcess_GenNormals |
 
+                                             aiProcess_FixInfacingNormals);
 
+//    Assimp::Exporter exporter;
+////    exporter.Export();
+//    auto count = exporter.GetExportFormatCount();
+//    auto format1 = exporter.GetExportFormatDescription(0);
+//    qDebug()<<format1->description;
+
+////    auto caught = exporter.Export(scene, "Wavefront OBJ format", "resources/objects/rock/export.obj");
+//    auto caught = exporter.Export(scene,  "obj", "resources/objects/rock/AssimpExport.obj", aiProcess_FlipWindingOrder);
+//    qDebug()<<"NO EXPORT: "<<exporter.GetErrorString();
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
             {
@@ -47,14 +57,12 @@ void Model::processNode(aiNode *node, const aiScene *scene)
         // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-        Shape myShape = processMesh(mesh, scene);
-//        qDebug()<<sizeof(myShape)<<sizeof(myShape.vertices)<<myShape.vertices.max_size();
+        ShapePtr ptrShape = processMesh(mesh, scene);
 
-        if(myShape.vertices.data() != nullptr)
+        if(ptrShape->vertices.data() != nullptr)
         {
-            // problem here, when pushing back the vector are not copied for some reason
-            meshes.push_back(myShape);
-            auto test = meshes[0];
+            // (note, pushing_back for objects on the stack calls copy ctor)
+            meshes.push_back(ptrShape);
         }
     }
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
@@ -64,7 +72,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
     }
 }
 
-Shape Model::processMesh(aiMesh *mesh, const aiScene *scene)
+ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
     // data to fill
     std::vector<Vertex> vertices;
@@ -96,19 +104,25 @@ Shape Model::processMesh(aiMesh *mesh, const aiScene *scene)
           indices.push_back(face.mIndices[j]);
         }
     }
-    Shape myShape = Shape(vertices, indices, pScene, pShader);
-    return myShape;
+
+//    Shape *ptrNewShape = new Shape(vertices, indices, pScene, pShader);
+//    return ptrNewShape;
+//    ShapePtr ptrNewShape = std::make_shared<Shape>(vertices, indices, pScene, pShader);
+     ShapePtr ptrNewShape = std::make_shared<Shape>(vertices, indices);
+    return ptrNewShape;
 }
 
 void Model::draw()
 {
     for(unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].draw();
+    {
+        meshes[i]->draw();
+    }
 }
 
 void Model::bind()
 {
     for(unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].bind();
+        meshes[i]->bind();
 }
 

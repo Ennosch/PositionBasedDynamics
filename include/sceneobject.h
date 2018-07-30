@@ -21,6 +21,7 @@ public:
 
     void bind();
     void draw();
+    void drawOld();
     void release();
     void setTranslation(const QVector3D &_dt);
     void translate(const QVector3D &_dt);
@@ -32,7 +33,7 @@ public:
     std::shared_ptr<Shape> shape();
     int m_Id = 33;
 
-private:
+//private:
 
     Scene *pScene;
     //std::shared_ptr<Shape>
@@ -49,5 +50,6 @@ inline void SceneObject::translate(const QVector3D &_dt){m_Transform.translate(_
 inline void SceneObject::rotate(const QQuaternion &_rot){m_Transform.rotate(_rot); };
 inline void SceneObject::setScale(const QVector3D &_s){m_Transform.scale(_s); };
 
+inline void SceneObject::drawOld(){ pShape->drawOld(); };
 
 #endif // SCENEOBJECT_H

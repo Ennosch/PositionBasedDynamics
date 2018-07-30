@@ -58,6 +58,7 @@ public:
     void bind();
     void setupMesh();
     void draw();
+    void drawOld();
 
     void inline foo(){qDebug()<<"hello shape";};
 
