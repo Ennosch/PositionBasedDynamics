@@ -39,7 +39,8 @@ HEADERS += \
     include/sceneobject.h \
     include/shape.h \
     include/model.h \
-    include/model.h
+    include/model.h \
+    include/utils.h
 
 
 OTHER_FILES += \

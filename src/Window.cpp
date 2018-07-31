@@ -229,7 +229,7 @@ void Window::keyPressEvent(QKeyEvent *event)
     // Simple QKeyEvent switch
     if (event->isAutoRepeat())
     {
-      qDebug("event isAutoRepeat");
+//      qDebug("event isAutoRepeat");
     }
     else
     {

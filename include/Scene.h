@@ -27,11 +27,13 @@
 #include "shape.h"
 #include "model.h"
 
+#include "utils.h"
 
-typedef std::unordered_map <std::string, std::shared_ptr <Shape>> ShapeMap;
-typedef std::unordered_map <std::string, std::shared_ptr <Model>> ModelMap;
-typedef std::shared_ptr <SceneObject> pSceneOb;
-typedef std::shared_ptr <Shape> ShapePtr;
+//typedef std::unordered_map <std::string, std::shared_ptr <Shape>> ShapeMap;
+//typedef std::unordered_map <std::string, std::shared_ptr <Model>> ModelMap;
+//typedef std::shared_ptr <SceneObject> pSceneOb;
+//typedef std::shared_ptr <Shape> ShapePtr;
+//typedef std::shared_ptr <Model> ModelPtr;
 
 struct Light
 {
@@ -73,14 +75,15 @@ public:
 
   pSceneOb addSceneObject(std::string _shape);
   pSceneOb addSceneObject(std::string _shape, const QVector3D &_pos);
-  pSceneOb addSceneObject(std::string _shape, const QVector3D &_pos, const QQuaternion &_rot);
+  pSceneOb addSceneObject(std::string _name, const QVector3D &_pos, const QQuaternion &_rot);
+  pSceneOb addSceneObjectFromModel(std::string _name, const QVector3D &_pos, const QQuaternion &_rot);
 
   float randf(int _mod = 10);
   QVector3D randVec3(int _mod = 10);
   float randfinRange(int a, int b);
 
   std::shared_ptr<Shape> getShapeFromPool(std::string _key);
-  std::shared_ptr<Model> getShapeFromModelPool(std::string _key);
+  std::shared_ptr<Model> getModelFromPool(std::string _key);
 
   // rename this (not a shape!)
   pSceneOb getShapeFromIndex(int _index);

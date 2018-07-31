@@ -1,24 +1,26 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "shape.h"
+
 #include <iostream>
 #include <vector>
 
 #include <QtGui/QOpenGLShaderProgram>
-//#include "Scene.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include "shape.h"
+#include "utils.h"
 
 
+
+
+
+// forward declare Scene, to enable passing *scene and *shader to meshes.
 class Scene;
-
-// already typed in Scene.h. But to avoid cycle define again
-typedef std::shared_ptr <Shape> ShapePtr;
 
 class Model
 {
@@ -31,7 +33,7 @@ public:
     void bind();
     ShapePtr processMesh(aiMesh *mesh, const aiScene *scene);
 
-        void inline foo(){qDebug()<<"hello model";};
+    void inline foo(){qDebug()<<"hello model";};
 
 //private:
     std::string directory;
@@ -42,7 +44,5 @@ public:
     QOpenGLShaderProgram *pShader;
 
 };
-
-
 
 #endif // MODEL_H

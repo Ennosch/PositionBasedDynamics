@@ -7,8 +7,13 @@
 
 #include "transform.h"
 #include "shape.h"
+#include "model.h"
+
+
 
 class Scene;
+
+class Model;
 
 class SceneObject
 {
@@ -17,6 +22,7 @@ public:
     SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape);
     SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape, const QVector3D &_pos);
     SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape, const QVector3D &_pos, const QQuaternion &_rot);
+    SceneObject(Scene *_scene, std::shared_ptr<Model> _Model, const QVector3D &_pos, const QQuaternion &_rot);
     SceneObject(std::string _path);
 
     void bind();
@@ -27,17 +33,17 @@ public:
     void translate(const QVector3D &_dt);
     void setScale(const QVector3D &_s);
     void rotate(const QQuaternion &_rot);
+
     const QMatrix4x4 getMatrix();
     const QVector3D getPos();
-
     std::shared_ptr<Shape> shape();
-    int m_Id = 33;
 
-//private:
-
+private:
     Scene *pScene;
-    //std::shared_ptr<Shape>
+    // not typedefed yet to avoid includeing scene.h every where
+    // make untils.h for typedef for that
     std::shared_ptr<Shape> pShape;
+    std::shared_ptr<Model> pModel;
     Transform m_Transform;
 };
 

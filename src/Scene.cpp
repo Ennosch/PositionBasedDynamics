@@ -69,26 +69,6 @@ static const GLuint tindices[20][3] = {
     {7, 10,  3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1,  6},
     {6,  1, 10}, {9, 0, 11}, {9, 11, 2}, { 9, 2, 5}, {7, 2, 11}};
 
-//static const QVector3D myShapeNormals[] = {
-//    // Face 1 (Front)
-//      VERTEX_FTR, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_FTL, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_FBL, QVector3D(0.0f, 0.0f, -1.0f),
-//      VERTEX_FBL, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_FBR, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_FTR, QVector3D(0.0f, 0.0f, -1.0f),
-//    // Face 2 (Back)
-//      VERTEX_BBR, QVector3D(0.0f, 0.0f, 1.0f), VERTEX_BTL, QVector3D(0.0f, 0.0f, 1.0f), VERTEX_BTR, QVector3D(0.0f, 0.0f, 1.0f),
-//      VERTEX_BTL, QVector3D(0.0f, 0.0f, 1.0f), VERTEX_BBR, QVector3D(0.0f, 0.0f, 1.0f), VERTEX_BBL, QVector3D(0.0f, 0.0f, 1.0f),
-//    // Face 3 (Top)
-//      VERTEX_FTR, QVector3D(0.0f, 1.0f, 0.0f), VERTEX_BTR, QVector3D(0.0f, 1.0f, 0.0f), VERTEX_BTL, QVector3D(0.0f, 1.0f, 0.0f),
-//      VERTEX_BTL, QVector3D(0.0f, 1.0f, 0.0f), VERTEX_FTL, QVector3D(0.0f, 1.0f, 0.0f), VERTEX_FTR, QVector3D(0.0f, 1.0f, 0.0f),
-//    // Face 4 (Bottom)
-//      VERTEX_FBR, QVector3D(0.0f, -1.0f, 0.0f), VERTEX_FBL, QVector3D(0.0f, -1.0f, 0.0f), VERTEX_BBL, QVector3D(0.0f, -1.0f, 0.0f),
-//      VERTEX_BBL, QVector3D(0.0f, -1.0f, 0.0f), VERTEX_BBR, QVector3D(0.0f, -1.0f, 0.0f), VERTEX_FBR, QVector3D(0.0f, -1.0f, 0.0f),
-//    // Face 5 (Left)
-//      VERTEX_FBL, QVector3D(-1.0f, 0.0f, 0.0f), VERTEX_FTL, QVector3D(-1.0f, 0.0f, 0.0f), VERTEX_BTL, QVector3D(-1.0f, 0.0f, 0.0f),
-//      VERTEX_FBL, QVector3D(-1.0f, 0.0f, 0.0f), VERTEX_BTL, QVector3D(-1.0f, 0.0f, 0.0f), VERTEX_BBL, QVector3D(-1.0f, 0.0f, 0.0f),
-//    // Face 6 (Right)
-//      VERTEX_FTR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_FBR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_BBR, QVector3D(1.0f, 0.0f, 0.0f),
-//      VERTEX_BBR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_BTR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_FTR, QVector3D(1.0f, 0.0f, 0.0f)
-//};
 
 static const QVector3D myShapeNormals[] = {
     // Face 1 (Front)
@@ -179,15 +159,29 @@ pSceneOb Scene::addSceneObject(std::string _shape, const QVector3D &_pos)
     return newPtr;
 }
 
-pSceneOb Scene::addSceneObject(std::string _shape, const QVector3D &_pos, const QQuaternion &_rot)
+pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const QQuaternion &_rot)
 {
-    auto pShape = getShapeFromPool(_shape);
-    if(pShape == NULL)
+
+        auto pShape = getShapeFromPool(_name);
+        if(pShape == NULL)
+        {
+            qDebug()<<"WARNING: COULD NOT ADD SceneObject";
+            return NULL;
+        }
+        auto pSO = std::make_shared<SceneObject>(this, pShape, _pos, _rot);
+        m_SceneObjects.push_back(pSO);
+        return pSO;
+}
+
+pSceneOb Scene::addSceneObjectFromModel(std::string _name, const QVector3D &_pos, const QQuaternion &_rot)
+{
+    auto pModel = getModelFromPool(_name);
+    if(pModel == NULL)
     {
         qDebug()<<"WARNING: COULD NOT ADD SceneObject";
         return NULL;
     }
-    auto pSO = std::make_shared<SceneObject>(this, pShape, _pos, _rot);
+    auto pSO = std::make_shared<SceneObject>(this, pModel, _pos, _rot);
     m_SceneObjects.push_back(pSO);
     return pSO;
 }
@@ -233,7 +227,7 @@ std::shared_ptr<Shape> Scene::getShapeFromPool(std::string _key)
     return nullptr;
 }
 
-std::shared_ptr<Model> Scene::getShapeFromModelPool(std::string _key)
+std::shared_ptr<Model> Scene::getModelFromPool(std::string _key)
 {
     ModelMap::const_iterator got = m_ModelPool.find(_key);
     if ( got == m_ModelPool.end())
@@ -285,8 +279,8 @@ void Scene::QtOpenGLinitialize()
 //    MAKE MODEL TO RENDER
    // add Model
    pModel = std::make_shared<Model>();
-//   pModel->loadModel("resources/objects/rock/AssimpExport.obj");
-   pModel->loadModel("resources/objects/nanosuit/nanosuit.obj");
+//   pModel->loadModel("resources/objects/HCube.obj");
+   pModel->loadModel("resources/objects/nanosuit.obj");
    m_ModelPool["Obj"] = pModel;
 //   m_ShapePool["CubeObj"] = pModel->meshes[0];
 
@@ -308,9 +302,14 @@ void Scene::QtOpenGLinitialize()
 
    addSceneObject("Cube");
 
+   addSceneObjectFromModel("Obj", QVector3D(0,0,0), QQuaternion(1,0,0,0));
+
    m_SceneObjects[0]->setScale(QVector3D(0.2, 0.2, 0.2));
    m_SceneObjects[1]->setScale(QVector3D(5.0, 5.0, 5.0));
-   m_SceneObjects[1]->translate(QVector3D(0,-4,0));
+   m_SceneObjects[1]->translate(QVector3D(0,-3,0));
+   m_SceneObjects[2]->setScale(QVector3D(0.2, 0.2, 0.2));
+   m_SceneObjects[2]->translate(QVector3D(-2,0,0));
+
 
     m_CubeModel_vao = new QOpenGLVertexArrayObject(window());
     m_CubeModel_vao->create();
@@ -437,11 +436,15 @@ void Scene::paint()
        glDrawArrays(GL_TRIANGLES, 0, 36);
        m_CubeModel_vao->release();
 
-      m_sphere_Mmatrix.setToIdentity();
-      m_sphere_Mmatrix.translate(QVector3D(5,0,0));
-      m_lighting_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
 
-      pModel->draw();
+       m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[2]->getMatrix());
+       m_SceneObjects[2]->draw();
+
+//      m_sphere_Mmatrix.setToIdentity();
+//      m_sphere_Mmatrix.translate(QVector3D(5,0,0));
+//      m_lighting_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
+//      pModel->draw();
+
 
        m_lighting_program->release();
 
@@ -451,9 +454,9 @@ void Scene::paint()
       m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
       m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
 
-      m_SceneObjects[0]->pShape->m_pVao->bind();
+      m_SceneObjects[0]->shape()->m_pVao->bind();
       glDrawArrays(GL_TRIANGLES, 0, 36);
-      m_SceneObjects[0]->pShape->m_pVao->release();
+      m_SceneObjects[0]->shape()->m_pVao->release();
 
 //      m_sphere_Mmatrix.setToIdentity();
 //      m_sphere_Mmatrix.translate(QVector3D(5,0,0));

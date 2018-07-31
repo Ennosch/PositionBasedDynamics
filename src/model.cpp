@@ -1,4 +1,4 @@
-#include "include/model.h"
+#include "model.h"
 
 #include <QDebug>
 
@@ -18,18 +18,16 @@ Model::Model(Scene *_scene, QOpenGLShaderProgram *_shaderProgram)
 void Model::loadModel(std::string _path)
 {
     Assimp::Importer importer;
-//    std::cout<<_path<<std::endl;
-
+    // bitwise And flags: aiProcess_FlipWindingOrder |  aiProcess_GenSmoothNormals |
     const aiScene* scene = importer.ReadFile(_path,
                                              aiProcess_Triangulate |
                                              aiProcess_FlipUVs |
                                              aiProcess_CalcTangentSpace |
                                              aiProcess_JoinIdenticalVertices |
-                                             aiProcess_FlipWindingOrder |
                                              aiProcess_GenNormals |
-
                                              aiProcess_FixInfacingNormals);
 
+////------------------- exporter test
 //    Assimp::Exporter exporter;
 ////    exporter.Export();
 //    auto count = exporter.GetExportFormatCount();
@@ -41,10 +39,10 @@ void Model::loadModel(std::string _path)
 //    qDebug()<<"NO EXPORT: "<<exporter.GetErrorString();
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
-            {
-                std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-                return;
-            }
+    {
+        std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+        return;
+    }
     directory = _path.substr(0, _path.find_last_of('/'));
     processNode(scene->mRootNode, scene);
 }

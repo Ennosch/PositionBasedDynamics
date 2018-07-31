@@ -28,6 +28,17 @@ SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape,
     pScene(_scene),
     pShape(_Shape)
 {
+
+    m_Transform.setTranslation(_pos);
+    m_Transform.rotate(_rot);
+}
+
+SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Model> _Model,
+                         const QVector3D &_pos,
+                         const QQuaternion &_rot) :
+    pScene(_scene),
+    pModel(_Model)
+{
     m_Transform.setTranslation(_pos);
     m_Transform.rotate(_rot);
 }
@@ -45,7 +56,14 @@ void SceneObject::bind()
 void SceneObject::draw()
 {
 //    pShape->draw();
-    pShape->drawOld();
+    if(pModel != NULL)
+    {
+        pModel->draw();
+    }
+    else
+    {
+        pShape->drawOld();
+    }
 }
 
 void SceneObject::release()
