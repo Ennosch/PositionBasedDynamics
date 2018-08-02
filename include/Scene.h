@@ -1,4 +1,3 @@
-
 #ifndef SCENE_H
 #define SCENE_H
 
@@ -29,20 +28,7 @@
 
 #include "utils.h"
 
-//typedef std::unordered_map <std::string, std::shared_ptr <Shape>> ShapeMap;
-//typedef std::unordered_map <std::string, std::shared_ptr <Model>> ModelMap;
-//typedef std::shared_ptr <SceneObject> pSceneOb;
-//typedef std::shared_ptr <Shape> ShapePtr;
-//typedef std::shared_ptr <Model> ModelPtr;
 
-struct Light
-{
-    QVector3D position,
-        direction,
-        ambient,
-        diffuse,
-        specular;
-};
 
 struct BufferSpec
 {
@@ -54,7 +40,6 @@ struct BufferSpec
 
 class Scene : public AbstractScene
 {
-
 
 public:
   Scene(Window *_window);
@@ -70,38 +55,23 @@ public:
   void QtOpenGLinitialize();
   void initLights();
 
-  static void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);
-  void addModel(Scene *_scene, std::string _name, std::string _path);
+  void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);
+  ModelPtr addModel(Scene *_scene, std::string _name, std::string _path);
 
   pSceneOb addSceneObject(std::string _shape);
   pSceneOb addSceneObject(std::string _shape, const QVector3D &_pos);
   pSceneOb addSceneObject(std::string _name, const QVector3D &_pos, const QQuaternion &_rot);
   pSceneOb addSceneObjectFromModel(std::string _name, const QVector3D &_pos, const QQuaternion &_rot);
+  LightPtr addPointLight();
+  LightPtr addPointLight(const QVector3D &_pos, const QVector3D &_color);
+  MaterialPtr addMaterial(const QVector3D &_ambient, const QVector3D &_diffuse, const QVector3D &_specular, float _shininess);
 
-  float randf(int _mod = 10);
-  QVector3D randVec3(int _mod = 10);
-  float randfinRange(int a, int b);
-
-  std::shared_ptr<Shape> getShapeFromPool(std::string _key);
-  std::shared_ptr<Model> getModelFromPool(std::string _key);
-
-  // rename this (not a shape!)
-  pSceneOb getShapeFromIndex(int _index);
-
-  void bar();
-
-
-
+  ShapePtr getShapeFromPool(std::string _key);
+  ModelPtr getModelFromPool(std::string _key);
+  pSceneOb getSceneObjectFromIndex(int _index);
 
 private:
   friend class Window;
-
-  // to cache location the uniform vars
-
-  int m_Id = 5;
-  static int m_ShapeCount;
-  static int m_SceneObjectCount;
-
 
   QOpenGLShaderProgram* m_program;
   QOpenGLShaderProgram* m_screen_program;
@@ -118,35 +88,18 @@ private:
   QMatrix4x4 m_projection_matrix;
 
   Camera3D m_arcCamera;
-  std::vector <Light> m_lights;
 
-  std::vector <pSceneOb> m_SceneObjects;
   ShapeMap m_ShapePool;
   ModelMap m_ModelPool;
 
-  //-----tmp and Wip------
-//  QMatrix4x4 m_model_matrix;
-//  QOpenGLBuffer m_vvbo;
-//  QOpenGLVertexArrayObject m_vao;
-  QVector3D m_lightPos = QVector3D(0.0f, 5.0f, 0.0f);
-
-  std::shared_ptr <Model> pModel;
-
-  QOpenGLVertexArrayObject* m_sphere_vao;
-  QOpenGLBuffer m_sphere_vbo;
-  QOpenGLBuffer m_sphere_ebo;
-  QMatrix4x4 m_sphere_Mmatrix;
-
-  QOpenGLVertexArrayObject* m_CubeModel_vao;
-  QOpenGLBuffer m_CubeModel_vbo;
-  QOpenGLBuffer m_CubeModel_ebo;
+  std::vector <LightPtr> m_Pointlights;
+  std::vector <MaterialPtr> m_Materials;
+  std::vector <pSceneOb> m_SceneObjects;
 };
 
 
 
-//-------------scene Utils------------------
-void addShape();
-
-inline pSceneOb Scene::getShapeFromIndex(int _index){ return m_SceneObjects[_index]; };
+inline pSceneOb Scene::getSceneObjectFromIndex(int _index){ return m_SceneObjects[_index]; };
+inline LightPtr Scene::addPointLight(){ return addPointLight(QVector3D(0,0,0), QVector3D(0,0,0)); };
 
 #endif // SCENE_H

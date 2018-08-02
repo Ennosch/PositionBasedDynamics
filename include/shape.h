@@ -9,16 +9,11 @@
 
 #include <QtGui/QOpenGLShaderProgram>
 
+#include "utils.h"
+
 
 
 class Scene;
-
-struct Vertex {
-    // position
-    QVector3D Position;
-    // normal
-    QVector3D Normal;
-};
 
 class Shape
 {
@@ -31,7 +26,7 @@ public:
     };
     // ctor
     Shape();
-    Shape(int _id): m_Id(_id){ qDebug()<<"Ctor 2 Shape";};
+    Shape(int _id): m_Id(_id){ qDebug()<<"Ctor 2 Shape";}
     Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices);
     Shape(std::vector<Vertex> &_vertices,
           std::vector<unsigned int> &_indices,
@@ -59,14 +54,13 @@ public:
     void setupMesh();
     void draw();
     void drawOld();
+    Vertex* data();
 
-    void inline foo(){qDebug()<<"hello shape";};
-
-    inline int getVertsSize(){return m_verticesSize;};
-    inline const QVector3D* getData(){return m_vertices; };
+//    inline int getVertsSize(){return m_verticesSize;}
+//    inline const QVector3D* getData(){return m_vertices; }
 
 //-----members-------
-//private:
+private:
     int m_Id = 5;
     ShapeType type;
     QOpenGLBuffer m_vvbo;
@@ -87,6 +81,7 @@ public:
 };
 
 inline void Shape::bind(){m_pVao->bind(); };
+inline Vertex* Shape::data(){ return vertices.data(); };
 
 
 #endif // SHAPE_H

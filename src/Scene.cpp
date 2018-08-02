@@ -1,95 +1,7 @@
-#include <array>
-#include <iostream>
-#include <math.h>
-#include <stdlib.h>
-
-#include <QDebug>
 #include <QFile>
-#include <QDebug>
 #include <QString>
 
 #include "Scene.h"
-
-// Front Verticies
-#define VERTEX_FTR QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 1.0f, 0.0f, 0.0f )
-#define VERTEX_FTL QVector3D(-0.5f,  0.5f,  0.5f), QVector3D( 0.0f, 1.0f, 0.0f )
-#define VERTEX_FBL QVector3D(-0.5f, -0.5f,  0.5f), QVector3D( 0.0f, 0.0f, 1.0f )
-#define VERTEX_FBR QVector3D( 0.5f, -0.5f,  0.5f), QVector3D( 0.0f, 0.0f, 0.0f )
-
-// Back Verticies
-#define VERTEX_BTR QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 0.0f )
-#define VERTEX_BTL QVector3D(-0.5f,  0.5f, -0.5f), QVector3D( 0.0f, 1.0f, 1.0f )
-#define VERTEX_BBL QVector3D(-0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 0.0f, 1.0f )
-#define VERTEX_BBR QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 1.0f )
-
-#define myqDebug() qDebug() << fixed << qSetRealNumberPrecision(2)
-
-static const float quad[] = {
-  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-   1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-   1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-   1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-  -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f
-};
-
-static const QVector3D myShape[] = {
-    // Face 1 (Front)
-      VERTEX_FTR, VERTEX_FTL, VERTEX_FBL,
-      VERTEX_FBL, VERTEX_FBR, VERTEX_FTR,
-    // Face 2 (Back)
-      VERTEX_BBR, VERTEX_BTL, VERTEX_BTR,
-      VERTEX_BTL, VERTEX_BBR, VERTEX_BBL,
-    // Face 3 (Top)
-      VERTEX_FTR, VERTEX_BTR, VERTEX_BTL,
-      VERTEX_BTL, VERTEX_FTL, VERTEX_FTR,
-    // Face 4 (Bottom)
-      VERTEX_FBR, VERTEX_FBL, VERTEX_BBL,
-      VERTEX_BBL, VERTEX_BBR, VERTEX_FBR,
-    // Face 5 (Left)
-      VERTEX_FBL, VERTEX_FTL, VERTEX_BTL,
-      VERTEX_FBL, VERTEX_BTL, VERTEX_BBL,
-    // Face 6 (Right)
-      VERTEX_FTR, VERTEX_FBR, VERTEX_BBR,
-      VERTEX_BBR, VERTEX_BTR, VERTEX_FTR
-};
-
-static const GLfloat X = 0.525731112119133606;
-static const GLfloat Z = 0.850650808352039932;
-
-static const  GLfloat vdata[12][3] = {
-    {-X, 0.0f, Z}, {X, 0.0f, Z}, {-X, 0.0f, -Z}, {X, 0.0f, -Z},
-    {0.0f, Z, X}, {0.0f, Z, -X}, {0.0f, -Z, X}, {0.0f, -Z, -X},
-    {Z, X, 0.0}, {-Z, X, 0.0f}, {Z, -X, 0.0f}, {-Z, -X, 0.0f}
- };
-
-static const GLuint tindices[20][3] = {
-    {0,  4,  1}, {0, 9,  4}, {9,  5, 4}, { 4, 5, 8}, {4, 8,  1},
-    {8, 10,  1}, {8, 3, 10}, {5,  3, 8}, { 5, 2, 3}, {2, 7,  3},
-    {7, 10,  3}, {7, 6, 10}, {7, 11, 6}, {11, 0, 6}, {0, 1,  6},
-    {6,  1, 10}, {9, 0, 11}, {9, 11, 2}, { 9, 2, 5}, {7, 2, 11}};
-
-
-static const QVector3D myShapeNormals[] = {
-    // Face 1 (Front)
-      VERTEX_FTR, QVector3D(0.0f, 0.0f, 1.0f), VERTEX_FTL, QVector3D(0.0f, 0.0f, 1.0f), VERTEX_FBL, QVector3D(0.0f, 0.0f, 1.0f),
-      VERTEX_FBL, QVector3D(0.0f, 0.0f, 1.0f), VERTEX_FBR, QVector3D(0.0f, 0.0f, 1.0f), VERTEX_FTR, QVector3D(0.0f, 0.0f, 1.0f),
-    // Face 2 (Back)
-      VERTEX_BBR, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_BTL, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_BTR, QVector3D(0.0f, 0.0f, -1.0f),
-      VERTEX_BTL, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_BBR, QVector3D(0.0f, 0.0f, -1.0f), VERTEX_BBL, QVector3D(0.0f, 0.0f, -1.0f),
-    // Face 3 (Top)
-      VERTEX_FTR, QVector3D(0.0f, 1.0f, 0.0f), VERTEX_BTR, QVector3D(0.0f, 1.0f, 0.0f), VERTEX_BTL, QVector3D(0.0f, 1.0f, 0.0f),
-      VERTEX_BTL, QVector3D(0.0f, 1.0f, 0.0f), VERTEX_FTL, QVector3D(0.0f, 1.0f, 0.0f), VERTEX_FTR, QVector3D(0.0f, 1.0f, 0.0f),
-    // Face 4 (Bottom)
-      VERTEX_FBR, QVector3D(0.0f, -1.0f, 0.0f), VERTEX_FBL, QVector3D(0.0f, -1.0f, 0.0f), VERTEX_BBL, QVector3D(0.0f, -1.0f, 0.0f),
-      VERTEX_BBL, QVector3D(0.0f, -1.0f, 0.0f), VERTEX_BBR, QVector3D(0.0f, -1.0f, 0.0f), VERTEX_FBR, QVector3D(0.0f, -1.0f, 0.0f),
-    // Face 5 (Left)
-      VERTEX_FBL, QVector3D(-1.0f, 0.0f, 0.0f), VERTEX_FTL, QVector3D(-1.0f, 0.0f, 0.0f), VERTEX_BTL, QVector3D(-1.0f, 0.0f, 0.0f),
-      VERTEX_FBL, QVector3D(-1.0f, 0.0f, 0.0f), VERTEX_BTL, QVector3D(-1.0f, 0.0f, 0.0f), VERTEX_BBL, QVector3D(-1.0f, 0.0f, 0.0f),
-    // Face 6 (Right)
-      VERTEX_FTR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_FBR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_BBR, QVector3D(1.0f, 0.0f, 0.0f),
-      VERTEX_BBR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_BTR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_FTR, QVector3D(1.0f, 0.0f, 0.0f)
-};
 
 
 Scene::Scene(Window *_window) : AbstractScene(_window)
@@ -101,6 +13,7 @@ Scene::~Scene()
 {
 
 }
+
 void Scene::initialize()
 {
   AbstractScene::initialize();  
@@ -130,32 +43,31 @@ void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, i
     _scene->m_ShapePool[_name] = pShape;
 }
 
-void Scene::addModel(Scene *_scene, std::string _name, std::string _path)
+ModelPtr Scene::addModel(Scene *_scene, std::string _name, std::string _path)
 {
     if(_scene->m_ModelPool[_name])
     {
         qDebug()<<_name.data()<<" already exists in ModelPool";
-        return;
+        return nullptr;
     }
     auto pModel = std::make_shared<Model>();
-
     // load the model using assimp
-     pModel->loadModel(_path);
-
-    _scene->m_ModelPool[_name] = pModel;
+    pModel->loadModel(_path);
+    m_ModelPool[_name] = pModel;
+    return pModel;
 }
 
 pSceneOb Scene::addSceneObject(std::string _shape)
 {
     pSceneOb newPtr= addSceneObject(_shape, QVector3D(0.0f, 0.0f, 0.0f), QQuaternion::fromAxisAndAngle(0,1,0,0));
-    if(newPtr == NULL){qDebug()<<"ptr to NULL returned";};
+    if(newPtr == nullptr){qDebug()<<"ptr to NULL returned";};
     return newPtr;
 }
 
 pSceneOb Scene::addSceneObject(std::string _shape, const QVector3D &_pos)
 {
     pSceneOb newPtr= addSceneObject(_shape, _pos, QQuaternion::fromAxisAndAngle(0,1,0,0));
-    if(newPtr == NULL){qDebug()<<"ptr to NULL returned";};
+    if(newPtr == nullptr){qDebug()<<"ptr to NULL returned";};
     return newPtr;
 }
 
@@ -163,10 +75,10 @@ pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const Q
 {
 
         auto pShape = getShapeFromPool(_name);
-        if(pShape == NULL)
+        if(pShape == nullptr)
         {
             qDebug()<<"WARNING: COULD NOT ADD SceneObject";
-            return NULL;
+            return nullptr;
         }
         auto pSO = std::make_shared<SceneObject>(this, pShape, _pos, _rot);
         m_SceneObjects.push_back(pSO);
@@ -176,43 +88,37 @@ pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const Q
 pSceneOb Scene::addSceneObjectFromModel(std::string _name, const QVector3D &_pos, const QQuaternion &_rot)
 {
     auto pModel = getModelFromPool(_name);
-    if(pModel == NULL)
+    if(pModel == nullptr)
     {
         qDebug()<<"WARNING: COULD NOT ADD SceneObject";
-        return NULL;
+        return nullptr;
     }
     auto pSO = std::make_shared<SceneObject>(this, pModel, _pos, _rot);
     m_SceneObjects.push_back(pSO);
     return pSO;
 }
 
-float Scene::randf(int _mod)
+LightPtr Scene::addPointLight(const QVector3D &_pos, const QVector3D &_color)
 {
-    float r10 = std::rand() % _mod;
-    float r1 = (std::rand() % _mod) / 10.0;
-    if(r10 == 0.0) r10 = 1;
-    if(r10 == 0.0) r1 = 0.1;
-
-//    qDebug()<<"randf is: "<< r10<<"rand1 is: "<< r1 <<" result: "<<r10 * r1;
-    return r10 * r1;
+    auto pLight = std::make_shared<Light>();
+    pLight->position = _pos;
+    pLight->color = _color;
+    m_Pointlights.push_back(pLight);
+    return pLight;
 }
 
-QVector3D Scene::randVec3(int _mod)
+MaterialPtr Scene::addMaterial(const QVector3D &_ambient, const QVector3D &_diffuse, const QVector3D &_specular, float _shininess)
 {
-    QVector3D randomVec = QVector3D(randf(_mod), randf(_mod), randf(_mod));
-//    qDebug()<<"randVec3 is: "<<randomVec;
-    return randomVec;
+    auto pMaterial = std::make_shared<Material>();
+    pMaterial->ambient = _ambient;
+    pMaterial->diffuse = _diffuse;
+    pMaterial->specular = _specular;
+    pMaterial->shininess = _shininess;
+    m_Materials.push_back(pMaterial);
+    return pMaterial;
 }
 
-float Scene::randfinRange(int a, int b)
-{
-    float r1 = a + (std::rand() % ( b - a + 1));
-    float r2 = (a + (std::rand() % ( b - a + 1))) * 0.1;
-//    qDebug()<<r1<<" : "<<r2;
-    return r1 + r2;
-}
-
-std::shared_ptr<Shape> Scene::getShapeFromPool(std::string _key)
+ShapePtr Scene::getShapeFromPool(std::string _key)
 {
     ShapeMap::const_iterator got = m_ShapePool.find(_key);
     if ( got == m_ShapePool.end())
@@ -227,7 +133,7 @@ std::shared_ptr<Shape> Scene::getShapeFromPool(std::string _key)
     return nullptr;
 }
 
-std::shared_ptr<Model> Scene::getModelFromPool(std::string _key)
+ModelPtr Scene::getModelFromPool(std::string _key)
 {
     ModelMap::const_iterator got = m_ModelPool.find(_key);
     if ( got == m_ModelPool.end())
@@ -242,15 +148,9 @@ std::shared_ptr<Model> Scene::getModelFromPool(std::string _key)
     return nullptr;
 }
 
-void Scene::bar()
-{
-    qDebug()<<"bar";
-}
-
 void Scene::QtOpenGLinitialize()
 {
-//    glEnable(GL_CULL_FACE);
-      glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
 //    glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -276,16 +176,27 @@ void Scene::QtOpenGLinitialize()
     m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
     m_flat_program->link();
 
-//    MAKE MODEL TO RENDER
-   // add Model
-   pModel = std::make_shared<Model>();
-//   pModel->loadModel("resources/objects/HCube.obj");
-   pModel->loadModel("resources/objects/nanosuit.obj");
-   m_ModelPool["Obj"] = pModel;
-//   m_ShapePool["CubeObj"] = pModel->meshes[0];
 
-   addShape(this, "Cube", &myShapeNormals[0], sizeof(myShapeNormals));
-   auto myShape = getShapeFromPool("Cube");
+    addPointLight();
+
+    addMaterial(    QVector3D(0.01f , 0.04f ,0.1f),   // ambient
+                    QVector3D(0.1f , 0.3f ,0.8f),    // diffuse
+                    QVector3D(1.0f , 1.0f ,1.0f),    // specular
+                    32.0 );                          // shininess
+
+    addMaterial(    QVector3D(0.02f , 0.0f ,0.0f),   // ambient
+                    QVector3D(0.5f , 0.05f ,0.05f),  // diffuse
+                    QVector3D(1.0f , 1.0f ,1.0f),    // specular
+                    20.0 );                          // shininess
+
+//    MAKE MODEL TO RENDER
+   addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
+
+   addModel(this, "bunny", "../bunny.obj");
+
+   addShape(this, "Cube", &CubeWithNormals[0], sizeof(CubeWithNormals));
+
+   addSceneObject("Cube");
    addSceneObject("Cube");
 
    m_flat_program->enableAttributeArray(0);
@@ -296,43 +207,18 @@ void Scene::QtOpenGLinitialize()
                            3,                    // components per vertex attr
                            3*sizeof(QVector3D)); // stride - size of all buffer attrs together
 
-//   m_SceneObjects[0]->pShape->allocate( &myShapeNormals[0], sizeof(myShapeNormals));
-//   stride - size of all buffer attrs together
-//   addSceneObject("Obj");
 
-   addSceneObject("Cube");
-
-   addSceneObjectFromModel("Obj", QVector3D(0,0,0), QQuaternion(1,0,0,0));
+   addSceneObjectFromModel("nanoSuit", QVector3D(0,0,0), QQuaternion(1,0,0,0));
+   addSceneObjectFromModel("bunny", QVector3D(0,0,0), QQuaternion(1,0,0,0));
 
    m_SceneObjects[0]->setScale(QVector3D(0.2, 0.2, 0.2));
-   m_SceneObjects[1]->setScale(QVector3D(5.0, 5.0, 5.0));
-   m_SceneObjects[1]->translate(QVector3D(0,-3,0));
    m_SceneObjects[2]->setScale(QVector3D(0.2, 0.2, 0.2));
    m_SceneObjects[2]->translate(QVector3D(-2,0,0));
+   m_SceneObjects[3]->setScale(QVector3D(10, 10, 10));
+   m_SceneObjects[3]->translate(QVector3D(2,0,0));
 
 
-    m_CubeModel_vao = new QOpenGLVertexArrayObject(window());
-    m_CubeModel_vao->create();
-    m_CubeModel_vao->bind();
-
-    m_CubeModel_vbo.create();
-    m_CubeModel_vbo.bind();
-    m_CubeModel_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_CubeModel_vbo.allocate(myShapeNormals, sizeof(myShapeNormals));
-
-    m_lighting_program->enableAttributeArray(0);
-    m_lighting_program->setAttributeBuffer(
-                            0,                     // shader location
-                            GL_FLOAT,             // type of elements
-                            0,                    // attr offset
-                            3,                    // components per vertex attr
-                            3*sizeof(QVector3D)); // stride - size of all buffer attrs together
-    m_lighting_program->enableAttributeArray(1);
-    m_lighting_program->setAttributeBuffer(1, GL_FLOAT, sizeof(QVector3D), 3, 3*sizeof(QVector3D));
-    m_lighting_program->enableAttributeArray(2);
-    m_lighting_program->setAttributeBuffer(2, GL_FLOAT, 2*sizeof(QVector3D), 3, 3*sizeof(QVector3D));
-
-    m_flat_program->setAttributeBuffer(
+   m_flat_program->setAttributeBuffer(
                             0,                     // shader location
                             GL_FLOAT,             // type of elements
                             0,                    // attr offset
@@ -424,26 +310,33 @@ void Scene::paint()
       m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
       m_lighting_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
 
-      m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[1]->getMatrix());
+//      m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[1]->getMatrix());
 
       // set light properties for single pointLight (doent exist on client side)
-      m_lighting_program->setUniformValue("lightPos",  m_SceneObjects[0]->getPos());
+      if(m_SceneObjects[0])
+            m_lighting_program->setUniformValue("lightPos",  m_SceneObjects[0]->getPos());
+      else
+          m_lighting_program->setUniformValue("lightPos", QVector3D(0,4,2) );
+
       m_lighting_program->setUniformValue("lightColor", 1.0f, 1.0f, 1.0f);
       m_lighting_program->setUniformValue("viewPos", m_arcCamera.worldPos());
       m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
 
-      m_CubeModel_vao->bind();
-       glDrawArrays(GL_TRIANGLES, 0, 36);
-       m_CubeModel_vao->release();
-
-
        m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[2]->getMatrix());
        m_SceneObjects[2]->draw();
+        m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[3]->getMatrix());
+       m_SceneObjects[3]->draw();
 
-//      m_sphere_Mmatrix.setToIdentity();
-//      m_sphere_Mmatrix.translate(QVector3D(5,0,0));
-//      m_lighting_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
-//      pModel->draw();
+
+ // set light uniforms loop
+ //      for(uint i = 0; i < m_lights.size(); i++)
+ //      {
+ //          std::string uniFName = "dirLights[" + std::to_string(i) +"]";
+ //          m_lighting_program->setUniformValue((uniFName+".direction").c_str(), m_lights[i].direction);
+ //          m_lighting_program->setUniformValue((uniFName+".specular").c_str(), m_lights[i].specular);
+ //          m_lighting_program->setUniformValue((uniFName+".diffuse").c_str(), m_lights[i].diffuse);
+ //          m_lighting_program->setUniformValue((uniFName+".ambient").c_str(), m_lights[i].ambient);
+ //      }
 
 
        m_lighting_program->release();
@@ -454,15 +347,10 @@ void Scene::paint()
       m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
       m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
 
-      m_SceneObjects[0]->shape()->m_pVao->bind();
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-      m_SceneObjects[0]->shape()->m_pVao->release();
+      m_SceneObjects[0]->draw();
+//      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[1]->getMatrix());
+//      m_SceneObjects[1]->draw();
 
-//      m_sphere_Mmatrix.setToIdentity();
-//      m_sphere_Mmatrix.translate(QVector3D(5,0,0));
-//      m_flat_program->setUniformValue("ModelMatrix", m_sphere_Mmatrix);
-
-//      pModel->draw();
 
       m_flat_program->release();
 //       -------------------end Sphere Code------------------------------------------------------------------------------
@@ -490,52 +378,12 @@ void Scene::update()
 void Scene::SceneInitialize()
 {
 
-    auto pSO1 = addSceneObject("cubeLit");
-    float rf= randf();
-    pSO1->setScale(QVector3D(0.3, 0.3, 0.3));
-
-    pSO1 = addSceneObject("cubeLit", QVector3D(0,0,0));
-    rf= randf(5);
-    pSO1->setScale(QVector3D(10.0, 10.0, 10.0));
-
-//    int num = 20;
-//    for(int i = 0; i<num ; i++)
-//    {
-//        pSO1 = addSceneObject("cubeLit", randVec3(i % 5 + 8));
-//        rf= randf(5);
-//        pSO1->setScale(QVector3D(rf, rf, rf));
-//        float x,y,z, w;
-//        x = randfinRange(-1,1);
-//        y = randfinRange(-1,1);
-//        z = randfinRange(-1,1);
-//        w = randfinRange(90,90);
-//        pSO1->rotate(QQuaternion::fromAxisAndAngle(x, y, z, w));
-//    }
 }
 
 void Scene::initLights()
 {
     // init simple 3-point DirLight setup
-    Light lightA, lightB, lightC;
 
-    lightA.direction = QVector3D(0.0, -1.0, 0.0);
-    lightA.ambient = QVector3D(0.1, 0.1, 0.1);
-    lightA.diffuse = QVector3D(1.0, 0.0, 0.0);
-    lightA.specular = QVector3D(0.4, 0.4, 0.4);
-
-//    lightB.direction = QVector3D(1.0, 0.8, 0.2);
-//    lightB.ambient = QVector3D(0.2, 0.2, 0.2);
-//    lightB.diffuse = QVector3D(1.0, 1.0, 1.0);
-//    lightB.specular = QVector3D(0.0, 1.0, 0.0);
-
-//    lightC.direction = QVector3D(-0.3, 0.5, 1.0);
-//    lightC.ambient = QVector3D(0.0, 0.0, 0.0);
-//    lightC.diffuse = QVector3D(0.0, 0.0, 0.0);
-//    lightC.specular = QVector3D(0.1, 0.1, 0.4);
-
-    m_lights.push_back(lightA);
-//    m_lights.push_back(lightB);
-//    m_lights.push_back(lightB);
 }
 
 

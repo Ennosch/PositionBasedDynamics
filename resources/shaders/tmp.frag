@@ -42,9 +42,28 @@ void main()
     fColor = vec4(diffuse + specular , 1.0);
 
 //    fColor = vec4(normal, 1.0);
-
 }
 
+
+// WIP sketch
+/*
+    for(p in pointLights)
+        result += pResult
+
+    for(d in directionalIghts)
+        result += lResult
+
+
+
+
+        ?? Working on Light Vector.
+            how to send to shader (see Tutorial)
+            how to splitt point lights and dir lights
+
+
+
+
+*/
 
 
 

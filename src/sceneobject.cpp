@@ -7,14 +7,14 @@ SceneObject::SceneObject()
     qDebug()<<"dtor: initScene Object";
 }
 
-SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape) :
+SceneObject::SceneObject(Scene *_scene, ShapePtr _Shape) :
     pScene(_scene),
     pShape(_Shape)
 {
     qDebug()<<"ctor: initScene Object";
 }
 
-SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape,
+SceneObject::SceneObject(Scene *_scene, ShapePtr _Shape,
                          const QVector3D &_pos) :
     pScene(_scene),
     pShape(_Shape)
@@ -22,7 +22,7 @@ SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape,
     m_Transform.setTranslation(_pos);
 }
 
-SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape,
+SceneObject::SceneObject(Scene *_scene, ShapePtr _Shape,
                          const QVector3D &_pos,
                          const QQuaternion &_rot) :
     pScene(_scene),
@@ -33,7 +33,7 @@ SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape,
     m_Transform.rotate(_rot);
 }
 
-SceneObject::SceneObject(Scene *_scene, std::shared_ptr<Model> _Model,
+SceneObject::SceneObject(Scene *_scene, ModelPtr _Model,
                          const QVector3D &_pos,
                          const QQuaternion &_rot) :
     pScene(_scene),

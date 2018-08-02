@@ -57,8 +57,9 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 
         ShapePtr ptrShape = processMesh(mesh, scene);
 
-        if(ptrShape->vertices.data() != nullptr)
+        if(ptrShape->data() != nullptr)
         {
+            auto test = ptrShape->data();
             // (note, pushing_back for objects on the stack calls copy ctor)
             meshes.push_back(ptrShape);
         }

@@ -157,27 +157,27 @@ void Window::update()
     }
     if(inputManager::keyPressed(Qt::Key_7))
     {
-        scene()->m_SceneObjects[1]->rotate(QQuaternion::fromAxisAndAngle(1,0,0,15));
+        scene()->m_SceneObjects[2]->rotate(QQuaternion::fromAxisAndAngle(1,0,0,15));
     }
     if(inputManager::keyPressed(Qt::Key_8))
     {
-        scene()->m_SceneObjects[1]->rotate(QQuaternion::fromAxisAndAngle(1,0,0,-15));
+        scene()->m_SceneObjects[2]->rotate(QQuaternion::fromAxisAndAngle(1,0,0,-15));
     }
     if(inputManager::keyPressed(Qt::Key_4))
     {
-        scene()->m_SceneObjects[1]->rotate(QQuaternion::fromAxisAndAngle(0,1,0,15));
+        scene()->m_SceneObjects[2]->rotate(QQuaternion::fromAxisAndAngle(0,1,0,15));
     }
     if(inputManager::keyPressed(Qt::Key_5))
     {
-        scene()->m_SceneObjects[1]->rotate(QQuaternion::fromAxisAndAngle(0,1,0,-15));
+        scene()->m_SceneObjects[2]->rotate(QQuaternion::fromAxisAndAngle(0,1,0,-15));
     }
     if(inputManager::keyPressed(Qt::Key_1))
     {
-        scene()->m_SceneObjects[1]->translate(QVector3D(0,0,0.5));
+        scene()->m_SceneObjects[2]->translate(QVector3D(0,0,0.5));
     }
     if(inputManager::keyPressed(Qt::Key_2))
     {
-        scene()->m_SceneObjects[1]->translate(QVector3D(0,0,-0.5));
+        scene()->m_SceneObjects[2]->translate(QVector3D(0,0,-0.5));
     }
     if(inputManager::keyPressed(Qt::Key_0))
     {

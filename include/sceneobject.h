@@ -19,10 +19,10 @@ class SceneObject
 {
 public:
     SceneObject();
-    SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape);
-    SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape, const QVector3D &_pos);
-    SceneObject(Scene *_scene, std::shared_ptr<Shape> _Shape, const QVector3D &_pos, const QQuaternion &_rot);
-    SceneObject(Scene *_scene, std::shared_ptr<Model> _Model, const QVector3D &_pos, const QQuaternion &_rot);
+    SceneObject(Scene *_scene, ShapePtr _Shape);
+    SceneObject(Scene *_scene, ShapePtr _Shape, const QVector3D &_pos);
+    SceneObject(Scene *_scene, ShapePtr _Shape, const QVector3D &_pos, const QQuaternion &_rot);
+    SceneObject(Scene *_scene, ModelPtr _Model, const QVector3D &_pos, const QQuaternion &_rot);
     SceneObject(std::string _path);
 
     void bind();

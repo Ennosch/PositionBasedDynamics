@@ -2,10 +2,9 @@
 #define QCAMERA_H
 
 #include <QPoint>
-
 #include "transform.h"
+#include "utils.h"
 
-#define myqDebug() qDebug() << fixed << qSetRealNumberPrecision(3)
 
 class Camera3D
 {
