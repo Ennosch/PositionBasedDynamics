@@ -8,8 +8,7 @@
 #include "transform.h"
 #include "shape.h"
 #include "model.h"
-
-
+#include "utils.h"
 
 class Scene;
 
@@ -22,7 +21,7 @@ public:
     SceneObject(Scene *_scene, ShapePtr _Shape);
     SceneObject(Scene *_scene, ShapePtr _Shape, const QVector3D &_pos);
     SceneObject(Scene *_scene, ShapePtr _Shape, const QVector3D &_pos, const QQuaternion &_rot);
-    SceneObject(Scene *_scene, ModelPtr _Model, const QVector3D &_pos, const QQuaternion &_rot);
+    SceneObject(Scene *_scene, ModelPtr _Model, const uint _materialID, const QVector3D &_pos, const QQuaternion &_rot);
     SceneObject(std::string _path);
 
     void bind();
@@ -36,17 +35,19 @@ public:
 
     const QMatrix4x4 getMatrix();
     const QVector3D getPos();
+    uint getMaterialID();
     std::shared_ptr<Shape> shape();
 
 private:
-    Scene *pScene;
-    // not typedefed yet to avoid includeing scene.h every where
-    // make untils.h for typedef for that
-    std::shared_ptr<Shape> pShape;
-    std::shared_ptr<Model> pModel;
+    uint m_MaterialID;
+    Scene *pScene;    
+    ShapePtr pShape;
+    ModelPtr pModel;
+    MaterialPtr pMaterial;
     Transform m_Transform;
 };
 
+inline uint SceneObject::getMaterialID(){ return m_MaterialID;};
 inline const QMatrix4x4 SceneObject::getMatrix(){return m_Transform.toMatrix();};
 inline const QVector3D SceneObject::getPos(){ return m_Transform.translation(); };
 inline std::shared_ptr<Shape> SceneObject::shape(){return pShape; };

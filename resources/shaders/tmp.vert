@@ -19,5 +19,4 @@ void main()
     vColor = vec3(0.2f , 0.0f , 0.5f);
 //    vNormal = normal;
     vNormal = mat3(transpose(inverse( ModelMatrix ))) * normal;
-    //vec4 test = mat3(transpose(inverse(ModelMatrix))) * normal;
 }

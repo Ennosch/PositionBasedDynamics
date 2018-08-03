@@ -57,6 +57,9 @@ ModelPtr Scene::addModel(Scene *_scene, std::string _name, std::string _path)
     return pModel;
 }
 
+/*
+ *
+ * // WIP
 pSceneOb Scene::addSceneObject(std::string _shape)
 {
     pSceneOb newPtr= addSceneObject(_shape, QVector3D(0.0f, 0.0f, 0.0f), QQuaternion::fromAxisAndAngle(0,1,0,0));
@@ -84,8 +87,9 @@ pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const Q
         m_SceneObjects.push_back(pSO);
         return pSO;
 }
+*/
 
-pSceneOb Scene::addSceneObjectFromModel(std::string _name, const QVector3D &_pos, const QQuaternion &_rot)
+pSceneOb Scene::addSceneObjectFromModel(std::string _name, const uint _materialID,  const QVector3D &_pos, const QQuaternion &_rot)
 {
     auto pModel = getModelFromPool(_name);
     if(pModel == nullptr)
@@ -93,7 +97,7 @@ pSceneOb Scene::addSceneObjectFromModel(std::string _name, const QVector3D &_pos
         qDebug()<<"WARNING: COULD NOT ADD SceneObject";
         return nullptr;
     }
-    auto pSO = std::make_shared<SceneObject>(this, pModel, _pos, _rot);
+    auto pSO = std::make_shared<SceneObject>(this, pModel, _materialID ,_pos, _rot);
     m_SceneObjects.push_back(pSO);
     return pSO;
 }
@@ -176,54 +180,20 @@ void Scene::QtOpenGLinitialize()
     m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
     m_flat_program->link();
 
+//   m_flat_program->enableAttributeArray(0);
+//   m_flat_program->setAttributeBuffer(
+//                           0,                     // shader location
+//                           GL_FLOAT,             // type of elements
+//                           0,                    // attr offset
+//                           3,                    // components per vertex attr
+//                           3*sizeof(QVector3D)); // stride - size of all buffer attrs together
 
-    addPointLight();
-
-    addMaterial(    QVector3D(0.01f , 0.04f ,0.1f),   // ambient
-                    QVector3D(0.1f , 0.3f ,0.8f),    // diffuse
-                    QVector3D(1.0f , 1.0f ,1.0f),    // specular
-                    32.0 );                          // shininess
-
-    addMaterial(    QVector3D(0.02f , 0.0f ,0.0f),   // ambient
-                    QVector3D(0.5f , 0.05f ,0.05f),  // diffuse
-                    QVector3D(1.0f , 1.0f ,1.0f),    // specular
-                    20.0 );                          // shininess
-
-//    MAKE MODEL TO RENDER
-   addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
-
-   addModel(this, "bunny", "../bunny.obj");
-
-   addShape(this, "Cube", &CubeWithNormals[0], sizeof(CubeWithNormals));
-
-   addSceneObject("Cube");
-   addSceneObject("Cube");
-
-   m_flat_program->enableAttributeArray(0);
-   m_flat_program->setAttributeBuffer(
-                           0,                     // shader location
-                           GL_FLOAT,             // type of elements
-                           0,                    // attr offset
-                           3,                    // components per vertex attr
-                           3*sizeof(QVector3D)); // stride - size of all buffer attrs together
-
-
-   addSceneObjectFromModel("nanoSuit", QVector3D(0,0,0), QQuaternion(1,0,0,0));
-   addSceneObjectFromModel("bunny", QVector3D(0,0,0), QQuaternion(1,0,0,0));
-
-   m_SceneObjects[0]->setScale(QVector3D(0.2, 0.2, 0.2));
-   m_SceneObjects[2]->setScale(QVector3D(0.2, 0.2, 0.2));
-   m_SceneObjects[2]->translate(QVector3D(-2,0,0));
-   m_SceneObjects[3]->setScale(QVector3D(10, 10, 10));
-   m_SceneObjects[3]->translate(QVector3D(2,0,0));
-
-
-   m_flat_program->setAttributeBuffer(
-                            0,                     // shader location
-                            GL_FLOAT,             // type of elements
-                            0,                    // attr offset
-                            3,                    // components per vertex attr
-                            3*sizeof(QVector3D));
+//   m_flat_program->setAttributeBuffer(
+//                            0,                     // shader location
+//                            GL_FLOAT,             // type of elements
+//                            0,                    // attr offset
+//                            3,                    // components per vertex attr
+//                            3*sizeof(QVector3D));
 
 //    Scene::addShape(this, "cubeLit", &myShapeNormals[0], sizeof(myShapeNormals));
     /* GL equivalent
@@ -290,9 +260,7 @@ void Scene::QtOpenGLinitialize()
 
     m_gbuffer_fbo->release();
 
-//    SceneInitialize();
-    initLights();
-    //printVersionInformation();
+    setupScene();
 }
 
 void Scene::paint()
@@ -309,35 +277,30 @@ void Scene::paint()
       m_lighting_program->bind();
       m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
       m_lighting_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-
-//      m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[1]->getMatrix());
-
-      // set light properties for single pointLight (doent exist on client side)
-      if(m_SceneObjects[0])
-            m_lighting_program->setUniformValue("lightPos",  m_SceneObjects[0]->getPos());
-      else
-          m_lighting_program->setUniformValue("lightPos", QVector3D(0,4,2) );
-
-      m_lighting_program->setUniformValue("lightColor", 1.0f, 1.0f, 1.0f);
       m_lighting_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+      m_lighting_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
+      m_lighting_program->setUniformValue("numMaterials", int(m_Materials.size()));
+
+      // set Position + color for all pointsLights
+      for(uint i = 0; i < m_Pointlights.size(); i++)
+      {
+            std::string uniFName = "PointLights[" + std::to_string(i) +"]";
+            m_lighting_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
+            m_lighting_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
+      }
+
       m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
 
-       m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[2]->getMatrix());
-       m_SceneObjects[2]->draw();
-        m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[3]->getMatrix());
-       m_SceneObjects[3]->draw();
-
-
- // set light uniforms loop
- //      for(uint i = 0; i < m_lights.size(); i++)
- //      {
- //          std::string uniFName = "dirLights[" + std::to_string(i) +"]";
- //          m_lighting_program->setUniformValue((uniFName+".direction").c_str(), m_lights[i].direction);
- //          m_lighting_program->setUniformValue((uniFName+".specular").c_str(), m_lights[i].specular);
- //          m_lighting_program->setUniformValue((uniFName+".diffuse").c_str(), m_lights[i].diffuse);
- //          m_lighting_program->setUniformValue((uniFName+".ambient").c_str(), m_lights[i].ambient);
- //      }
-
+      for(uint i = 0; i < m_SceneObjects.size(); i++)
+      {
+          uint matID = m_SceneObjects[i]->getMaterialID();
+          m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
+          m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
+          m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
+          m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+          m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
+          m_SceneObjects[i]->draw();
+      }
 
        m_lighting_program->release();
 
@@ -345,9 +308,9 @@ void Scene::paint()
       m_flat_program->bind();
       m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
       m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
 
-      m_SceneObjects[0]->draw();
+//      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
+//      m_SceneObjects[0]->draw();
 //      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[1]->getMatrix());
 //      m_SceneObjects[1]->draw();
 
@@ -380,15 +343,48 @@ void Scene::SceneInitialize()
 
 }
 
-void Scene::initLights()
+void Scene::setupScene()
 {
-    // init simple 3-point DirLight setup
+//        addPointLight(QVector3D(5,0,0), QVector3D(0, 0, 1));
+//        addPointLight(QVector3D(-5,0,0), QVector3D(0, 1, 0));
+//        addPointLight(QVector3D(0,5,0), QVector3D(1, 0, 0));
+
+         addPointLight(QVector3D(0,5,0), QVector3D(1.2, 1.2, 1.2));
+         addPointLight(QVector3D(0,-5,0), QVector3D(1, 0.6, 0));
+
+
+         // blue tone
+        addMaterial(    QVector3D(0.01f , 0.04f ,0.1f),   // ambient
+                        QVector3D(0.1f , 0.3f ,0.8f),    // diffuse
+                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+                        32.0 );                          // shininess
+
+        // organge tone
+        addMaterial(    QVector3D(0.1f , 0.01f ,0.01f),   // ambient
+                        QVector3D(0.5f , 0.2f ,0.07f),   // diffuse
+                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+                        20.0 );                          // shininess
+
+
+        // green tone
+        addMaterial(    QVector3D(0.0f , 0.0f ,0.0f),   // ambient
+                        QVector3D(0.08f , 0.5f ,0.1f),   // diffuse
+                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+                        15.0 );
+
+    //    MAKE MODEL TO RENDER
+       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
+       addModel(this, "bunny", "../bunny.obj");
+       addModel(this, "HCube", "resources/objects/HCube.obj");
+       addModel(this, "Ico", "../Icosahedronf4.obj");
+       addShape(this, "Cube", &CubeWithNormals[0], sizeof(CubeWithNormals));
+
+       // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
+       addSceneObjectFromModel("bunny", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
+       addSceneObjectFromModel("Ico", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
+       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
 
 }
-
-
-
-
 
 
 
