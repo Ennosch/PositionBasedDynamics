@@ -18,6 +18,7 @@ Shape::Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices
 
     qDebug()<<"ctor 2 shape. indecies vertices ";
     setupMesh();
+    int v = 4;
 }
 
 Shape::Shape(std::vector<Vertex> &_vertices,
@@ -109,8 +110,14 @@ void Shape::draw()
 {
        m_pVao->bind();
        unsigned int count = indices.size();
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+       glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+//       glDrawArrays(GL_TRIANGLES, 0, count);
         m_pVao->release();
+}
+
+void Shape::drawWireframe()
+{
+
 }
 
 void Shape::drawOld()
@@ -120,5 +127,22 @@ void Shape::drawOld()
     glDrawArrays(GL_TRIANGLES, 0, 36);
     m_pVao->release();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

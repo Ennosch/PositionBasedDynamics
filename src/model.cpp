@@ -21,10 +21,11 @@ void Model::loadModel(std::string _path)
     // bitwise And flags: aiProcess_FlipWindingOrder |  aiProcess_GenSmoothNormals |
     const aiScene* scene = importer.ReadFile(_path,
                                              aiProcess_Triangulate |
-                                             aiProcess_FlipUVs |
-                                             aiProcess_CalcTangentSpace |
                                              aiProcess_JoinIdenticalVertices |
+                                             aiProcess_FlipUVs |
+                                             aiProcess_CalcTangentSpace |                                             
                                              aiProcess_GenNormals |
+//                                             aiProcess_GenSmoothNormals |
                                              aiProcess_FixInfacingNormals);
 
 ////------------------- exporter test
@@ -123,5 +124,15 @@ void Model::bind()
 {
     for(unsigned int i = 0; i < meshes.size(); i++)
         meshes[i]->bind();
+}
+
+ShapePtr Model::getShape(unsigned int _index)
+{
+    if(!meshes[_index])
+    {
+        qDebug ()<<"WARNING NO SHAPE RETURN FROM GETSHAPE()";
+        return nullptr;
+    }
+    return meshes[_index];
 }
 

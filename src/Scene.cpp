@@ -206,6 +206,23 @@ void Scene::QtOpenGLinitialize()
      *                   (void*)0));        //  pointer to the first component of data
      */
 
+    m_Test_vao = new QOpenGLVertexArrayObject(window());
+    m_Test_vao->create();
+    m_Test_vao->bind();
+    m_Test_vbo.create();
+    m_Test_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_Test_vbo.bind();
+    m_Test_vbo.allocate(&CubeWithNormals[0], sizeof(CubeWithNormals));
+
+    m_flat_program->enableAttributeArray(0);
+   m_flat_program->setAttributeBuffer(
+                            0,                     // shader location
+                            GL_FLOAT,             // type of elements
+                            0,                    // attr offset
+                            3,                    // components per vertex attr
+                            3*sizeof(QVector3D));
+
+
 //----prepare a QuadPlane
     m_quad_vao = new QOpenGLVertexArrayObject(window());
     m_quad_vao->create();
@@ -268,7 +285,6 @@ void Scene::paint()
     // draw to the framebuffer (off-screen render)
     glViewport(0,0, m_gbuffer_fbo->width(), m_gbuffer_fbo->height());
     glDisable(GL_CULL_FACE);
-
     m_gbuffer_fbo->bind();
       glEnable(GL_DEPTH_TEST);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -291,7 +307,8 @@ void Scene::paint()
 
       m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
 
-      for(uint i = 0; i < m_SceneObjects.size(); i++)
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      for(uint i = 1; i < m_SceneObjects.size(); i++)
       {
           uint matID = m_SceneObjects[i]->getMaterialID();
           m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
@@ -307,19 +324,31 @@ void Scene::paint()
 //-------------------------Draw flatShader Cube---------------------------------------------------------------------------
       m_flat_program->bind();
       m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-      m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-
-//      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[0]->getMatrix());
-//      m_SceneObjects[0]->draw();
-//      m_flat_program->setUniformValue("ModelMatrix", m_SceneObjects[1]->getMatrix());
-//      m_SceneObjects[1]->draw();
-
-
+      m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());      
+      if(m_SceneObjects[0])
+      {
+          glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+          m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
+          m_SceneObjects[0]->draw();
+      }
       m_flat_program->release();
+
 //       -------------------end Sphere Code------------------------------------------------------------------------------
     m_gbuffer_fbo->release();
 
+
     // draw to screen
+    drawScreenQuad();
+}
+
+void Scene::update()
+{
+    // update from Window Qtimer animate cube
+    //m_myTransform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
+}
+
+void Scene::drawScreenQuad()
+{
     glViewport ( 0, 0, window()->width()*2, window()->height()*2);
     glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -327,15 +356,10 @@ void Scene::paint()
     m_screen_program->bind();
     m_view_position_texture->bind(0);
     m_quad_vao->bind();
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     m_quad_vao->release();
     m_screen_program->release();
-}
-
-void Scene::update()
-{
-    // update from Window Qtimer animate cube
-    //m_myTransform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
 }
 
 void Scene::SceneInitialize()
@@ -375,13 +399,15 @@ void Scene::setupScene()
     //    MAKE MODEL TO RENDER
        addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "../bunny.obj");
+       addModel(this, "grid", "../Grid100.obj");
        addModel(this, "HCube", "resources/objects/HCube.obj");
-       addModel(this, "Ico", "../Icosahedronf4.obj");
+       addModel(this, "Icosahedron", "../Icosahedronf4.obj");
        addShape(this, "Cube", &CubeWithNormals[0], sizeof(CubeWithNormals));
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
+       addSceneObjectFromModel("grid", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
+       addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
        addSceneObjectFromModel("bunny", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
-       addSceneObjectFromModel("Ico", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
        addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
 
 }

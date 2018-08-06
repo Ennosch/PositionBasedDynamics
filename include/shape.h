@@ -53,6 +53,7 @@ public:
     void bind();
     void setupMesh();
     void draw();
+    void drawWireframe();
     void drawOld();
     Vertex* data();
 
@@ -74,6 +75,7 @@ private:
     // WIP model loading
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    std::vector<unsigned int> LineIndices;
 
     Scene *pScene;
     QOpenGLShaderProgram *pShader;

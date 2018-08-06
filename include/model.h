@@ -31,11 +31,13 @@ public:
     void processNode(aiNode *node, const aiScene *scene);
     void draw();
     void bind();
+    ShapePtr getShape(unsigned int _index);
     ShapePtr processMesh(aiMesh *mesh, const aiScene *scene);
+
 
     void inline foo(){qDebug()<<"hello model";};
 
-//private:
+private:
     std::string directory;
     // could be to pointer of Shapp (that's what's discussed to save resources)
 //    std::vector<Shape *> meshes;

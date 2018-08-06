@@ -28,16 +28,6 @@
 
 #include "utils.h"
 
-
-
-struct BufferSpec
-{
-    int index;
-    int attrOffset;
-    int sizeTuple;
-    int stride;
-};
-
 class Scene : public AbstractScene
 {
 
@@ -48,8 +38,7 @@ public:
   void resize(int width, int height);
   void paint();
   void update();
-
-//  using AbstractScene::window;
+  void drawScreenQuad();
 
   void SceneInitialize();
   void QtOpenGLinitialize();
@@ -75,8 +64,6 @@ public:
   MaterialPtr getMaterial(int _index);
   pSceneOb getSceneObjectFromIndex(int _index);
 
-  inline void foo(){ qDebug()<<"asdasd"; }
-
 private:
   friend class Window;
 
@@ -90,6 +77,9 @@ private:
 
   QOpenGLVertexArrayObject* m_quad_vao;
   QOpenGLBuffer m_quad_vbo;
+
+  QOpenGLVertexArrayObject* m_Test_vao;
+  QOpenGLBuffer m_Test_vbo;
 
   QMatrix4x4 m_view_matrix;
   QMatrix4x4 m_projection_matrix;
