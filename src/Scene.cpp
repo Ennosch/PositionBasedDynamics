@@ -155,6 +155,7 @@ ModelPtr Scene::getModelFromPool(std::string _key)
 void Scene::QtOpenGLinitialize()
 {
     glEnable(GL_CULL_FACE);
+    glEnable(GL_MULTISAMPLE);
 //    glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -239,41 +240,136 @@ void Scene::QtOpenGLinitialize()
     m_quad_vbo.release();
     m_quad_vao->release();
 
-    //----Fill SceneObjects array
-    // create a framebuffer
-    m_gbuffer_fbo = new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2);
-    m_gbuffer_fbo->bind();
-    m_gbuffer_fbo->addColorAttachment(window()->width()*2, window()->height()*2, GL_RGB);
 
+
+//---------------------frame buffer pain ---------------------
+    QOpenGLFramebufferObjectFormat muliSampleFormat;
+    muliSampleFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    muliSampleFormat.setMipmap(true);
+    muliSampleFormat.setSamples(4);
+    muliSampleFormat.setTextureTarget(GL_TEXTURE_2D);
+    muliSampleFormat.setInternalTextureFormat(GL_RGBA32F_ARB);
+
+    m_fbo_A= new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2, muliSampleFormat);
+
+    QOpenGLFramebufferObjectFormat downSampledFormat;
+    downSampledFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    downSampledFormat.setMipmap(true);
+    downSampledFormat.setTextureTarget(GL_TEXTURE_2D);
+    downSampledFormat.setInternalTextureFormat(GL_RGBA32F_ARB);
+
+    m_fbo_B = new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2, downSampledFormat);
+
+
+    // create a framebuffer
+    QOpenGLFramebufferObjectFormat _testFBOFormat;
+    _testFBOFormat.setSamples(4);
+    _testFBOFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+    _testFBOFormat.setTextureTarget(GL_TEXTURE_2D_MULTISAMPLE);
+
+//    m_gbuffer_fbo = new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2, _testFBOFormat);
+    m_gbuffer_fbo = new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2, _testFBOFormat);
+    m_gbuffer_fbo->bind();
+    // Creates and attaches an additional texture or renderbuffer of size width and height.
+
+
+
+    QOpenGLFramebufferObject::blitFramebuffer( m_fbo_B , m_gbuffer_fbo , GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT,GL_NEAREST);
     // create a texture the fb can render to
-    m_view_position_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
+
+    ////  for multisample
+//    m_view_position_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
+    m_view_position_texture = new QOpenGLTexture(QOpenGLTexture::Target2DMultisample);
+    m_view_position_texture->create();
+    m_view_position_texture->bind();
+//    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_view_position_texture->textureId());
+//    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, window()->width()*2, window()->height()*2, GL_TRUE);
     m_view_position_texture->setSize(window()->width()*2, window()->height()*2);
     m_view_position_texture->setMinificationFilter(QOpenGLTexture::Nearest);
     m_view_position_texture->setMagnificationFilter(QOpenGLTexture::Nearest);
+    // change to GL_DEPTH24_STENCIL8 fixed 36182 => GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE, a wrong move the texture should be the color buffer hence D24S8 worng and back to RGB32F
+    // the teture is a color buffer. Depth and Stencil is wrong here
     m_view_position_texture->setFormat(QOpenGLTexture::RGB32F);
+    m_view_position_texture->setSamples(4);
+    //DepthStencil
     m_view_position_texture->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::Float32);
 
-    //bind the texture to the framebuffer
-    glBindTexture(GL_TEXTURE_2D, m_view_position_texture->textureId());
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_view_position_texture->textureId(), 0);
+    m_gbuffer_fbo->addColorAttachment(window()->width()*2, window()->height()*2, GL_RGB);
 
-    //create a render buffer
+     qDebug()<<"texture ID:"<<m_view_position_texture->textureId();
+
+    // check here if my custom fb is bound
+
+//    int _glValue;
+//    glGetIntegerv(GL_ACTIVE_PROGRAM, &_glValue);
+//    qDebug()<<"logGL:"<<unsigned(_glValue);
+
+
+    // attach texture to fbo
+//    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_view_position_texture->textureId(), 0);
+//    glFramebufferTexture2D(GL_FRAMEBUFFER,                      // target     (our currently bound custom fbo)
+//                           GL_COLOR_ATTACHMENT0,                // attachment (can be more than 1 color)
+//                           GL_TEXTURE_2D_MULTISAMPLE,           // textarget type of texture
+//                           m_view_position_texture->textureId(),// texture (ID)
+//                           0);                                  // level (mipmap level)
+
+//    auto whatIsAttatched = m_gbuffer_fbo->takeTexture(2);
+//    qDebug()<<"take texture:"<<whatIsAttatched;
+
+    m_view_position_texture->release();
+
+// ignore depth rbo for now
+/*
+    //create a render buffer (rbo) serving as DepthStencil buffer
     GLuint rbo_depth;
-    glGenRenderbuffers(1, &rbo_depth);
+    glGenRenderbuffers(1, &rbo_depth);    
     glBindRenderbuffer(GL_RENDERBUFFER, rbo_depth);
+    //  for multisample
     glRenderbufferStorage(
       GL_RENDERBUFFER,     // Target
-      GL_DEPTH_COMPONENT,  // Internal Format
+      GL_DEPTH_COMPONENT,  // Internal Format (?) check GL_DEPTH24_STENCIL8  here
       window()->width()*2, window()->height()*2    // Dimensions
     );
+//    glRenderbufferStorageMultisample(
+//      GL_RENDERBUFFER,     // Target
+//                4,         // probably sample count
+//      GL_DEPTH24_STENCIL8,  // Internal Format
+//      window()->width()*2, window()->height()*2    // Dimensions
+//    );
+    // attach rbo to fbo
     glFramebufferRenderbuffer(
       GL_FRAMEBUFFER,       // Target
       GL_DEPTH_ATTACHMENT,  // Attachment
       GL_RENDERBUFFER,      // Renderbuffer Target
       rbo_depth             // Renderbuffer
     );
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+*/
+
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical("gBuffer FBO not complete!");
+      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+
+//    auto oglEnum = GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE;
+//    auto oglEnum = GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
+//    qDebug()<<oglEnum;
+
+    /*
+     *36054 GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT is returned if any of the framebuffer attachment points are framebuffer incomplete.
+     *
+     * 36182:
+     *
+     * value of GL_RENDERBUFFER_SAMPLES is not the same for all attached renderbuffers
+     * value of GL_TEXTURE_SAMPLES is the not same for all attached textures
+     * or
+     * attached images are a mix of renderbuffers and textures
+     * value of GL_RENDERBUFFER_SAMPLES does not match the value of GL_TEXTURE_SAMPLES
+     *
+     * also
+     * value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not the same for all attached textures
+     * or
+     * attached images are a mix of renderbuffers and textures
+     * value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached textures
+     */
 
     m_gbuffer_fbo->release();
 

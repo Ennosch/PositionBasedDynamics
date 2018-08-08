@@ -27,8 +27,10 @@ public:
   void rotate(float angle, float ax, float ay, float az);
 
   void rotateAroundPoint(const float _angle, const QVector3D &_axis);
-  void rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggeredPos, const int _radius); //--------WIP--------
+  void rotateArcBall(const QPoint &_mousePos, const QPoint &_mouseTriggeredPos, const int _radius); //--------WIP--------
   void arcBallStart();
+  void orbit(const QPoint &_mousePos, const QPoint &_mouseTriggeredPos);
+  void orbit2(const QPoint &_mousePos, const QPoint &_mouseTriggeredPos);
 
   void dolly(const QPoint &_mousePos);
   void dollyStart(const QPoint &_mousePos);
@@ -59,8 +61,6 @@ public:
 //  const QMatrix4x4& rotationMat4() const;
   const QMatrix4x4& toMatrix();
 
-
-
   // Queries
   QVector3D forward() const;
   QVector3D up() const;
@@ -83,6 +83,7 @@ private:
   QQuaternion m_rotation, m_deltaRotation, m_startRotation;
 
   QMatrix4x4 m_world;
+  QMatrix4x4 m_tumble, m_tumbleStart, m_SecondTumble, m_SecondTumbleStart;
 
 #ifndef QT_NO_DATASTREAM
   friend QDataStream &operator<<(QDataStream &out, const Camera3D &transform);
@@ -116,7 +117,9 @@ inline void Camera3D::info()
 //    m_worldPos = myRotMat * m_translation;
      m_worldPos = myRotMat * (m_translation - m_pivot) + m_pivot;
 
-    myqDebug()<<"WP: "<<m_worldPos<<" translation :"<<m_translation<< "pivot: "<<m_pivot<<" rot: "<<m_rotation;
+//    myqDebug()<<"WP: "<<m_worldPos<<" translation :"<<m_translation<< "pivot: "<<m_pivot<<" rot: "<<m_rotation;
+     qDebug()<<"--------------------------------";
+     myqDebug()<<m_translation;
 
 };
 

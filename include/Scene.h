@@ -73,6 +73,9 @@ private:
   QOpenGLShaderProgram* m_flat_program;
 
   QOpenGLFramebufferObject* m_gbuffer_fbo;
+  QOpenGLFramebufferObject* m_fbo_A;
+  QOpenGLFramebufferObject* m_fbo_B;
+
   QOpenGLTexture* m_view_position_texture;
 
   QOpenGLVertexArrayObject* m_quad_vao;

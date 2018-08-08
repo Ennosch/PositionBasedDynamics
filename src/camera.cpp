@@ -32,7 +32,7 @@ void Camera3D::rotate(const QQuaternion &dr)
   m_rotation = dr * m_rotation;
 }
 
-void Camera3D::rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggeredPos, const int _radius)
+void Camera3D::rotateArcBall(const QPoint &_mousePos, const QPoint &_mouseTriggeredPos, const int _radius)
 {
     //https://pixeladventuresweb.wordpress.com/2016/10/04/arcball-controller/
     //qDebug()<<_mousePos<<_mouseTriggeredPos;    
@@ -83,6 +83,76 @@ void Camera3D::rotateArcBall(const QPoint _mousePos, const QPoint _mouseTriggere
     m_dirty = true;
 }
 
+void Camera3D::orbit(const QPoint &_mousePos, const QPoint &_mouseTriggeredPos)
+{
+    QQuaternion _rotY, _rotX;
+    QMatrix4x4 _orbitA, _orbitB;
+    _orbitA.setToIdentity();
+    _orbitB.setToIdentity();
+
+    float _x2 = _mousePos.x();
+    float _y2 = _mousePos.y();
+    float _x1 = _mouseTriggeredPos.x();
+    float _y1 = _mouseTriggeredPos.y();
+    float dx = (_x2 - _x1) * 1;
+    float dy = (_y2 - _y1) * 1;
+
+
+    _orbitA.rotate(dx, QVector3D(0, 1, 0));
+
+    _orbitB.rotate(-dy, QVector3D(1,0,0));
+
+    _rotY = QQuaternion::fromAxisAndAngle(QVector3D(0,1,0), dx);
+    _rotX = QQuaternion::fromAxisAndAngle(right(), -dy);
+
+//    m_rotation = _rot * m_startRotation;
+//    m_deltaRotation = _rot;
+
+//    m_rotation = _rotY * m_startRotation;
+
+//    m_rotation = _rotX ;
+    m_tumble = m_tumbleStart * _orbitA;
+    m_SecondTumble = m_SecondTumbleStart * _orbitB;
+
+
+
+    QQuaternion _test = quaternionFromMat4x4(_orbitA);
+
+
+     m_dirty = true;
+}
+
+void Camera3D::orbit2(const QPoint &_mousePos, const QPoint &_mouseTriggeredPos)
+{
+    QQuaternion _rotY, _rotX;
+    QMatrix4x4 _orbit;
+    _orbit.setToIdentity();
+
+    float _x2 = _mousePos.x();
+    float _y2 = _mousePos.y();
+    float _x1 = _mouseTriggeredPos.x();
+    float _y1 = _mouseTriggeredPos.y();
+    float dx = (_x2 - _x1) * 1;
+    float dy = (_y2 - _y1) * 1;
+
+    _orbit.rotate(-dy, right());
+    _orbit.rotate(dx, QVector3D(0, 1, 0));
+
+    _rotY = QQuaternion::fromAxisAndAngle(QVector3D(0,1,0), dx);
+    _rotX = QQuaternion::fromAxisAndAngle(right(), -dy);
+
+//    _rotX.toRotationMatrix();
+    //// update the Quaternion
+    //m_rotation = _rotX * m_startRotation;
+
+//    m_rotation = _rotX ;
+//    m_tumble = m_tumbleStart * _orbit;
+
+     m_dirty = true;
+}
+
+
+
 void Camera3D::track(const QPoint &_mousePos)
 {
     // (T) move delta cal in to input manager
@@ -108,6 +178,7 @@ void Camera3D::reset(const QPoint &_mousePos)
     m_rotation.setScalar(1);
     m_pivot = QVector3D(0,0,0);
     m_prevMousePos = QPoint(0,0);
+    m_tumble.setToIdentity();
     m_dirty = true;
 }
 
@@ -129,6 +200,8 @@ void Camera3D::arcBallStart()
     m_startRotation = m_rotation;
     m_PreWorldPos = m_worldPos;
     m_PrePivotToCam = m_pivotToCam;
+    m_tumbleStart = m_tumble;
+    m_SecondTumbleStart = m_SecondTumble;
     //    qDebug()<<"GE PWP: "<<m_PreWorldPos;
 }
 
@@ -147,12 +220,15 @@ const QMatrix4x4 &Camera3D::toMatrix()
 {
   if (m_dirty)
   {
-
     m_dirty = false;
     m_world.setToIdentity();
     m_world.translate(m_pivot);
     m_world.translate(-m_translation);
-    m_world.rotate(m_rotation);
+//    m_world.rotate(m_rotation);
+
+    m_world *= m_SecondTumble;
+    m_world *= m_tumble;
+
     m_world.translate(-m_pivot);
 
     // calc WP
@@ -160,19 +236,24 @@ const QMatrix4x4 &Camera3D::toMatrix()
 //    m_pivotToCam = m_rotation.rotatedVector(m_PrePivotToCam);
     QMatrix3x3 tmp = m_rotation.toRotationMatrix();
     float *m = tmp.data();
-        const float data[16]  = {
-                m[0],m[1],m[2],0,
-                m[3],m[4],m[5],0,
-                m[6],m[7],m[8],0,
-                   0, 0, 0, 1
-        };
+    const float data[16]  = {
+            m[0],m[1],m[2],0,
+            m[3],m[4],m[5],0,
+            m[6],m[7],m[8],0,
+               0, 0, 0, 1
+    };
     const float *ptr = data;
-    QMatrix4x4 myRotMat = QMatrix4x4(ptr);
+
+//    QMatrix4x4 myRotMat = QMatrix4x4(ptr);
 
 // only works in 1 axis ?
 //    m_worldPos = -(m_rotation.rotatedVector(-m_translation));
 //    m_worldPos = myRotMat * m_translation;
-     m_worldPos = myRotMat * (m_translation - m_pivot) + m_pivot;
+//// this line worked:
+//     m_worldPos = myRotMat * (m_translation - m_pivot) + m_pivot;
+
+    QMatrix4x4 myRotMat = m_SecondTumble * m_tumble;
+    m_worldPos = myRotMat.transposed() * (m_translation - m_pivot) + m_pivot;
   }
   return m_world;
 }
@@ -190,7 +271,11 @@ QVector3D Camera3D::forward() const
                0, 0, 0, 1
     };
     const float *ptr = data;
-    QMatrix4x4 my4 = QMatrix4x4(ptr);
+
+//    QMatrix4x4 my4 = QMatrix4x4(ptr);
+    QMatrix4x4 myRotMat = m_SecondTumble * m_tumble;
+    QMatrix4x4 my4 = myRotMat.transposed();
+
     QVector4D testRight = QVector4D(0,0,1,1);
     QVector4D up = my4 * testRight;
     return QVector3D(up.x(), up.y(), up.z());
@@ -208,7 +293,11 @@ QVector3D Camera3D::up() const
                0, 0, 0, 1
     };
     const float *ptr = data;
-    QMatrix4x4 my4 = QMatrix4x4(ptr);
+
+//    QMatrix4x4 my4 = QMatrix4x4(ptr);
+    QMatrix4x4 myRotMat = m_SecondTumble * m_tumble;
+    QMatrix4x4 my4 = myRotMat.transposed();
+
     QVector4D testRight = QVector4D(0,1,0,1);
     QVector4D up = my4 * testRight;
     return QVector3D(up.x(), up.y(), up.z());
@@ -226,7 +315,11 @@ QVector3D Camera3D::right() const
                0, 0, 0, 1
     };
     const float *ptr = data;
-    QMatrix4x4 my4 = QMatrix4x4(ptr);
+
+//    QMatrix4x4 my4 = QMatrix4x4(ptr);
+    QMatrix4x4 myRotMat = m_SecondTumble * m_tumble;
+    QMatrix4x4 my4 = myRotMat.transposed();
+
     QVector4D testRight = QVector4D(1,0,0,1);
     QVector4D right = my4 * testRight;
     return QVector3D(right.x(), right.y(), right.z());

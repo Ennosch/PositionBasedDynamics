@@ -113,7 +113,10 @@ void Window::update()
     if(inputManager::buttonPressed(Qt::LeftButton))
     {
         int _radius = std::min(this->width(), this->height()) / 2;
-        scene()->m_arcCamera.rotateArcBall(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition(), _radius);
+//        scene()->m_arcCamera.rotateArcBall(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition(), _radius);
+        scene()->m_arcCamera.orbit(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
+//        scene()->m_arcCamera.orbit(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
+//        scene()->m_arcCamera.correction2(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
     }
 
     // RightButton
@@ -246,12 +249,12 @@ void Window::keyPressEvent(QKeyEvent *event)
           break;
         case Qt::Key_Left:
 //          scene()->m_arcCamera.rotate(-15,0,1,0);
-          scene()->m_SceneObjects[1]->translate(QVector3D(0.5,0,0));
+//          scene()->m_SceneObjects[1]->translate(QVector3D(0.5,0,0));
             break;
         case Qt::Key_Right:
 //          scene()->m_arcCamera.rotate(15,0,1,0);
-            scene()->m_SceneObjects[1]->translate(QVector3D(-0.5,0,0));
-            break;
+//            scene()->m_SceneObjects[1]->translate(QVector3D(-0.5,0,0));
+
       case Qt::Key_J:
 //          scene()->m_arcCamera.rotate(15,0,0,1);
           //scene()->m_arcCamera.rotateAroundPoint(-15.0, QVector3D(0,1,0));
@@ -264,7 +267,7 @@ void Window::keyPressEvent(QKeyEvent *event)
       case Qt::Key_I:
 //           scene()->m_arcCamera.rotate(QQuaternion::fromAxisAndAngle(QVector3D(0,1,0), 10.0));
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
-//          scene()->m_arcCamera.info();
+          scene()->m_arcCamera.info();
 //          qDebug()<<"transform[0]: "<<scene()->m_SceneObjects[0]->m_Transform.toMatrix()<<"transform[1]: "<<scene()->m_SceneObjects[1]->m_Transform.toMatrix();;
           break;
       case Qt::Key_M:
