@@ -42,6 +42,7 @@ public:
 
   void SceneInitialize();
   void QtOpenGLinitialize();
+  void QtOpenGLinitialize_backup();
   void setupScene();
 
   void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);
@@ -75,6 +76,10 @@ private:
   QOpenGLFramebufferObject* m_gbuffer_fbo;
   QOpenGLFramebufferObject* m_fbo_A;
   QOpenGLFramebufferObject* m_fbo_B;
+
+  // fbo raw OpenGL
+  GLuint SCR_WIDTH, SCR_HEIGHT;
+  unsigned int fbo, texture, rbo, intermediateFBO, screenTexture;
 
   QOpenGLTexture* m_view_position_texture;
 

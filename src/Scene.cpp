@@ -152,11 +152,11 @@ ModelPtr Scene::getModelFromPool(std::string _key)
     return nullptr;
 }
 
-void Scene::QtOpenGLinitialize()
+void Scene::QtOpenGLinitialize_backup()
 {
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
-//    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     m_arcCamera.translate(0.0f, 0.0f, 6.0f);
@@ -181,21 +181,6 @@ void Scene::QtOpenGLinitialize()
     m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
     m_flat_program->link();
 
-//   m_flat_program->enableAttributeArray(0);
-//   m_flat_program->setAttributeBuffer(
-//                           0,                     // shader location
-//                           GL_FLOAT,             // type of elements
-//                           0,                    // attr offset
-//                           3,                    // components per vertex attr
-//                           3*sizeof(QVector3D)); // stride - size of all buffer attrs together
-
-//   m_flat_program->setAttributeBuffer(
-//                            0,                     // shader location
-//                            GL_FLOAT,             // type of elements
-//                            0,                    // attr offset
-//                            3,                    // components per vertex attr
-//                            3*sizeof(QVector3D));
-
 //    Scene::addShape(this, "cubeLit", &myShapeNormals[0], sizeof(myShapeNormals));
     /* GL equivalent
      * glVertexAttribPointer(
@@ -206,22 +191,6 @@ void Scene::QtOpenGLinitialize()
      *                   6 * sizeof(float), //  stride -byte offset between consecutive generic vertex attributes
      *                   (void*)0));        //  pointer to the first component of data
      */
-
-    m_Test_vao = new QOpenGLVertexArrayObject(window());
-    m_Test_vao->create();
-    m_Test_vao->bind();
-    m_Test_vbo.create();
-    m_Test_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_Test_vbo.bind();
-    m_Test_vbo.allocate(&CubeWithNormals[0], sizeof(CubeWithNormals));
-
-    m_flat_program->enableAttributeArray(0);
-   m_flat_program->setAttributeBuffer(
-                            0,                     // shader location
-                            GL_FLOAT,             // type of elements
-                            0,                    // attr offset
-                            3,                    // components per vertex attr
-                            3*sizeof(QVector3D));
 
 
 //----prepare a QuadPlane
@@ -372,12 +341,108 @@ void Scene::QtOpenGLinitialize()
     setupScene();
 }
 
+void Scene::QtOpenGLinitialize()
+{
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_MULTISAMPLE);
+//    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    m_arcCamera.translate(0.0f, 0.0f, 6.0f);
+    m_arcCamera.SetWorldPos(QVector3D(0.0f, 0.0f, 6.0f));
+    m_arcCamera.SetPivot(QVector3D(0.0f, 0.0f, 0.0f));
+    m_arcCamera.SetPivotToCam(QVector3D(0,0,6));
+    m_arcCamera.arcBallStart();
+
+//----build, compline and link shaders
+    m_screen_program = new QOpenGLShaderProgram;
+    m_screen_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/screen.vert");
+    m_screen_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/screen.frag");
+    m_screen_program->link();
+
+    m_lighting_program = new QOpenGLShaderProgram();
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/tmp.vert");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/tmp.frag");
+    m_lighting_program->link();
+
+    m_flat_program = new QOpenGLShaderProgram();
+    m_flat_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/flat.vert");
+    m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
+    m_flat_program->link();
+
+    //----prepare a QuadPlane
+    m_quad_vao = new QOpenGLVertexArrayObject(window());
+    m_quad_vao->create();
+    m_quad_vbo.create();
+    m_quad_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_quad_vao->bind();
+    m_quad_vbo.bind();
+    m_quad_vbo.allocate(quad, 30 * sizeof(GLfloat));
+    // tell simple shader how to interpret the quadPlane
+    m_screen_program->setAttributeBuffer("position", GL_FLOAT, 0, 3, 5 * sizeof(GLfloat));
+    m_screen_program->enableAttributeArray("position");
+    m_screen_program->setAttributeBuffer("uv", GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
+    m_screen_program->enableAttributeArray("uv");
+    m_quad_vbo.release();
+    m_quad_vao->release();
+
+    //--------manual Frame Buffer workflow--------------
+    SCR_WIDTH = window()->width()*2;
+    SCR_HEIGHT = window()->height()*2;
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture, 0);
+
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+
+
+    // configure second post-processing framebuffer
+        unsigned int intermediateFBO;
+        glGenFramebuffers(1, &intermediateFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
+        // create a color attachment texture
+        unsigned int screenTexture;
+        glGenTextures(1, &screenTexture);
+        glBindTexture(GL_TEXTURE_2D, screenTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);	// we only need a color buffer
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+          qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+     m_screen_program->setUniformValue("screenTexture", 0);
+
+    //------------------fbo end-------------------
+    setupScene();
+}
+
 void Scene::paint()
 {
     // draw to the framebuffer (off-screen render)
-    glViewport(0,0, m_gbuffer_fbo->width(), m_gbuffer_fbo->height());
+//    glViewport(0,0, m_gbuffer_fbo->width(), m_gbuffer_fbo->height());
+    glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
     glDisable(GL_CULL_FACE);
-    m_gbuffer_fbo->bind();
+    // bind old QtWrapper style
+    // m_gbuffer_fbo->bind();
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
       glEnable(GL_DEPTH_TEST);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
@@ -426,11 +491,31 @@ void Scene::paint()
       m_flat_program->release();
 
 //       -------------------end Sphere Code------------------------------------------------------------------------------
-    m_gbuffer_fbo->release();
+//    m_gbuffer_fbo->release();
 
+  // 2. now blit multisampled buffer(s) to normal colorbuffer of intermediate FBO. Image is stored in screenTexture
+          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+          glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+  // 3. now render quad with scene's visuals as its texture image
+          glBindFramebuffer(GL_FRAMEBUFFER, 0);
+          glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+          glClear(GL_COLOR_BUFFER_BIT);
+          glDisable(GL_DEPTH_TEST);
 
     // draw to screen
-    drawScreenQuad();
+//    drawScreenQuad();
+          glViewport ( 0, 0, window()->width()*2, window()->height()*2);
+          glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
+          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+          m_screen_program->bind();
+          m_quad_vao->bind();
+          glActiveTexture(GL_TEXTURE0);
+          glBindTexture(GL_TEXTURE_2D, screenTexture);
+          glDrawArrays(GL_TRIANGLES, 0, 6);
+          m_quad_vao->release();
 }
 
 void Scene::update()
