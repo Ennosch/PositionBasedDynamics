@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
   QSurfaceFormat fmt;
   fmt.setMinorVersion(3);
   fmt.setMajorVersion(3);
-  fmt.setSamples(4);
+  fmt.setSamples(16);
   fmt.setSwapInterval(1);
   
   fmt.setRenderableType(QSurfaceFormat::OpenGL);
