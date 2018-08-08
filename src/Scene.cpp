@@ -390,21 +390,43 @@ void Scene::QtOpenGLinitialize()
     SCR_WIDTH = window()->width()*2;
     SCR_HEIGHT = window()->height()*2;
 
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    //-------------texture as color buffer
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+    // ------------rbo for depth as stencil buffer------------------
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //------------------fbo end-------------------
+
+
     setupScene();
 }
 
 void Scene::paint()
 {
     // draw to the framebuffer (off-screen render)
-//    glViewport(0,0, m_gbuffer_fbo->width(), m_gbuffer_fbo->height());
-    glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
+    glViewport(0,0, window()->width()*2, window()->height()*2);
+//    glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
     glDisable(GL_CULL_FACE);
+    glDisable(GL_MULTISAMPLE);
     // bind old QtWrapper style
     // m_gbuffer_fbo->bind();
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glDisable(GL_MULTISAMPLE);
 
       glEnable(GL_DEPTH_TEST);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -427,7 +449,7 @@ void Scene::paint()
 
       m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
 
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       for(uint i = 1; i < m_SceneObjects.size(); i++)
       {
           uint matID = m_SceneObjects[i]->getMaterialID();
@@ -441,20 +463,34 @@ void Scene::paint()
 
        m_lighting_program->release();
 
-//-------------------------Draw flatShader Cube---------------------------------------------------------------------------
+//-------------------------Draw Wireframe---------------------------------------------------------------------------
       m_flat_program->bind();
       m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
       m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());      
       if(m_SceneObjects[0])
       {
+
+          glLineWidth(20.0);
+          glEnable(GL_LINE_SMOOTH);
           glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
           m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
           m_SceneObjects[0]->draw();
       }
       m_flat_program->release();
 
-//       -------------------end Sphere Code------------------------------------------------------------------------------
-//    m_gbuffer_fbo->release();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glViewport ( 0, 0, window()->width()*2, window()->height()*2);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_screen_program->bind();
+    m_quad_vao->bind();
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    m_quad_vao->release();
+    m_screen_program->release();
 
 }
 
