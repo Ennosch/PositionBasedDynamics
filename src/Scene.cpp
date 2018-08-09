@@ -345,7 +345,7 @@ void Scene::QtOpenGLinitialize()
 {
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
-//    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     m_arcCamera.translate(0.0f, 0.0f, 6.0f);
@@ -395,24 +395,52 @@ void Scene::QtOpenGLinitialize()
 
     //-------------texture as color buffer
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+//    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+
+    // attach multisampled texture
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture, 0);
+
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
     // ------------rbo for depth as stencil buffer------------------
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-
+//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
       qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //------------------fbo end-------------------
 
+    intermediateFBO;
+    glGenFramebuffers(1, &intermediateFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
+
+    glGenTextures(1, &screenTexture);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+//    m_screen_program->setUniformValue("screenTexture", 0);
+
+    GLuint id = m_screen_program->programId();
+    glUniform1i(glGetUniformLocation(id, "screenTexture"), 0);
 
     setupScene();
 }
@@ -423,7 +451,6 @@ void Scene::paint()
     glViewport(0,0, window()->width()*2, window()->height()*2);
 //    glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
     glDisable(GL_CULL_FACE);
-    glDisable(GL_MULTISAMPLE);
     // bind old QtWrapper style
     // m_gbuffer_fbo->bind();
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -432,63 +459,71 @@ void Scene::paint()
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-      m_lighting_program->bind();
-      m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-      m_lighting_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-      m_lighting_program->setUniformValue("viewPos", m_arcCamera.worldPos());
-      m_lighting_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
-      m_lighting_program->setUniformValue("numMaterials", int(m_Materials.size()));
+              m_lighting_program->bind();
+              m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+              m_lighting_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+              m_lighting_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+              m_lighting_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
+              m_lighting_program->setUniformValue("numMaterials", int(m_Materials.size()));
 
-      // set Position + color for all pointsLights
-      for(uint i = 0; i < m_Pointlights.size(); i++)
-      {
-            std::string uniFName = "PointLights[" + std::to_string(i) +"]";
-            m_lighting_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
-            m_lighting_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
-      }
+              // set Position + color for all pointsLights
+              for(uint i = 0; i < m_Pointlights.size(); i++)
+              {
+                    std::string uniFName = "PointLights[" + std::to_string(i) +"]";
+                    m_lighting_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
+                    m_lighting_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
+              }
 
-      m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
+              m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      for(uint i = 1; i < m_SceneObjects.size(); i++)
-      {
-          uint matID = m_SceneObjects[i]->getMaterialID();
-          m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
-          m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
-          m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
-          m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-          m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
-          m_SceneObjects[i]->draw();
-      }
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+              for(uint i = 1; i < m_SceneObjects.size(); i++)
+              {
+                  uint matID = m_SceneObjects[i]->getMaterialID();
+                  m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
+                  m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
+                  m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
+                  m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+                  m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
+                  m_SceneObjects[i]->draw();
+              }
 
-       m_lighting_program->release();
+               m_lighting_program->release();
 
-//-------------------------Draw Wireframe---------------------------------------------------------------------------
-      m_flat_program->bind();
-      m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-      m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());      
-      if(m_SceneObjects[0])
-      {
+        //-------------------------Draw Wireframe---------------------------------------------------------------------------
+              m_flat_program->bind();
+              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+              if(m_SceneObjects[0])
+              {
+                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
+                  m_SceneObjects[0]->draw();
+              }
+              m_flat_program->release();
 
-          glLineWidth(20.0);
-          glEnable(GL_LINE_SMOOTH);
-          glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-          m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
-          m_SceneObjects[0]->draw();
-      }
-      m_flat_program->release();
-
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glViewport ( 0, 0, window()->width()*2, window()->height()*2);
+//    glViewport ( 0, 0, window()->width()*2, window()->height()*2);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+
     m_screen_program->bind();
     m_quad_vao->bind();
-    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-    glBindTexture(GL_TEXTURE_2D, texture);
+
+//    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
     m_quad_vao->release();
     m_screen_program->release();
 
