@@ -21,7 +21,7 @@ void Model::loadModel(std::string _path)
     // bitwise And flags: aiProcess_FlipWindingOrder |  aiProcess_GenSmoothNormals |
     const aiScene* scene = importer.ReadFile(_path,
                                              aiProcess_Triangulate |
-                                             aiProcess_JoinIdenticalVertices |
+//                                             aiProcess_JoinIdenticalVertices |
                                              aiProcess_FlipUVs |
                                              aiProcess_CalcTangentSpace |                                             
                                              aiProcess_GenNormals |
@@ -92,7 +92,16 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
         vector.setZ(mesh->mNormals[i].z);
         vertex.Normal = vector;
 
+        // Barycentric depends ebo.
+        vertex.Barycentric = QVector3D(0,0,0);
+
         vertices.push_back(vertex);
+
+//        if(vertex.Position == QVector3D(0, 0, 0))
+//        if(vertex.Position[0] > 1.0)
+//        {
+//            qDebug()<<"hello";
+//        }
     }
 
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -102,6 +111,10 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
         for(unsigned int j = 0; j < face.mNumIndices; j++)
         {
           indices.push_back(face.mIndices[j]);
+          QVector3D _barycentric = QVector3D(0, 0, 0);
+          int _mod = j % 3;
+          _barycentric[_mod] = 1;
+          vertices[face.mIndices[j]].Barycentric = _barycentric;
         }
     }
 

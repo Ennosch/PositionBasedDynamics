@@ -81,7 +81,8 @@ void Shape::setupMesh()
     m_vvbo.create();
     m_vvbo.bind();
     m_vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vvbo.allocate(vertices.data(), vertices.size() * 24);
+    // vertices.size() * 24 perviously here
+    m_vvbo.allocate(vertices.data(), vertices.size() * sizeof(Vertex));
 
     m_ebo = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
     m_ebo.create();
@@ -97,13 +98,20 @@ void Shape::setupMesh()
                           GL_FALSE,
                           sizeof(Vertex),
                           nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(Vertex),
+                          (void*)offsetof(Vertex, Normal));
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2,
                           3,
                           GL_FLOAT,
                           GL_FALSE,
                           sizeof(Vertex),
-                          (void*)offsetof(Vertex, Normal));
+                          (void*)offsetof(Vertex, Barycentric));
 }
 
 void Shape::draw()

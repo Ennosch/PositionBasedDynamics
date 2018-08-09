@@ -12,6 +12,7 @@
 #include <QQuaternion>
 #include <QMatrix4x4>
 #include <QVector3D>
+#include <QVector2D>
 
 #include <QDebug>
 
@@ -58,6 +59,8 @@ struct Vertex {
     QVector3D Position;
     // normal
     QVector3D Normal;
+    // barycentric
+    QVector3D Barycentric;
 };
 
 typedef std::unordered_map <std::string, std::shared_ptr <Shape>>       ShapeMap;

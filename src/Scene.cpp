@@ -490,6 +490,8 @@ void Scene::paint()
 
                m_lighting_program->release();
 
+        auto testModel = m_ModelPool["Icosahedron"];
+
         //-------------------------Draw Wireframe---------------------------------------------------------------------------
               m_flat_program->bind();
               m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
@@ -508,7 +510,7 @@ void Scene::paint()
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-//    glViewport ( 0, 0, window()->width()*2, window()->height()*2);
+    glViewport ( 0, 0, window()->width()*2, window()->height()*2);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -561,8 +563,9 @@ void Scene::setupScene()
 //        addPointLight(QVector3D(-5,0,0), QVector3D(0, 1, 0));
 //        addPointLight(QVector3D(0,5,0), QVector3D(1, 0, 0));
 
-         addPointLight(QVector3D(0,5,0), QVector3D(1.2, 1.2, 1.2));
-         addPointLight(QVector3D(0,-5,0), QVector3D(1, 0.6, 0));
+         addPointLight(QVector3D(0,5,0), QVector3D(1.0, 1.0, 1.0));
+         addPointLight(QVector3D(2,5,0), QVector3D(0.6, 0.6, 1.0));
+         addPointLight(QVector3D(0,3,2), QVector3D(0.8, 0.8, 0.8));
 
 
          // blue tone
@@ -580,24 +583,28 @@ void Scene::setupScene()
 
         // green tone
         addMaterial(    QVector3D(0.0f , 0.0f ,0.0f),   // ambient
-                        QVector3D(0.08f , 0.5f ,0.1f),   // diffuse
+                        QVector3D(0.2f , 0.3f ,0.05f),   // diffuse
                         QVector3D(1.0f , 1.0f ,1.0f),    // specular
                         15.0 );
 
     //    MAKE MODEL TO RENDER
+       addModel(this, "grid1", "../Grid1.obj");
        addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "../bunny.obj");
        addModel(this, "grid", "../Grid100.obj");
+
        addModel(this, "HCube", "resources/objects/HCube.obj");
        addModel(this, "Icosahedron", "../Icosahedronf4.obj");
        addShape(this, "Cube", &CubeWithNormals[0], sizeof(CubeWithNormals));
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
-       addSceneObjectFromModel("grid", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
+       addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
        addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
        addSceneObjectFromModel("bunny", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
        addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
 
+
+       auto myModel = m_ModelPool["grid1"];
 }
 
 

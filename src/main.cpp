@@ -48,6 +48,7 @@ void Read(QString Filename)
 
 int main(int argc, char *argv[])
 {
+
   QGuiApplication app(argc, argv);
   Window window;
 
