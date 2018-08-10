@@ -242,7 +242,8 @@ void Window::keyPressEvent(QKeyEvent *event)
       {
         case Qt::Key_Up:
 //          scene()->m_arcCamera.rotate(15,1,0,0);
-            scene()->m_SceneObjects[1]->translate(QVector3D(0,0.5,0));
+//            scene()->m_arcCamera.setTranslation(QVector3D(0,0,12));
+//            scene()->m_SceneObjects[1]->translate(QVector3D(0,0.5,0));
             break;
         case Qt::Key_Down:
           scene()->m_SceneObjects[1]->translate(QVector3D(0,-0.5,0));
@@ -324,11 +325,21 @@ void Window::mousePressEvent(QMouseEvent *event)
 {
 //  qDebug()<<"event:"<< event;
   inputManager::registerMousePress(event->button());
+//  qDebug()<<event;
 }
 
 void Window::mouseReleaseEvent(QMouseEvent *event)
 {
   inputManager::registerMouseRelease(event->button());
+}
+
+void Window::wheelEvent(QWheelEvent *event)
+{
+    QVector3D camTranslation = scene()->m_arcCamera.translation();
+    float t = event->pixelDelta().y();
+
+    QVector3D nextCamTranslation = camTranslation + (QVector3D(0,0,1) * t * 0.05);
+    scene()->m_arcCamera.setTranslation(nextCamTranslation);
 }
 
 void Window::printVersionInformation()

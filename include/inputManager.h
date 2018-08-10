@@ -17,8 +17,6 @@ public:
       InputReleased
     };
 
-    //inputManager();
-
     // the InputState of the Qt::Key if it's in the container
     static InputState keyState(Qt::Key key);
     static bool keyTriggered(Qt::Key key);
@@ -29,7 +27,10 @@ public:
     static bool buttonTriggered(Qt::MouseButton button);
     static bool buttonPressed(Qt::MouseButton button);
     static bool buttonReleased(Qt::MouseButton button);
-    static inline void foo(){ qDebug("---- inputManager Foo-----"); };
+
+//    to Do: add wheelEvents
+//    static bool wheelTriggered();
+
 
     static QPoint mousePosition();
     static QPoint mouseTriggeredPosition();
