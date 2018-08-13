@@ -4,6 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
+
 #include <QDebug>
 #include <QKeyEvent>
 #include <QString>
@@ -22,9 +23,9 @@
 
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
-  //connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
 
-  //qDebug()<< format().swapInterval();
+  //        sender      signal          reviecer    member
+  connect(&m_timer, SIGNAL(timeout()), this, SLOT(loop()));
 
   if(format().swapInterval() == -1)
   {
@@ -37,59 +38,19 @@ Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
       // V_blank synchronization available
       m_timer.setInterval(0);
   }
-  //m_timer.setInterval(500);
+//  m_timer.setInterval();
+  m_elpasedTimer.start();
+  lag = 0.0;
   m_timer.start();
+
   //m_elapsTimer.start();
 }
 
-Scene *Window::scene() const
+void Window::testerTimer()
 {
-  return m_scene;
 }
 
-void Window::setScene(Scene *_scene)
-{
-  m_scene = _scene;
-}
-
-void Window::initializeGL()
-{
-  // Init OpenGL Backend  (QOpenGLFunctions)
-  if (scene())
-    scene()->initialize();
-
-  printVersionInformation();
-
-  // Init QtWindow specific things, connectionQtype
-  // sender signal receive, method
-  connect(context(), SIGNAL(aboutToBeDestroyed()), this, SLOT(teardownGL()), Qt::DirectConnection);
-  connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
-}
-
-void Window::paintGL()
-{
-  if (scene())
-    scene()->paint();
-}
-
-void Window::resizeGL(int _w, int _h)
-{
-  qDebug("New window size: %d, %d", _w, _h);
-  if (scene())
-    scene()->resize(_w, _h);
-}
-
-void Window::teardownGL()
-{
-    /*
-  // Actually destroy our OpenGL information
-  m_object.destroy();
-  m_vertex.destroy();
-  delete m_program;
-  */
-}
-
-void Window::update()
+void Window::processInput()
 {
     // update() registers keys, add/remove from inputManager containers
 
@@ -210,8 +171,81 @@ void Window::update()
     {
         scene()->m_SceneObjects[0]->translate(QVector3D(0,0,-0.1));
     }
-    scene()->update();
+}
+
+Scene *Window::scene() const
+{
+  return m_scene;
+}
+
+void Window::setScene(Scene *_scene)
+{
+  m_scene = _scene;
+}
+
+void Window::initializeGL()
+{
+  // Init OpenGL Backend  (QOpenGLFunctions)
+  if (scene())
+    scene()->initialize();
+
+  printVersionInformation();
+
+  // Init QtWindow specific things, connectionQtype
+  // sender signal receive, method
+  connect(context(), SIGNAL(aboutToBeDestroyed()), this, SLOT(teardownGL()), Qt::DirectConnection);
+
+
+  // QOpenGLWindow::frameSwapped();
+  // This signal is emitted after the potentially blocking buffer swap has been done. Applications
+  // that wish to continuously repaint synchronized to the vertical refresh, should issue an update()
+  // upon this signal. This allows for a much smoother experience compared to the traditional usage of timers.
+//  connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
+}
+
+void Window::paintGL()
+{
+  if (scene())
+    scene()->paint();
+}
+
+void Window::resizeGL(int _w, int _h)
+{
+  qDebug("New window size: %d, %d", _w, _h);
+  if (scene())
+    scene()->resize(_w, _h);
+}
+
+void Window::teardownGL()
+{
+    /*
+  // Actually destroy our OpenGL information
+  m_object.destroy();
+  m_vertex.destroy();
+  delete m_program;
+  */
+}
+
+void Window::loop()
+{
+    processInput();
+
+    // calls paintGL and resizeGL of our
+
+    lag += m_elpasedTimer.elapsed();
+
+    /*
+     * // update step
+     * // MS_PER_UPDATE size of fixed time step
+     *
+     * while() lag >= MS_PER_UPDATE
+     *      update();
+     *      lag -= MS_PER_UPDATE;
+     */
+
     QOpenGLWindow::update();
+
+//    qDebug() << "The slow operation took" << m_Etimer.nsecsElapsed() << "nanoSec"<< m_Etimer.elapsed() << "milliseconds";
 }
 
 void Window::keyPressEvent(QKeyEvent *event)

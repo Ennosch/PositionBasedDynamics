@@ -501,6 +501,19 @@ void Scene::paint()
                   m_SceneObjects[i]->draw();
               }
 
+              // slow maker
+//              for(uint i = 1; i < 100000; i++)
+//              {
+//                  uint matID = m_SceneObjects[1]->getMaterialID();
+//                  m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
+//                  m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
+//                  m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
+//                  m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+//                  m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[1]->getMatrix());
+//                  m_SceneObjects[1]->draw();
+//              }
+
+
                m_lighting_program->release();
 
         auto testModel = m_ModelPool["Icosahedron"];
@@ -541,12 +554,6 @@ void Scene::paint()
     m_quad_vao->release();
     m_screen_program->release();
 
-}
-
-void Scene::update()
-{
-    // update from Window Qtimer animate cube
-    //m_myTransform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
 }
 
 void Scene::drawScreenQuad()

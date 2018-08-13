@@ -37,7 +37,6 @@ public:
   void initialize();
   void resize(int width, int height);
   void paint();
-  void update();
   void drawScreenQuad();
 
   void SceneInitialize();

@@ -26,7 +26,9 @@ public:
 
 protected slots:
     void teardownGL();
-    void update();
+    void loop();
+    void testerTimer();
+    void processInput();
     void printVersionInformation();
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
@@ -40,9 +42,10 @@ protected:
   void resizeGL(int _w, int _h);
 
 private:
-  //make m_scene ptr of type *Scene because, to be able to access member of the actual scene.
+  double lag;
   Scene *m_scene = nullptr;
   QTimer m_timer;
+  QElapsedTimer m_elpasedTimer;
   inputManager m_inputManger;
 
 };
