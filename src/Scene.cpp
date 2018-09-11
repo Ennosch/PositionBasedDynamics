@@ -93,7 +93,7 @@ pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const Q
         auto pShape = getShapeFromPool(_name);
         if(pShape == nullptr)
         {
-            qDebug()<<"WARNING: COULD NOT ADD SceneObject";
+          qDebug()<<"WARNING: COULD NOT ADD SceneObject";
             return nullptr;
         }
         auto pSO = std::make_shared<SceneObject>(this, pShape, _pos, _rot);
