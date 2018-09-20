@@ -185,6 +185,7 @@ void Window::setScene(Scene *_scene)
 
 void Window::initializeGL()
 {
+    qDebug("calling init Wind");
   // Init OpenGL Backend  (QOpenGLFunctions)
   if (scene())
     scene()->initialize();
@@ -194,7 +195,6 @@ void Window::initializeGL()
   // Init QtWindow specific things, connectionQtype
   // sender signal receive, method
   connect(context(), SIGNAL(aboutToBeDestroyed()), this, SLOT(teardownGL()), Qt::DirectConnection);
-
 
   // QOpenGLWindow::frameSwapped();
   // This signal is emitted after the potentially blocking buffer swap has been done. Applications
@@ -399,3 +399,7 @@ void Window::printVersionInformation()
   // qPrintable() will print our QString w/o quotes around it.
   qDebug() << qPrintable(glType) << qPrintable(glVersion) << "(" << qPrintable(glProfile) << ")";
 }
+
+#include "moc_Window.cpp"
+
+

@@ -8,8 +8,9 @@
 #include <QTextStream>
 
 // Project
-#include "Scene.h"
 #include "Window.h"
+#include "Scene.h"
+
 #include "AbstractScene.h"
 #include "shape.h"
 #include <iostream>
@@ -65,13 +66,22 @@ int main(int argc, char *argv[])
   Scene scene(&window);
   window.setScene(&scene);
 
+// just init crashes !
+// scene.initialize();
+
   window.resize(720, 720);
+
 
   window.show();
 
-  QString mFilename = "/Users/ennoschlunder/Dev/QtOpenGLBoilerplate/test.txt";
-  QString shader = ":/shader/simple.vert";
+
+
+//  QString mFilename = "/Users/ennoschlunder/Dev/QtOpenGLBoilerplate/test.txt";
+//  QString shader = ":/shader/simple.vert";
+
 
   return app.exec();
 
 }
+
+

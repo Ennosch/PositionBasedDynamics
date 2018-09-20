@@ -9,10 +9,12 @@
 //#include  <QKeyEvent>
 
 // Project
-#include "AbstractScene.h"
 #include "inputManager.h"
 
+
+
 // forward declare class Scene, so Window can be constructed with the Scene null-pointer
+//class AbstractScene;
 class Scene;
 
 class Window : public QOpenGLWindow

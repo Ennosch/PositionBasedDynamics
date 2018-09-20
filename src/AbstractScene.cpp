@@ -35,8 +35,9 @@ const QOpenGLContext *AbstractScene::context() const
 
 void AbstractScene::initialize()
 {
+  qDebug()<<"init openglfucntions :";
   initializeOpenGLFunctions();
-
+  qDebug()<<"init openglfucntions end";
 }
 
 
