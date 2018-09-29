@@ -33,12 +33,12 @@
 #define VERTEX_BBR QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 1.0f, 1.0f, 1.0f )
 
 
-
-
 class Shape;
 class Model;
 class SceneObject;
 class QOpenGLFunctions;
+class DynamicObject;
+class Particle;
 
 
 struct Material {
@@ -48,8 +48,7 @@ struct Material {
     float shininess;
 };
 
-struct Light
-{
+struct Light{
     QVector3D position;
     QVector3D   color;
 };
@@ -63,6 +62,11 @@ struct Vertex {
     QVector3D Barycentric;
 };
 
+struct int3{
+    int i,j,k;
+};
+
+
 typedef std::unordered_map <std::string, std::shared_ptr <Shape>>       ShapeMap;
 typedef std::unordered_map <std::string, std::shared_ptr <Model>>       ModelMap;
 
@@ -71,6 +75,9 @@ typedef std::shared_ptr <Shape>             ShapePtr;
 typedef std::shared_ptr <Model>             ModelPtr;
 typedef std::shared_ptr <Material>          MaterialPtr;
 typedef std::shared_ptr <Light>             LightPtr;
+
+typedef std::shared_ptr <DynamicObject>     DynamicObjectPtr;
+typedef std::shared_ptr <Particle>          ParticlePtr;
 
 
 // (?) utils should become a class to be able to forward declare and have a nameSpace ?

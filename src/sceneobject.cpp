@@ -74,3 +74,4 @@ void SceneObject::release()
 {
     pShape->release();
 }
+

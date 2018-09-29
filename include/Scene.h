@@ -25,8 +25,8 @@
 #include "sceneobject.h"
 #include "shape.h"
 #include "model.h"
-
 #include "utils.h"
+#include "dynamics/dynamicsWorld.h"
 
 class Scene : public AbstractScene
 {
@@ -39,11 +39,12 @@ public:
   void paint();
   void drawScreenQuad();
 
-  void SceneInitialize();
+  void setDynamicsWorld(DynamicsWorld *_world);
   void QtOpenGLinitialize();
-  void QtOpenGLinitialize_backup();
+  void DynamicsInitialize();
   void setupScene();
 
+  // creation
   void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);
   ModelPtr addModel(Scene *_scene, std::string _name, std::string _path);
 
@@ -58,14 +59,21 @@ public:
   LightPtr addPointLight();
   LightPtr addPointLight(const QVector3D &_pos, const QVector3D &_color);
   MaterialPtr addMaterial(const QVector3D &_ambient, const QVector3D &_diffuse, const QVector3D &_specular, float _shininess);
+  void makeDynamic(pSceneOb _sceneObject);
 
+  // accessor
   ShapePtr getShapeFromPool(std::string _key);
   ModelPtr getModelFromPool(std::string _key);
   MaterialPtr getMaterial(int _index);
   pSceneOb getSceneObjectFromIndex(int _index);
 
+  QVector3D *getData();
+  DynamicsWorld* dynamicsWorld();
+
 private:
   friend class Window;
+
+  DynamicsWorld m_DynamicsWorld;
 
   QOpenGLShaderProgram* m_program;
   QOpenGLShaderProgram* m_screen_program;
@@ -73,24 +81,15 @@ private:
   QOpenGLShaderProgram* m_flat_program;
 
   QOpenGLFramebufferObject* m_gbuffer_fbo;
-  QOpenGLFramebufferObject* m_fbo_A;
-  QOpenGLFramebufferObject* m_fbo_B;
 
   // fbo raw OpenGL
-  GLuint SCR_WIDTH, SCR_HEIGHT;
   unsigned int fbo, texture, rbo, intermediateFBO, screenTexture;
 
   QOpenGLTexture* m_view_position_texture;
-
   QOpenGLVertexArrayObject* m_quad_vao;
   QOpenGLBuffer m_quad_vbo;
 
-  QOpenGLVertexArrayObject* m_Test_vao;
-  QOpenGLBuffer m_Test_vbo;
-
-  QMatrix4x4 m_view_matrix;
   QMatrix4x4 m_projection_matrix;
-
   Camera3D m_arcCamera;
 
   ShapeMap m_ShapePool;
@@ -100,7 +99,6 @@ private:
   std::vector <MaterialPtr> m_Materials;
   std::vector <pSceneOb> m_SceneObjects;
 };
-
 
 inline MaterialPtr Scene::getMaterial(int _index){ return m_Materials[_index]; };
 inline pSceneOb Scene::getSceneObjectFromIndex(int _index){ return m_SceneObjects[_index]; };

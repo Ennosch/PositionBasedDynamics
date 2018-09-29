@@ -56,6 +56,7 @@ public:
     void drawWireframe();
     void drawOld();
     Vertex* data();
+    unsigned int getNumVertices();
 
 //    inline int getVertsSize(){return m_verticesSize;}
 //    inline const QVector3D* getData(){return m_vertices; }
@@ -75,7 +76,6 @@ private:
     // WIP model loading
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<unsigned int> LineIndices;
 
     Scene *pScene;
     QOpenGLShaderProgram *pShader;
@@ -84,6 +84,7 @@ private:
 
 inline void Shape::bind(){m_pVao->bind(); };
 inline Vertex* Shape::data(){ return vertices.data(); };
+inline unsigned int Shape::getNumVertices(){ return indices.size(); };
 
 
 #endif // SHAPE_H

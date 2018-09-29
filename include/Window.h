@@ -10,7 +10,7 @@
 
 // Project
 #include "inputManager.h"
-
+#include "dynamics/dynamicsWorld.h"
 
 
 // forward declare class Scene, so Window can be constructed with the Scene null-pointer
@@ -22,9 +22,10 @@ class Window : public QOpenGLWindow
   Q_OBJECT
 
 public:
-  Window(QWindow *parent = 0);
+  Window(QWindow *parent = nullptr);
   Scene* scene() const;
   void setScene(Scene *_scene);
+  Vertex* passSceneData();
 
 protected slots:
     void teardownGL();

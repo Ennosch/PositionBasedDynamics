@@ -18,8 +18,8 @@ void Scene::initialize()
 {
   AbstractScene::initialize();  
   QtOpenGLinitialize();
-
-//  Scene::addModel(this, "model", "resources/objects/rock/Cube.obj");
+  DynamicsInitialize();
+  setupScene();
 }
 
 void Scene::resize(int width, int height)
@@ -135,12 +135,20 @@ MaterialPtr Scene::addMaterial(const QVector3D &_ambient, const QVector3D &_diff
     return pMaterial;
 }
 
+void Scene::makeDynamic(pSceneOb _sceneObject)
+{
+    qDebug()<<"make Dynamic";
+//    m_DynamicsWorld.addDynamicObject(_sceneObject);
+    m_DynamicsWorld.addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().x(), _sceneObject->getPos().x());
+
+}
+
 ShapePtr Scene::getShapeFromPool(std::string _key)
 {
     ShapeMap::const_iterator got = m_ShapePool.find(_key);
     if ( got == m_ShapePool.end())
     {
-        qDebug()<< "WARNING: NO SHAPE WERE FOUND";
+        qDebug()<< "WARNING: NO SHAPE WAS FOUND";
     }
     else
     {
@@ -155,7 +163,7 @@ ModelPtr Scene::getModelFromPool(std::string _key)
     ModelMap::const_iterator got = m_ModelPool.find(_key);
     if ( got == m_ModelPool.end())
     {
-        qDebug()<< "WARNING: NO SHAPE WERE FOUND";
+        qDebug()<< "WARNING: NO MODEL WAS FOUND";
     }
     else
     {
@@ -165,193 +173,9 @@ ModelPtr Scene::getModelFromPool(std::string _key)
     return nullptr;
 }
 
-void Scene::QtOpenGLinitialize_backup()
+DynamicsWorld* Scene::dynamicsWorld()
 {
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_MULTISAMPLE);
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    m_arcCamera.translate(0.0f, 0.0f, 6.0f);
-    m_arcCamera.SetWorldPos(QVector3D(0.0f, 0.0f, 6.0f));
-    m_arcCamera.SetPivot(QVector3D(0.0f, 0.0f, 0.0f));
-    m_arcCamera.SetPivotToCam(QVector3D(0,0,6));
-    m_arcCamera.arcBallStart();
-
-//----build, compline and link shaders
-    m_screen_program = new QOpenGLShaderProgram;
-    m_screen_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/screen.vert");
-    m_screen_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/screen.frag");
-    m_screen_program->link();
-
-    m_lighting_program = new QOpenGLShaderProgram();
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/tmp.vert");
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/tmp.frag");
-    m_lighting_program->link();
-
-    m_flat_program = new QOpenGLShaderProgram();
-    m_flat_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/flat.vert");
-    m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
-    m_flat_program->link();
-
-//    Scene::addShape(this, "cubeLit", &myShapeNormals[0], sizeof(myShapeNormals));
-    /* GL equivalent
-     * glVertexAttribPointer(
-     *                   0,                  // index - shader location
-     *                   3,                 //  number of components per generic vertex attribute
-     *                   GL_FLOAT,          //  data type of each component
-     *                   GL_FALSE,          //  bool to fixed-point data values should be normalized (true)
-     *                   6 * sizeof(float), //  stride -byte offset between consecutive generic vertex attributes
-     *                   (void*)0));        //  pointer to the first component of data
-     */
-
-
-//----prepare a QuadPlane
-    m_quad_vao = new QOpenGLVertexArrayObject(window());
-    m_quad_vao->create();
-    m_quad_vbo.create();
-    m_quad_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_quad_vao->bind();
-    m_quad_vbo.bind();
-    m_quad_vbo.allocate(quad, 30 * sizeof(GLfloat));
-    // tell simple shader how to interpret the quadPlane
-    m_screen_program->setAttributeBuffer("position", GL_FLOAT, 0, 3, 5 * sizeof(GLfloat));
-    m_screen_program->enableAttributeArray("position");
-    m_screen_program->setAttributeBuffer("uv", GL_FLOAT, 3 * sizeof(GLfloat), 2, 5 * sizeof(GLfloat));
-    m_screen_program->enableAttributeArray("uv");
-    m_quad_vbo.release();
-    m_quad_vao->release();
-
-
-
-//---------------------frame buffer pain ---------------------
-//    QOpenGLFramebufferObjectFormat muliSampleFormat;
-//    muliSampleFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-//    muliSampleFormat.setMipmap(true);
-//    muliSampleFormat.setSamples(4);
-//    muliSampleFormat.setTextureTarget(GL_TEXTURE_2D);
-//    muliSampleFormat.setInternalTextureFormat(GL_RGBA32F_ARB);
-
-//    m_fbo_A= new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2, muliSampleFormat);
-
-//    QOpenGLFramebufferObjectFormat downSampledFormat;
-//    downSampledFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-//    downSampledFormat.setMipmap(true);
-//    downSampledFormat.setTextureTarget(GL_TEXTURE_2D);
-//    downSampledFormat.setInternalTextureFormat(GL_RGBA32F_ARB);
-
-//    m_fbo_B = new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2, downSampledFormat);
-
-
-    // create a framebuffer
-    QOpenGLFramebufferObjectFormat _testFBOFormat;
-    _testFBOFormat.setSamples(4);
-    _testFBOFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
-    _testFBOFormat.setTextureTarget(GL_TEXTURE_2D_MULTISAMPLE);
-
-//    m_gbuffer_fbo = new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2, _testFBOFormat);
-    m_gbuffer_fbo = new QOpenGLFramebufferObject(window()->width()*2, window()->height()*2);
-    m_gbuffer_fbo->bind();
-    // Creates and attaches an additional texture or renderbuffer of size width and height.
-//    QOpenGLFramebufferObject::blitFramebuffer( m_fbo_B , m_gbuffer_fbo , GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT,GL_NEAREST);
-    // create a texture the fb can render to
-
-    ////  for multisample
-    m_view_position_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
-//    m_view_position_texture = new QOpenGLTexture(QOpenGLTexture::Target2DMultisample);
-    m_view_position_texture->create();
-    m_view_position_texture->bind();
-//    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_view_position_texture->textureId());
-//    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, window()->width()*2, window()->height()*2, GL_TRUE);
-    m_view_position_texture->setSize(window()->width()*2, window()->height()*2);
-    m_view_position_texture->setMinificationFilter(QOpenGLTexture::Nearest);
-    m_view_position_texture->setMagnificationFilter(QOpenGLTexture::Nearest);
-    // change to GL_DEPTH24_STENCIL8 fixed 36182 => GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE, a wrong move the texture should be the color buffer hence D24S8 worng and back to RGB32F
-    // the teture is a color buffer. Depth and Stencil is wrong here
-    m_view_position_texture->setFormat(QOpenGLTexture::RGB32F);
-//    m_view_position_texture->setSamples(4);
-    //DepthStencil
-    m_view_position_texture->allocateStorage(QOpenGLTexture::RGB, QOpenGLTexture::Float32);
-    m_gbuffer_fbo->addColorAttachment(window()->width()*2, window()->height()*2, GL_RGB);
-
-//     qDebug()<<"texture ID:"<<m_view_position_texture->textureId();
-
-    // check here if my custom fb is bound
-
-//    int _glValue;
-//    glGetIntegerv(GL_ACTIVE_PROGRAM, &_glValue);
-//    qDebug()<<"logGL:"<<unsigned(_glValue);
-
-
-    // attach texture to fbo
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_view_position_texture->textureId(), 0);
-//    glFramebufferTexture2D(GL_FRAMEBUFFER,                      // target     (our currently bound custom fbo)
-//                           GL_COLOR_ATTACHMENT0,                // attachment (can be more than 1 color)
-//                           GL_TEXTURE_2D_MULTISAMPLE,           // textarget type of texture
-//                           m_view_position_texture->textureId(),// texture (ID)
-//                           0);                                  // level (mipmap level)
-
-//    auto whatIsAttatched = m_gbuffer_fbo->takeTexture(2);
-//    qDebug()<<"take texture:"<<whatIsAttatched;
-
-    m_view_position_texture->release();
-
-// ignore depth rbo for now
-
-    //create a render buffer (rbo) serving as DepthStencil buffer
-    GLuint rbo_depth;
-    glGenRenderbuffers(1, &rbo_depth);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo_depth);
-    //  for multisample
-    glRenderbufferStorage(
-      GL_RENDERBUFFER,     // Target
-      GL_DEPTH_COMPONENT,  // Internal Format (?) check GL_DEPTH24_STENCIL8  here
-      window()->width()*2, window()->height()*2    // Dimensions
-    );
-//    glRenderbufferStorageMultisample(
-//      GL_RENDERBUFFER,     // Target
-//                4,         // probably sample count
-//      GL_DEPTH24_STENCIL8,  // Internal Format
-//      window()->width()*2, window()->height()*2    // Dimensions
-//    );
-    // attach rbo to fbo
-    glFramebufferRenderbuffer(
-      GL_FRAMEBUFFER,       // Target
-      GL_DEPTH_ATTACHMENT,  // Attachment
-      GL_RENDERBUFFER,      // Renderbuffer Target
-      rbo_depth             // Renderbuffer
-    );
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
-
-//    auto oglEnum = GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE;
-//    auto oglEnum = GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
-//    qDebug()<<oglEnum;
-
-    /*
-     *36054 GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT is returned if any of the framebuffer attachment points are framebuffer incomplete.
-     *
-     * 36182:
-     *
-     * value of GL_RENDERBUFFER_SAMPLES is not the same for all attached renderbuffers
-     * value of GL_TEXTURE_SAMPLES is the not same for all attached textures
-     * or
-     * attached images are a mix of renderbuffers and textures
-     * value of GL_RENDERBUFFER_SAMPLES does not match the value of GL_TEXTURE_SAMPLES
-     *
-     * also
-     * value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not the same for all attached textures
-     * or
-     * attached images are a mix of renderbuffers and textures
-     * value of GL_TEXTURE_FIXED_SAMPLE_LOCATIONS is not GL_TRUE for all attached textures
-     */
-
-    m_gbuffer_fbo->release();
-
-    setupScene();
+    return &m_DynamicsWorld;
 }
 
 void Scene::QtOpenGLinitialize()
@@ -400,8 +224,8 @@ void Scene::QtOpenGLinitialize()
     m_quad_vao->release();
 
     //--------manual Frame Buffer workflow--------------
-    SCR_WIDTH = window()->width()*2;
-    SCR_HEIGHT = window()->height()*2;
+//    SCR_WIDTH = window()->width()*2;
+//    SCR_HEIGHT = window()->height()*2;
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -455,7 +279,12 @@ void Scene::QtOpenGLinitialize()
     GLuint id = m_screen_program->programId();
     glUniform1i(glGetUniformLocation(id, "screenTexture"), 0);
 
-    setupScene();
+}
+
+void Scene::DynamicsInitialize()
+{
+    m_DynamicsWorld  = DynamicsWorld();
+    m_DynamicsWorld.initialize();
 }
 
 void Scene::paint()
@@ -512,7 +341,6 @@ void Scene::paint()
 //                  m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[1]->getMatrix());
 //                  m_SceneObjects[1]->draw();
 //              }
-
 
                m_lighting_program->release();
 
@@ -571,11 +399,6 @@ void Scene::drawScreenQuad()
     m_screen_program->release();
 }
 
-void Scene::SceneInitialize()
-{
-
-}
-
 void Scene::setupScene()
 {
 //        addPointLight(QVector3D(5,0,0), QVector3D(0, 0, 1));
@@ -618,12 +441,17 @@ void Scene::setupScene()
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
-       addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
-       addSceneObjectFromModel("bunny", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
-       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
+//       addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
+//       addSceneObjectFromModel("bunny", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
+//       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0.1,3,0), QQuaternion(1,0,0,0));
+       makeDynamic(sceneObject);
+
 
 
        auto myModel = m_ModelPool["grid1"];
+
+
 }
 
 

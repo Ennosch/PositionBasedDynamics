@@ -1,17 +1,18 @@
+#include <typeinfo>
 
-// Project
-#include "Window.h"
+// STL
 #include <iostream>
 #include <algorithm>
 
-
+// QT
 #include <QDebug>
 #include <QKeyEvent>
 #include <QString>
 #include <QString>
 #include <QCursor>
 
-#include <typeinfo>
+// Project
+#include "utils.h"
 
 
 // now include Scene.h, to define Window::initializeGL() which calls things from the scene()
@@ -180,7 +181,29 @@ Scene *Window::scene() const
 
 void Window::setScene(Scene *_scene)
 {
-  m_scene = _scene;
+    m_scene = _scene;
+}
+
+Vertex* Window::passSceneData()
+{
+    // Loop over scene's ModelMap
+    ModelMap::const_iterator it = scene()->m_ModelPool.begin();
+    while(it != scene()->m_ModelPool.end())
+    {
+//        std::cout<<it->first << ": "<<it->second<< std::endl;
+        ModelPtr model = it->second;
+        for(int i = 0; i < model->getNumShapes() ; i++ )
+        {
+            ShapePtr shape = model->getShape(i);
+            Vertex *shapeData = shape->data();
+            int vertCount = shape->getNumVertices();
+            for(int i = 0; i < vertCount; i++)
+            {
+                //qDebug()<<shapeData[i].Position;
+            }
+        }
+        it++;
+    }
 }
 
 void Window::initializeGL()
@@ -201,6 +224,8 @@ void Window::initializeGL()
   // that wish to continuously repaint synchronized to the vertical refresh, should issue an update()
   // upon this signal. This allows for a much smoother experience compared to the traditional usage of timers.
 //  connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
+  //--- WIP ----
+  // also pass DynamicsWorld to the scene
 }
 
 void Window::paintGL()
@@ -229,9 +254,6 @@ void Window::teardownGL()
 void Window::loop()
 {
     processInput();
-
-    // calls paintGL and resizeGL of our
-
     lag += m_elpasedTimer.elapsed();
 
     /*
@@ -243,7 +265,12 @@ void Window::loop()
      *      lag -= MS_PER_UPDATE;
      */
 
+    // calls paintGL and resizeGL of our
     QOpenGLWindow::update();
+
+    // physics
+//    scene()->dynamicsWorld()->update();
+
 
 //    qDebug() << "The slow operation took" << m_Etimer.nsecsElapsed() << "nanoSec"<< m_Etimer.elapsed() << "milliseconds";
 }
@@ -287,8 +314,7 @@ void Window::keyPressEvent(QKeyEvent *event)
 //          scene()->m_SceneObjects[1]->translate(QVector3D(0.5,0,0));
             break;
         case Qt::Key_Right:
-//          scene()->m_arcCamera.rotate(15,0,1,0);
-//            scene()->m_SceneObjects[1]->translate(QVector3D(-0.5,0,0));
+          scene()->dynamicsWorld()->update();
 
       case Qt::Key_J:
 //          scene()->m_arcCamera.rotate(15,0,0,1);

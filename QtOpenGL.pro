@@ -16,7 +16,11 @@ SOURCES += \
     src/camera.cpp \
     src/sceneobject.cpp \
     src/shape.cpp \
-    src/model.cpp
+    src/model.cpp \
+    src/hashgrid.cpp \
+    src/dynamics/dynamicObject.cpp \
+    src/dynamics/dynamicsWorld.cpp \
+    src/dynamics/particle.cpp
 
 OBJECTS_DIR = build/obj
 MOC_DIR = build/moc
@@ -30,17 +34,34 @@ INCLUDEPATH += /usr/local/include
 DEPENDPATH += /usr/local/include
 
 HEADERS += \
+#    include/AbstractScene.h \
+#    include/Scene.h \
+#    include/Window.h \
+#    include/transform.h \
+#    include/inputManager.h \
+#    include/camera.h \
+#    include/sceneobject.h \
+#    include/shape.h \
+#    include/model.h \
+#    include/model.h \
+#    include/utils.h \
+#    include/dynamicsWorld.h \
+#    include/dynamicObject.h
+    include/*.h \
+    include/dynamics/dynamicObject.h \
+    include/dynamics/dynamicsWorld.h \
     include/AbstractScene.h \
-    include/Scene.h \
-    include/Window.h \
-    include/transform.h \
-    include/inputManager.h \
     include/camera.h \
+    include/inputManager.h \
+    include/model.h \
+    include/Scene.h \
     include/sceneobject.h \
     include/shape.h \
-    include/model.h \
-    include/model.h \
-    include/utils.h
+    include/transform.h \
+    include/utils.h \
+    include/Window.h \
+    include/hashgrid.h \
+    include/dynamics/particle.h
 
 
 OTHER_FILES += \

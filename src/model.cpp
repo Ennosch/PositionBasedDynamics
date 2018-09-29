@@ -44,9 +44,11 @@ void Model::loadModel(std::string _path)
         std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
         return;
     }
-    directory = _path.substr(0, _path.find_last_of('/'));
+//    directory = _path.substr(0, _path.find_last_of('/'));
     processNode(scene->mRootNode, scene);
 }
+
+
 
 void Model::processNode(aiNode *node, const aiScene *scene)
 {

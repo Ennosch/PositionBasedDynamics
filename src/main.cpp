@@ -1,3 +1,6 @@
+// STL
+#include <iostream>
+#include <vector>
 
 // Qt
 #include <QGuiApplication>
@@ -10,11 +13,9 @@
 // Project
 #include "Window.h"
 #include "Scene.h"
-
 #include "AbstractScene.h"
-#include "shape.h"
-#include <iostream>
-#include <vector>
+#include "dynamics/dynamicsWorld.h"
+
 
 QString getString(QString Filename)
 {
@@ -68,20 +69,10 @@ int main(int argc, char *argv[])
 
 // just init crashes !
 // scene.initialize();
-
   window.resize(720, 720);
-
-
   window.show();
 
-
-
-//  QString mFilename = "/Users/ennoschlunder/Dev/QtOpenGLBoilerplate/test.txt";
-//  QString shader = ":/shader/simple.vert";
-
-
   return app.exec();
-
 }
 
 

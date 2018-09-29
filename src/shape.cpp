@@ -9,12 +9,14 @@ Shape::Shape()
     qDebug()<<"ctor 1.1 Shape";
 }
 
-Shape::Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices)
+Shape::Shape(std::vector<Vertex> &_vertices,
+             std::vector<unsigned int> &_indices)
         :  indices(_indices), vertices(_vertices)
 {
     // No parent, no automatic deletion ?!
     // The parent of an object may be viewed as the object's owner
 //    m_pVao = new QOpenGLVertexArrayObject();
+
 
     qDebug()<<"ctor 2 shape. indecies vertices ";
     setupMesh();
