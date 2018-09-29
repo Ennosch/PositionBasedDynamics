@@ -8,7 +8,6 @@
 #include "utils.h"
 #include "dynamics/particle.h"
 
-template <typename T>
 
 class HashGrid
 {

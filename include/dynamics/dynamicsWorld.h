@@ -31,7 +31,7 @@ class DynamicsWorld
         int m_ID = 0;
         std::vector <DynamicObjectPtr> m_DynamicObjects;
         std::vector <ParticlePtr> m_Particles;
-        HashGrid<ParticlePtr> m_hashGrid;
+        HashGrid m_hashGrid;
 
 };
 

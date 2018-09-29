@@ -6,28 +6,14 @@
 
 #include <QDebug>
 
-template <typename T>
-
-HashGrid<T>::HashGrid(float _cellSize)
-{
-
-}
-
-
-template<> HashGrid<ParticlePtr>::HashGrid(float _cellSize)
+HashGrid::HashGrid(float _cellSize)
 {
     qDebug("HashGrid Particle tmpl ctor 2");
 //    auto a = boost::math::iround<float>(14.494);
 
 }
 
-template<typename T>
-bool HashGrid<T>::insert(size_t _hashV, ParticlePtr _p)
-{
-
-}
-
-template<> bool HashGrid<ParticlePtr>::insert(size_t _hashV, ParticlePtr _p)
+bool HashGrid::insert(size_t _hashV, ParticlePtr _p)
 {
     bool CellExists = false;
     std::unordered_map< size_t , std::list< ParticlePtr >>::const_iterator itr = m_buckets.find(_hashV);
@@ -51,8 +37,7 @@ template<> bool HashGrid<ParticlePtr>::insert(size_t _hashV, ParticlePtr _p)
     return CellExists;
 }
 
-template<typename T>
-bool HashGrid<T>::cellExists(size_t _hashV)
+bool HashGrid::cellExists(size_t _hashV)
 {
     bool CellExists = false;
     std::unordered_map< size_t , std::list< ParticlePtr >>::const_iterator itr = m_buckets.find(_hashV);
@@ -67,33 +52,7 @@ bool HashGrid<T>::cellExists(size_t _hashV)
     return CellExists;
 }
 
-template<> bool HashGrid<ParticlePtr>::cellExists(size_t _hashV)
-{
-    bool CellExists = false;
-    std::unordered_map< size_t , std::list< ParticlePtr >>::const_iterator itr = m_buckets.find(_hashV);
-    if ( itr == m_buckets.end())
-    {
-        CellExists = false;
-    }
-    else
-    {
-        CellExists = true;
-    }
-    return CellExists;
-}
-
-
-
-
-template<typename T>
-size_t HashGrid<T>::hashFunction(int3 _cell)
-{
-        qDebug("hashFunction template T");
-
-}
-
-
-template<> size_t HashGrid<ParticlePtr>::hashFunction(int3 _cell)
+size_t HashGrid::hashFunction(int3 _cell)
 {
         qDebug("hashFunction ParticlePtr");
         // seed prime number
@@ -104,13 +63,7 @@ template<> size_t HashGrid<ParticlePtr>::hashFunction(int3 _cell)
         return hash;
 }
 
-template<typename T>
-int3 HashGrid<T>::pointToCell(float _x, float _y, float _z)
-{
-
-}
-
-template<> int3 HashGrid<ParticlePtr>::pointToCell(float _x, float _y, float _z)
+int3 HashGrid::pointToCell(float _x, float _y, float _z)
 {
     int3 cell;
     // rounding to full integer - coversion
@@ -121,14 +74,7 @@ template<> int3 HashGrid<ParticlePtr>::pointToCell(float _x, float _y, float _z)
     return cell;
 }
 
-template<typename T>
-std::list<ParticlePtr> HashGrid<T>::cellNeighbours(int3 _cell)
-{
-
-}
-
-
-template<> std::list<ParticlePtr> HashGrid<ParticlePtr>::cellNeighbours(int3 _cell)
+std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
 {
     std::list<ParticlePtr> neighbourParticles;
     std::list<int3> neighbourCells;
