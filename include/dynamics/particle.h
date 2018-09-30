@@ -13,11 +13,11 @@ class Particle
 {
 public:
     Particle();
-    Particle(float _x, float _y, float _z);
+    Particle(float _x, float _y, float _z, int _ID);
 
     void setCell(int _i, int _j, int _k);
     void setHash(size_t _hashv);
-    int ID = 5;
+    int ID = 0;
 
     QVector3D position();
 

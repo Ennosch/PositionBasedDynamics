@@ -139,7 +139,7 @@ void Scene::makeDynamic(pSceneOb _sceneObject)
 {
     qDebug()<<"make Dynamic";
 //    m_DynamicsWorld.addDynamicObject(_sceneObject);
-    m_DynamicsWorld.addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().x(), _sceneObject->getPos().x());
+    m_DynamicsWorld.addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().y(), _sceneObject->getPos().z());
 
 }
 
@@ -444,10 +444,31 @@ void Scene::setupScene()
 //       addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
 //       addSceneObjectFromModel("bunny", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
 //       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
-       auto sceneObject = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0.1,3,0), QQuaternion(1,0,0,0));
-       makeDynamic(sceneObject);
+
+       // 1 Cell
+       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0.1,3,0), QQuaternion(1,0,0,0));
+       auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.8,3.5,0), QQuaternion(1,0,0,0));
+       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,3.9,0.9), QQuaternion(1,0,0,0));
+
+       // in neighbourhood
+       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(1.9,4.9,1.9), QQuaternion(1,0,0,0));
+
+       // outside
+       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2.1,22,0), QQuaternion(1,0,0,0));
+
+       // Cells:
+       // 1  1-3-0
+       // 2  1-3-0
+       // 3  1-3-0
+       // 4  1-4-1
+       // 5  3-22-0
 
 
+       makeDynamic(sceneObject1);
+       makeDynamic(sceneObject2);
+       makeDynamic(sceneObject3);
+       makeDynamic(sceneObject4);
+       makeDynamic(sceneObject5);
 
        auto myModel = m_ModelPool["grid1"];
 

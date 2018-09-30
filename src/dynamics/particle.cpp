@@ -5,9 +5,10 @@ Particle::Particle()
 
 }
 
-Particle::Particle(float _x, float _y, float _z)
+Particle::Particle(float _x, float _y, float _z, int _ID)
+    :ID(_ID)
 {
-
+    x = QVector3D(_x, _y, _z);
 }
 
 void Particle::setCell(int _i, int _j, int _k)

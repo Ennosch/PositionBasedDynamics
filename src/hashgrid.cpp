@@ -16,24 +16,15 @@ HashGrid::HashGrid(float _cellSize)
 bool HashGrid::insert(size_t _hashV, ParticlePtr _p)
 {
     bool CellExists = false;
-    std::unordered_map< size_t , std::list< ParticlePtr >>::const_iterator itr = m_buckets.find(_hashV);
-    if ( itr == m_buckets.end())
-    {
-        CellExists = false;
-    }
-    else
+    if(cellExists(_hashV))
     {
         CellExists = true;
     }
+    else
+    {
+        CellExists = false;
+    }
     m_buckets[_hashV].push_back(_p);
-//    if(cellExists(_hashV))
-//    {
-//        CellExists = true;
-//    }
-//    else
-//    {
-//        CellExists = false;
-//    }
     return CellExists;
 }
 
@@ -54,7 +45,6 @@ bool HashGrid::cellExists(size_t _hashV)
 
 size_t HashGrid::hashFunction(int3 _cell)
 {
-        qDebug("hashFunction ParticlePtr");
         // seed prime number
         size_t hash = 85523717;
         boost::hash_combine(hash, _cell.i);
@@ -69,9 +59,23 @@ int3 HashGrid::pointToCell(float _x, float _y, float _z)
     // rounding to full integer - coversion
     // optionally use: auto a = boost::math::iround<float>(_x);
     cell.i = int(_x / cellSize);
-    cell.i = int(_y / cellSize);
-    cell.i = int(_z / cellSize);
+    cell.j = int(_y / cellSize);
+    cell.k = int(_z / cellSize);
     return cell;
+}
+
+std::list<ParticlePtr> HashGrid::query(size_t _hash)
+{
+    std::list<ParticlePtr> cellList;
+    if(!cellExists(_hash))
+    {
+        return cellList;
+    }
+    else
+    {
+        auto test = m_buckets[_hash];
+        return m_buckets[_hash];
+    }
 }
 
 std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
@@ -96,15 +100,26 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
                 nCell.k = _cell.k + z;
 
                 neighbourCells.push_back(nCell);
+
                 // query for std::list<ParticlePtr>
                 // and if possible merge
+                size_t hash = hashFunction(nCell);
+                if(cellExists(hash))
+                {
+//                    qDebug()<<"Found a hash: "<<x<<y<<z;
+                    std::list<ParticlePtr> currentCellList = query(hash);
+                    std::list<ParticlePtr>::const_iterator itr = neighbourParticles.end();
+                    std::list<ParticlePtr>::const_iterator itrNCellStart = currentCellList.begin();
+                    std::list<ParticlePtr>::const_iterator itrNCellEnd = currentCellList.end();
+                    neighbourParticles.insert(itr, itrNCellStart, itrNCellEnd);
+                };
 //                qDebug()<<"N: "<<n;
                 n++;
             }
         }
     }
 
-
+//    qDebug()<<&neighbourParticles;
     return neighbourParticles;
 }
 

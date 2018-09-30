@@ -26,6 +26,7 @@ class DynamicsWorld
         ParticlePtr addParticle(float _x, float _y, float _z);
 
         void foo(){qDebug("Dynamics World Foo");}
+        int pCount = 0;
 
     private:
         int m_ID = 0;

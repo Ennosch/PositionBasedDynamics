@@ -26,23 +26,26 @@ void DynamicsWorld::update()
 
         for( ParticlePtr p : m_Particles)
         {
+
+//            qDebug()<<"p: "<<p->ID<<"x: "<<p->position().x()<<"y: "<<p->position().y()<<"z: "<<p->position().z();
             int3 pCell = m_hashGrid.pointToCell(
                         p->position().x(),
                         p->position().y(),
                         p->position().z() );
 
+//            qDebug()<<"Position: "<<p->position().x()<<p->position().y()<<p->position().z();
+//            qDebug()<<"Cell: "<<pCell.i<<pCell.j<<pCell.k;
+
             size_t pHash = m_hashGrid.hashFunction(pCell);
             p->setHash(pHash);
             bool hashExisted = m_hashGrid.insert(pHash, p);
-
+            auto test = m_hashGrid.query(pHash);
             // get all neightbouring particles
             std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
-
-//            for(ParticlePtr n : neightbours)
-//            {
-
-//            }
-
+            for(ParticlePtr n : neighbourParticles)
+            {
+                qDebug()<<"checking p: "<<p->ID<<" against: "<<n->ID<<"Cell: "<<pCell.i<<pCell.j<<pCell.k;
+            }
         }
 }
 
@@ -68,7 +71,10 @@ void DynamicsWorld::addDynamicObject(pSceneOb _sceneObject)
 ParticlePtr DynamicsWorld::addParticle(float _x, float _y, float _z)
 {
     qDebug()<<"ADDED PARTICLE_____________________";
-    auto pParticle  = std::make_shared<Particle>(_x, _y, _z);
+    pCount++;
+
+
+    auto pParticle  = std::make_shared<Particle>(_x, _y, _z, pCount);
     m_Particles.push_back(pParticle);
     return pParticle;
 }
