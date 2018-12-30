@@ -2,13 +2,18 @@
 
 Particle::Particle()
 {
-
+        qDebug()<<"INit Particle 1 Constraint";
 }
 
 Particle::Particle(float _x, float _y, float _z, int _ID)
     :ID(_ID)
 {
+    qDebug()<<"INit Particle 2 Constraint";
+    r = 0.5;
+    m = 1.0;
     x = QVector3D(_x, _y, _z);
+    v = QVector3D(0, 0, 0);
+    w = 1/m;
 }
 
 void Particle::setCell(int _i, int _j, int _k)
@@ -23,4 +28,7 @@ void Particle::setHash(size_t _hashv)
     hash = _hashv;
 }
 
-
+float Particle::foo()
+{
+    return 2.0;
+}

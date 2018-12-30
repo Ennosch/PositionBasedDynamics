@@ -114,11 +114,11 @@ void Window::processInput()
     }
     if(inputManager::keyPressed(Qt::Key_Left))
     {
-
+        qDebug()<<"WHER IS: "<<scene()->dynamicsWorld()->m_Particles[0]->x;
     }
     if(inputManager::keyPressed(Qt::Key_Right))
     {
-
+//        scene()->dynamicsWorld()->m_Particles[0]->x = QVector3D(0,12.5,0);
     }
     if(inputManager::keyPressed(Qt::Key_7))
     {
@@ -265,11 +265,13 @@ void Window::loop()
      *      lag -= MS_PER_UPDATE;
      */
 
-    // calls paintGL and resizeGL of our
-    QOpenGLWindow::update();
 
     // physics
 //    scene()->dynamicsWorld()->update();
+
+    QOpenGLWindow::update();
+
+    // calls paintGL and resizeGL of our
 
 
 //    qDebug() << "The slow operation took" << m_Etimer.nsecsElapsed() << "nanoSec"<< m_Etimer.elapsed() << "milliseconds";
@@ -305,6 +307,7 @@ void Window::keyPressEvent(QKeyEvent *event)
 //          scene()->m_arcCamera.rotate(15,1,0,0);
 //            scene()->m_arcCamera.setTranslation(QVector3D(0,0,12));
 //            scene()->m_SceneObjects[1]->translate(QVector3D(0,0.5,0));
+          scene()->dynamicsWorld()->info();
             break;
         case Qt::Key_Down:
           scene()->m_SceneObjects[1]->translate(QVector3D(0,-0.5,0));
@@ -314,7 +317,9 @@ void Window::keyPressEvent(QKeyEvent *event)
 //          scene()->m_SceneObjects[1]->translate(QVector3D(0.5,0,0));
             break;
         case Qt::Key_Right:
+
           scene()->dynamicsWorld()->update();
+
 
       case Qt::Key_J:
 //          scene()->m_arcCamera.rotate(15,0,0,1);

@@ -13,6 +13,11 @@ HashGrid::HashGrid(float _cellSize)
 
 }
 
+void HashGrid::clear()
+{
+    m_buckets.clear();
+}
+
 bool HashGrid::insert(size_t _hashV, ParticlePtr _p)
 {
     bool CellExists = false;
@@ -82,6 +87,7 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
 {
     std::list<ParticlePtr> neighbourParticles;
     std::list<int3> neighbourCells;
+    size_t middleHash = hashFunction(_cell);
 
     int level = 1;
     int length = level + 2;
@@ -104,6 +110,8 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
                 // query for std::list<ParticlePtr>
                 // and if possible merge
                 size_t hash = hashFunction(nCell);
+//                if(hash == middleHash) continue;
+
                 if(cellExists(hash))
                 {
 //                    qDebug()<<"Found a hash: "<<x<<y<<z;

@@ -16,29 +16,30 @@ Scene::~Scene()
 
 void Scene::initialize()
 {
-  AbstractScene::initialize();  
+  AbstractScene::initialize();
+  SCR_WIDTH = window()->width() * 2;
+  SCR_HEIGHT = window()->height() * 2;
   QtOpenGLinitialize();
   DynamicsInitialize();
   setupScene();
+  m_DynamicsWorld.generateData();
 }
 
 void Scene::resize(int width, int height)
 {
     m_projection_matrix.setToIdentity();
-    m_projection_matrix.perspective(60.0f, width / float(height), 0.1f, 1000.0f);
-
+    m_projection_matrix.perspective(40.0f, width / float(height), 0.1f, 1000.0f);
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, window()->width()*2, window()->height()*2, GL_TRUE);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
 
     glBindTexture(GL_TEXTURE_2D, screenTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window()->width()*2, window()->height()*2, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 //    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, window()->width()*2, window()->height()*2);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
 }
 
 void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, int _size)
@@ -139,8 +140,10 @@ void Scene::makeDynamic(pSceneOb _sceneObject)
 {
     qDebug()<<"make Dynamic";
 //    m_DynamicsWorld.addDynamicObject(_sceneObject);
-    m_DynamicsWorld.addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().y(), _sceneObject->getPos().z());
-
+    ParticlePtr newParticle = m_DynamicsWorld.addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().y(), _sceneObject->getPos().z());
+    auto newDynamicObject = m_DynamicsWorld.addDynamicObjectAsParticle(_sceneObject, newParticle);
+    _sceneObject->makeDynamic(newDynamicObject);
+    //    _sceneObject->
 }
 
 ShapePtr Scene::getShapeFromPool(std::string _key)
@@ -180,15 +183,16 @@ DynamicsWorld* Scene::dynamicsWorld()
 
 void Scene::QtOpenGLinitialize()
 {
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_arcCamera.translate(0.0f, 0.0f, 6.0f);
-    m_arcCamera.SetWorldPos(QVector3D(0.0f, 0.0f, 6.0f));
+    m_arcCamera.translate(0.0f, 0.0f, 12.0f);
+    m_arcCamera.SetWorldPos(QVector3D(0.0f, 0.0f, 12.0f));
     m_arcCamera.SetPivot(QVector3D(0.0f, 0.0f, 0.0f));
-    m_arcCamera.SetPivotToCam(QVector3D(0,0,6));
+    m_arcCamera.SetPivotToCam(QVector3D(0,0,12));
     m_arcCamera.arcBallStart();
 
 //----build, compline and link shaders
@@ -224,8 +228,8 @@ void Scene::QtOpenGLinitialize()
     m_quad_vao->release();
 
     //--------manual Frame Buffer workflow--------------
-//    SCR_WIDTH = window()->width()*2;
-//    SCR_HEIGHT = window()->height()*2;
+//   int SCR_WIDTH = window()->width()*2;
+//   int SCR_HEIGHT = window()->height()*2;
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -235,7 +239,7 @@ void Scene::QtOpenGLinitialize()
 //    glBindTexture(GL_TEXTURE_2D, texture);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, window()->width()*2, window()->height()*2, GL_TRUE);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
     // attach multisampled texture
@@ -249,7 +253,7 @@ void Scene::QtOpenGLinitialize()
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 //    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, window()->width()*2, window()->height()*2);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
@@ -265,7 +269,7 @@ void Scene::QtOpenGLinitialize()
 
     glGenTextures(1, &screenTexture);
     glBindTexture(GL_TEXTURE_2D, screenTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window()->width()*2, window()->height()*2, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
@@ -290,7 +294,7 @@ void Scene::DynamicsInitialize()
 void Scene::paint()
 {
     // draw to the framebuffer (off-screen render)
-    glViewport(0,0, window()->width()*2, window()->height()*2);
+    glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
 //    glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
     glDisable(GL_CULL_FACE);
     // bind old QtWrapper style
@@ -319,6 +323,7 @@ void Scene::paint()
               m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            // draw all SceneObjects
               for(uint i = 1; i < m_SceneObjects.size(); i++)
               {
                   uint matID = m_SceneObjects[i]->getMaterialID();
@@ -326,6 +331,7 @@ void Scene::paint()
                   m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
                   m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
                   m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+                  auto testMat = m_SceneObjects[i]->getMatrix();
                   m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
                   m_SceneObjects[i]->draw();
               }
@@ -360,12 +366,12 @@ void Scene::paint()
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
-    glBlitFramebuffer(0, 0, window()->width()*2, window()->height()*2, 0, 0, window()->width()*2, window()->height()*2, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glViewport ( 0, 0, window()->width()*2, window()->height()*2);
+    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
@@ -386,7 +392,7 @@ void Scene::paint()
 
 void Scene::drawScreenQuad()
 {
-    glViewport ( 0, 0, window()->width()*2, window()->height()*2);
+    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
     glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // finally draw a quad to the screen
@@ -422,7 +428,6 @@ void Scene::setupScene()
                         QVector3D(1.0f , 1.0f ,1.0f),    // specular
                         20.0 );                          // shininess
 
-
         // green tone
         addMaterial(    QVector3D(0.0f , 0.0f ,0.0f),   // ambient
                         QVector3D(0.2f , 0.3f ,0.05f),   // diffuse
@@ -446,15 +451,15 @@ void Scene::setupScene()
 //       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
 
        // 1 Cell
-       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0.1,3,0), QQuaternion(1,0,0,0));
-       auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.8,3.5,0), QQuaternion(1,0,0,0));
-       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,3.9,0.9), QQuaternion(1,0,0,0));
+       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-2,3.0,0), QQuaternion(1,0,0,0));
+       auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,3.0,0), QQuaternion(1,0,0,0));
+//       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
 
-       // in neighbourhood
-       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(1.9,4.9,1.9), QQuaternion(1,0,0,0));
+//       // in neighbourhood
+//       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(1.9,4.9,1.9), QQuaternion(1,0,0,0));
 
-       // outside
-       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2.1,22,0), QQuaternion(1,0,0,0));
+//       // outside
+//       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2.1,22,0), QQuaternion(1,0,0,0));
 
        // Cells:
        // 1  1-3-0
@@ -466,11 +471,12 @@ void Scene::setupScene()
 
        makeDynamic(sceneObject1);
        makeDynamic(sceneObject2);
-       makeDynamic(sceneObject3);
-       makeDynamic(sceneObject4);
-       makeDynamic(sceneObject5);
+//       makeDynamic(sceneObject2);
+//       makeDynamic(sceneObject3);
+//       makeDynamic(sceneObject4);
+//       makeDynamic(sceneObject5);
 
-       auto myModel = m_ModelPool["grid1"];
+//       auto myModel = m_ModelPool["grid1"];
 
 
 }

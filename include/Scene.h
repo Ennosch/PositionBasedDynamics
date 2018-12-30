@@ -83,6 +83,7 @@ private:
   QOpenGLFramebufferObject* m_gbuffer_fbo;
 
   // fbo raw OpenGL
+  int SCR_HEIGHT, SCR_WIDTH;
   unsigned int fbo, texture, rbo, intermediateFBO, screenTexture;
 
   QOpenGLTexture* m_view_position_texture;

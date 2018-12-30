@@ -6,8 +6,7 @@
 
 #include "utils.h"
 
-
-
+class AbstractConstraint;
 
 class Particle
 {
@@ -20,16 +19,22 @@ public:
     int ID = 0;
 
     QVector3D position();
+    unsigned radius();
 
+    float foo();
 
-private:
-    unsigned m, r, age;
+//private:
+    unsigned age;
+    float w, r, m;
     size_t hash;
-    QVector3D v, vt, x, xt;
+    QVector3D p, pp, v, vt, x, xt, qc;
     int3 cell;
+    std::vector<ConstraintPtr> m_CollisionConstraints;
+    std::vector<ConstraintPtr> m_Constraints;
 
 };
 
 inline QVector3D Particle::position(){ return x; };
+inline unsigned Particle::radius(){ return r; };
 
 #endif // PARTICLE_H

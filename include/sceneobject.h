@@ -33,7 +33,8 @@ public:
     void translate(const QVector3D &_dt);
     void setScale(const QVector3D &_s);
     void rotate(const QQuaternion &_rot);
-
+    void makeDynamic(DynamicObjectPtr _dynamicObject);
+    bool isDynamic();
 
     const QMatrix4x4 getMatrix();
     const QVector3D getPos();
@@ -42,6 +43,7 @@ public:
     ShapePtr shape();
 
 private:
+    bool m_IsDynamic = false;
     uint m_MaterialID;    
     ShapePtr pShape;
     ModelPtr pModel;
@@ -53,9 +55,10 @@ private:
 };
 
 inline uint SceneObject::getMaterialID(){ return m_MaterialID;};
-inline const QMatrix4x4 SceneObject::getMatrix(){return m_Transform.toMatrix();};
 inline const QVector3D SceneObject::getPos(){ return m_Transform.translation(); };
 inline std::shared_ptr<Shape> SceneObject::shape(){return pShape; };
+
+inline bool SceneObject::isDynamic(){ return m_IsDynamic; };
 
 inline void SceneObject::setTranslation(const QVector3D &_dt){m_Transform.setTranslation(_dt); };
 inline void SceneObject::translate(const QVector3D &_dt){m_Transform.translate(_dt); };

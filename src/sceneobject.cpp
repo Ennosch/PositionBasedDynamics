@@ -75,3 +75,22 @@ void SceneObject::release()
     pShape->release();
 }
 
+void SceneObject::makeDynamic(DynamicObjectPtr _dynamicObject)
+{
+    pDynamicObject = _dynamicObject;
+    m_IsDynamic = true;
+}
+
+
+const QMatrix4x4 SceneObject::getMatrix()
+{
+    if(isDynamic())
+    {
+        return pDynamicObject->getTransfrom();
+    }
+    else
+    {
+        return m_Transform.toMatrix();
+    }
+}
+

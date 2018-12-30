@@ -40,6 +40,8 @@ class QOpenGLFunctions;
 class DynamicObject;
 class Particle;
 
+class AbstractConstraint;
+class DistanceEqualityConstraint;
 
 struct Material {
     QVector3D ambient;
@@ -62,10 +64,15 @@ struct Vertex {
     QVector3D Barycentric;
 };
 
+struct Plane {
+    Plane(){  qDebug()<<"Who Am I ";  }
+    QVector3D Normal;
+    QVector3D Offset;
+};
+
 struct int3{
     int i,j,k;
 };
-
 
 typedef std::unordered_map <std::string, std::shared_ptr <Shape>>       ShapeMap;
 typedef std::unordered_map <std::string, std::shared_ptr <Model>>       ModelMap;
@@ -76,8 +83,9 @@ typedef std::shared_ptr <Model>             ModelPtr;
 typedef std::shared_ptr <Material>          MaterialPtr;
 typedef std::shared_ptr <Light>             LightPtr;
 
-typedef std::shared_ptr <DynamicObject>     DynamicObjectPtr;
-typedef std::shared_ptr <Particle>          ParticlePtr;
+typedef std::shared_ptr <DynamicObject>         DynamicObjectPtr;
+typedef std::shared_ptr <Particle>              ParticlePtr;
+typedef std::shared_ptr <AbstractConstraint>    ConstraintPtr;
 
 
 // (?) utils should become a class to be able to forward declare and have a nameSpace ?

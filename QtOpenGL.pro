@@ -20,7 +20,10 @@ SOURCES += \
     src/hashgrid.cpp \
     src/dynamics/dynamicObject.cpp \
     src/dynamics/dynamicsWorld.cpp \
-    src/dynamics/particle.cpp
+    src/dynamics/particle.cpp \
+    src/dynamics/constraint.cpp \
+    src/dynamics/collisiondetection.cpp \
+    src/dynamics/abstractconstraint.cpp
 
 OBJECTS_DIR = build/obj
 MOC_DIR = build/moc
@@ -61,7 +64,10 @@ HEADERS += \
     include/utils.h \
     include/Window.h \
     include/hashgrid.h \
-    include/dynamics/particle.h
+    include/dynamics/particle.h \
+    include/dynamics/constraint.h \
+    include/dynamics/collisiondetection.h \
+    include/dynamics/abstractconstraint.h
 
 
 OTHER_FILES += \

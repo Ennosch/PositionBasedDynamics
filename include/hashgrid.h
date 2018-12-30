@@ -15,6 +15,8 @@ public:
 //    HashGrid();
     HashGrid(float _cellSize = 1.0);
 
+    void clear();
+
     bool insert(size_t _hashV, ParticlePtr _p);
     bool cellExists(size_t _hashV);
     size_t hashFunction(int3 _cell);
