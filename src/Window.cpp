@@ -166,7 +166,7 @@ void Window::processInput()
     }
     if(inputManager::keyPressed(Qt::Key_Q))
     {
-        scene()->m_SceneObjects[0]->translate(QVector3D(0,0,0.1));
+//        scene()->m_SceneObjects[0]->translate(QVector3D(0,0,0.1));
     }
     if(inputManager::keyPressed(Qt::Key_E))
     {
@@ -317,9 +317,7 @@ void Window::keyPressEvent(QKeyEvent *event)
 //          scene()->m_SceneObjects[1]->translate(QVector3D(0.5,0,0));
             break;
         case Qt::Key_Right:
-
           scene()->dynamicsWorld()->update();
-
 
       case Qt::Key_J:
 //          scene()->m_arcCamera.rotate(15,0,0,1);
@@ -391,6 +389,13 @@ void Window::mousePressEvent(QMouseEvent *event)
 //  qDebug()<<"event:"<< event;
   inputManager::registerMousePress(event->button());
 //  qDebug()<<event;
+  QPointF pos = event->pos();
+  float pixelNDCx = (pos.x() + 0.5) / this->width();
+  float pixelNDCy = (pos.y() + 0.5) / this->height();
+  float pixelScreenX = 2 * pixelNDCx - 1;
+  float pixelScreenY = 1 - 2 * pixelNDCy;
+  qDebug()<<pos<<pixelNDCx<<pixelScreenX<<pixelScreenY;
+
 }
 
 void Window::mouseReleaseEvent(QMouseEvent *event)

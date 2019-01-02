@@ -38,7 +38,7 @@ void DynamicsWorld::update(float dt)
     for( ParticlePtr p : m_Particles)
     {
         // e.G. gravity 0, 1, 0
-        QVector3D forceExt = QVector3D(0, 0, 0);
+        QVector3D forceExt = QVector3D(0, -1, 0);
         p->v = p->v + dt * p->w*forceExt;
     }
 
@@ -88,16 +88,16 @@ void DynamicsWorld::update(float dt)
     // Solver Iteration (9)
     for( ParticlePtr p : m_Particles)
     {
-        for( ConstraintPtr c : p->m_CollisionConstraints)
-        {
-            p->p += c->deltaP();
-        }
-        p->m_CollisionConstraints.clear();
-
         for( ConstraintPtr c : p->m_Constraints)
         {
 //            p->p += c->deltaP();
             c->project();
+        }
+
+
+        for( ConstraintPtr c : p->m_CollisionConstraints)
+        {
+            p->p += c->deltaP();
         }
         p->m_CollisionConstraints.clear();
     }
@@ -231,8 +231,14 @@ void DynamicsWorld::generateData()
     qDebug()<<"genData";
 //    auto nSpring = std::make_shared<DistanceEqualityConstraint>(*m_Particles[0], *m_Particles[1]);
     auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
+    nSpring->setRestLength(6.5);
     m_Particles[0]->m_Constraints.push_back(nSpring);
     m_Particles[1]->m_Constraints.push_back(nSpring);
+
+    auto nSpring2 = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[2]);
+    nSpring2->setRestLength(4.5);
+    m_Particles[0]->m_Constraints.push_back(nSpring2);
+    m_Particles[2]->m_Constraints.push_back(nSpring2);
 
 }
 

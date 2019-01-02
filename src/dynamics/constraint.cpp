@@ -71,7 +71,8 @@ DistanceEqualityConstraint::DistanceEqualityConstraint(const Particle &_p1, cons
 
 float DistanceEqualityConstraint::constraintFunction()
 {
-    return (p1.p - p2.p).length() - d;
+//    return ((p1.p - p2.p).length() - d);
+    return ((pptr1->p - pptr2->p).length() - d);
 }
 
 QVector3D DistanceEqualityConstraint::deltaP()
@@ -81,9 +82,25 @@ QVector3D DistanceEqualityConstraint::deltaP()
 
 void DistanceEqualityConstraint::project()
 {
-    qDebug()<<"prjecting";
+
 //    p1.p = QVector3D(0,0.1,0);
-    pptr1->p += QVector3D(0, -0.2 ,0);
+    float w1, w2;
+    QVector3D dp1, dp2, p1, p2;
+
+    p1 = pptr1->p;
+    p2 = pptr2->p;
+    w1 = pptr1->w;
+    w2 = pptr2->w;
+
+    dp1 =  -w1/(w1 + w2) * constraintFunction() * ((p1 - p2) / (p1-p2).length());
+    dp2 =  +w2/(w1 + w2) * constraintFunction() * ((p1 - p2) / (p1-p2).length());
+
+    pptr1->p += (dp1 / 2);
+    pptr2->p += (dp2 / 2);
+
+    float c2 = constraintFunction();
+
+    qDebug()<<"projecting";
 }
 
 void DistanceEqualityConstraint::setRestLength(float _d)

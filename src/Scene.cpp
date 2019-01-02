@@ -451,8 +451,9 @@ void Scene::setupScene()
 //       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
 
        // 1 Cell
-       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-2,3.0,0), QQuaternion(1,0,0,0));
-       auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,3.0,0), QQuaternion(1,0,0,0));
+       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,5.0,0), QQuaternion(1,0,0,0));
+       auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,1.0,0), QQuaternion(1,0,0,0));
+       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(4,0.5,0), QQuaternion(1,0,0,0));
 //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
 
 //       // in neighbourhood
@@ -468,9 +469,9 @@ void Scene::setupScene()
        // 4  1-4-1
        // 5  3-22-0
 
-
        makeDynamic(sceneObject1);
        makeDynamic(sceneObject2);
+       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject4);

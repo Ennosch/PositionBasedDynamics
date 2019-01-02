@@ -40,6 +40,7 @@ public:
 
 private:
     float d;
+//    ParticlePtr p;
     QVector3D n, p, dp, qc;
 };
 
