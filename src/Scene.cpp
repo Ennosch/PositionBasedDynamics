@@ -16,6 +16,7 @@ Scene::~Scene()
 
 void Scene::initialize()
 {
+  m_CollisionDetect =  CollisionDetection();
   AbstractScene::initialize();
   SCR_WIDTH = window()->width() * 2;
   SCR_HEIGHT = window()->height() * 2;
@@ -23,23 +24,6 @@ void Scene::initialize()
   DynamicsInitialize();
   setupScene();
   m_DynamicsWorld.generateData();
-}
-
-void Scene::resize(int width, int height)
-{
-    m_projection_matrix.setToIdentity();
-    m_projection_matrix.perspective(40.0f, width / float(height), 0.1f, 1000.0f);
-
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
-
-    glBindTexture(GL_TEXTURE_2D, screenTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
 }
 
 void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, int _size)
@@ -181,9 +165,18 @@ DynamicsWorld* Scene::dynamicsWorld()
     return &m_DynamicsWorld;
 }
 
+void Scene::rayIt(float pixelX, float pixelY)
+{
+    QVector3D rayCamreaSpace = QVector3D(pixelX, pixelY, -10.0);
+    QVector3D rayEnd = m_arcCamera.toMatrix().inverted() * rayCamreaSpace;
+    QVector3D rayStart = m_arcCamera.toMatrix().inverted() * QVector3D(0,0,0);
+
+    currentRayStart  =  rayStart;
+    currentRayEnd = rayEnd;
+}
+
 void Scene::QtOpenGLinitialize()
 {
-
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
@@ -283,12 +276,66 @@ void Scene::QtOpenGLinitialize()
     GLuint id = m_screen_program->programId();
     glUniform1i(glGetUniformLocation(id, "screenTexture"), 0);
 
+    m_flat_program->bind();
+    Line line1, line2, line3, newLine2;
+    line1.Start = QVector3D(0,0,0);
+    line1.End = QVector3D(0,2,0);
+    line2.Start = QVector3D(0,2.2,0);
+    line2.End = QVector3D(0,3,2);
+    line3.Start = QVector3D(0,3.4,0);
+    line3.End = QVector3D(4,3.4,0);
+
+    newLine2.Start = QVector3D(0,0,0);
+    newLine2.End = QVector3D(-13,-13,-13);
+
+    m_Lines.push_back(line1);
+    m_Lines.push_back(line2);
+    m_Lines.push_back(line3);
+
+    m_lines_vao = new QOpenGLVertexArrayObject();
+    m_lines_vao->create();
+    m_lines_vao->bind();
+
+    m_lines_vbo.create();
+    m_lines_vbo.bind();
+//    m_lines_vbo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    m_lines_vbo.allocate(m_Lines.data(), m_Lines.size() * sizeof(Line));
+
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(QVector3D),
+                          nullptr);
+    m_flat_program->release();
 }
 
 void Scene::DynamicsInitialize()
 {
     m_DynamicsWorld  = DynamicsWorld();
     m_DynamicsWorld.initialize();
+}
+
+void Scene::resize(int width, int height)
+{
+    SCR_WIDTH = window()->width() * 2;
+    SCR_HEIGHT = window()->height() * 2;
+
+    m_projection_matrix.setToIdentity();
+    m_projection_matrix.perspective(40.0f, width / float(height), 0.1f, 1000.0f);
+
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
+
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
 }
 
 void Scene::paint()
@@ -331,37 +378,32 @@ void Scene::paint()
                   m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
                   m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
                   m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-                  auto testMat = m_SceneObjects[i]->getMatrix();
                   m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
                   m_SceneObjects[i]->draw();
               }
 
-              // slow maker
-//              for(uint i = 1; i < 100000; i++)
-//              {
-//                  uint matID = m_SceneObjects[1]->getMaterialID();
-//                  m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
-//                  m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
-//                  m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
-//                  m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-//                  m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[1]->getMatrix());
-//                  m_SceneObjects[1]->draw();
-//              }
-
                m_lighting_program->release();
-
-        auto testModel = m_ModelPool["Icosahedron"];
 
         //-------------------------Draw Wireframe---------------------------------------------------------------------------
               m_flat_program->bind();
               m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
               m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
               if(m_SceneObjects[0])
               {
                   glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
                   m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
                   m_SceneObjects[0]->draw();
               }
+
+         //-------------------------Draw Lines---------------------------------------------------------------------------
+              {
+                m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
+                m_lines_vao->bind();
+                glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
+                m_lines_vao->release();
+              }
+
               m_flat_program->release();
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
@@ -387,6 +429,8 @@ void Scene::paint()
 
     m_quad_vao->release();
     m_screen_program->release();
+
+
 
 }
 
@@ -451,10 +495,13 @@ void Scene::setupScene()
 //       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
 
        // 1 Cell
-       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,5.0,0), QQuaternion(1,0,0,0));
-       auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,1.0,0), QQuaternion(1,0,0,0));
-       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(4,0.5,0), QQuaternion(1,0,0,0));
-//       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
+       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
+       auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
+       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
+       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(1,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
+       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
+       //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
 
 //       // in neighbourhood
 //       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(1.9,4.9,1.9), QQuaternion(1,0,0,0));

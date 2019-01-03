@@ -65,9 +65,18 @@ struct Vertex {
 };
 
 struct Plane {
-    Plane(){  qDebug()<<"Who Am I ";  }
     QVector3D Normal;
     QVector3D Offset;
+};
+
+struct Ray{
+    QVector3D Origin;
+    QVector3D Dir;
+};
+
+struct Line{
+    QVector3D Start;
+    QVector3D End;
 };
 
 struct int3{

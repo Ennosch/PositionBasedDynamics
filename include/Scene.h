@@ -28,6 +28,8 @@
 #include "utils.h"
 #include "dynamics/dynamicsWorld.h"
 
+#include "dynamics/collisiondetection.h"
+
 class Scene : public AbstractScene
 {
 
@@ -70,6 +72,82 @@ public:
   QVector3D *getData();
   DynamicsWorld* dynamicsWorld();
 
+  void rayIt(float pixelX, float pixelY);
+
+  void updateLines()
+  {
+      m_lines_vao->bind();
+      m_lines_vbo.create();
+      m_lines_vbo.bind();
+      m_lines_vbo.allocate(m_Lines.data(), m_Lines.size() * sizeof(Line));
+      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0,
+                            3,
+                            GL_FLOAT,
+                            GL_FALSE,
+                            sizeof(QVector3D),
+                            nullptr);
+      m_lines_vao->release();
+
+  }
+
+  void drawRay()
+  {
+      Line newLine;
+      newLine.Start = currentRayStart;
+      newLine.End = (currentRayEnd-currentRayStart).normalized() * 10;
+
+
+      m_Lines.push_back(newLine);
+      updateLines();
+  }
+  void moveSphere()
+  {
+          qDebug()<<"moving sphere";
+//          m_SceneObjects[4]->setTranslation(currentRayStart);
+//          m_SceneObjects[5]->setTranslation(currentRayEnd);
+//      qDebug()<<currentRayStart<<(currentRayEnd-currentRayStart).normalized();
+
+//      Line newLine, newLine2;
+//      newLine.Start = currentRayStart;
+//      newLine.End = (currentRayEnd-currentRayStart).normalized() * 10;
+
+//      newLine2.Start = QVector3D(0,0,0);
+//      newLine2.End = QVector3D(13,13,13);
+//      m_Lines.push_back(newLine2);
+
+//      updateLines();
+
+      for(uint i = 1; i < m_SceneObjects.size(); i++)
+      {
+          bool hit = m_CollisionDetect.checkRaySphere(currentRayStart,
+                                                      (currentRayEnd-currentRayStart).normalized(),
+                                                      m_SceneObjects[i]->getPos(),
+                                                      0.5);
+            m_SceneObjects[i]->getPos();
+          if(hit)
+          {
+              qDebug()<<"hit "<<i;
+//              Line newLine;
+//              newLine.Start = currentRayStart;
+//              newLine.End = (currentRayEnd-currentRayStart).normalized() * 10;
+
+
+//              m_Lines.push_back(newLine);
+//              updateLines();
+          }
+          else
+          {
+//              qDebug()<<"No hit";
+          }
+      }
+  }
+
+
+  CollisionDetection m_CollisionDetect;
+  QVector3D currentRayStart = QVector3D(0,0,0);
+  QVector3D currentRayEnd = QVector3D(0,0,0);
+
 private:
   friend class Window;
 
@@ -80,7 +158,7 @@ private:
   QOpenGLShaderProgram* m_lighting_program;
   QOpenGLShaderProgram* m_flat_program;
 
-  QOpenGLFramebufferObject* m_gbuffer_fbo;
+//  QOpenGLFramebufferObject* m_gbuffer_fbo;
 
   // fbo raw OpenGL
   int SCR_HEIGHT, SCR_WIDTH;
@@ -89,6 +167,9 @@ private:
   QOpenGLTexture* m_view_position_texture;
   QOpenGLVertexArrayObject* m_quad_vao;
   QOpenGLBuffer m_quad_vbo;
+
+  QOpenGLVertexArrayObject* m_lines_vao;
+  QOpenGLBuffer m_lines_vbo;
 
   QMatrix4x4 m_projection_matrix;
   Camera3D m_arcCamera;
@@ -99,6 +180,7 @@ private:
   std::vector <LightPtr> m_Pointlights;
   std::vector <MaterialPtr> m_Materials;
   std::vector <pSceneOb> m_SceneObjects;
+  std::vector <Line> m_Lines;
 };
 
 inline MaterialPtr Scene::getMaterial(int _index){ return m_Materials[_index]; };

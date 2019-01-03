@@ -20,5 +20,4 @@ void main()
 //    vNormal = normal;
     vBC = barycentric;
     vNormal = mat3(transpose(inverse( ModelMatrix ))) * normal;
-
 }

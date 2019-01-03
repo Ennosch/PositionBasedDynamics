@@ -92,7 +92,6 @@ void Shape::setupMesh()
     m_ebo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     m_ebo.allocate(indices.data(), indices.size()*4);
 
-    // theory this call is not setting this in the shader/ or doesn't reacht the GL context
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0,
                           3,
@@ -122,7 +121,7 @@ void Shape::draw()
        unsigned int count = indices.size();
        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
 //       glDrawArrays(GL_TRIANGLES, 0, count);
-        m_pVao->release();
+       m_pVao->release();
 }
 
 void Shape::drawWireframe()

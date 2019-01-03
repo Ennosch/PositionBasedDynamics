@@ -5,6 +5,7 @@
 #include <QMatrix4x4>
 #include <QVector3D>
 
+#include "utils.h"
 
 typedef QVector3D Vec3;
 
@@ -14,6 +15,9 @@ public:
     CollisionDetection();
     float checkPointPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o);
     Vec3 checkRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o);
+
+    bool checkRaySphere(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
+    bool solveQuadratic(const float &a, const float &b, const float &c, float &x0, float &x1);
 };
 
 

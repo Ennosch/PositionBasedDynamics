@@ -335,6 +335,11 @@ void Window::keyPressEvent(QKeyEvent *event)
 //          qDebug()<<"transform[0]: "<<scene()->m_SceneObjects[0]->m_Transform.toMatrix()<<"transform[1]: "<<scene()->m_SceneObjects[1]->m_Transform.toMatrix();;
           break;
       case Qt::Key_M:
+            scene()->moveSphere();
+          //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
+          break;
+      case Qt::Key_N:
+            scene()->drawRay();
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
           break;
       case Qt::Key_F:
@@ -392,10 +397,27 @@ void Window::mousePressEvent(QMouseEvent *event)
   QPointF pos = event->pos();
   float pixelNDCx = (pos.x() + 0.5) / this->width();
   float pixelNDCy = (pos.y() + 0.5) / this->height();
+
   float pixelScreenX = 2 * pixelNDCx - 1;
   float pixelScreenY = 1 - 2 * pixelNDCy;
-  qDebug()<<pos<<pixelNDCx<<pixelScreenX<<pixelScreenY;
 
+  float aspectRatio = float(this->width()) / float(this->height());
+  float pixelCameraX =  pixelScreenX * aspectRatio;
+  float pixelCameraY =  pixelScreenY;
+
+  float angle = tan(40 * (3.14159 / 180));
+
+  float pixelCameraXA = pixelCameraX * angle ;
+  float pixelCameraYA = pixelCameraY * angle;
+
+  scene()->rayIt(pixelCameraXA, pixelCameraYA);
+
+//  scene()->rayIt(0, 0);
+//  qDebug()<<tan(40 * (3.14159 / 180))<<pixelCameraX<<pixelCameraY<<pixelCameraXA<<pixelCameraYA;
+//    qDebug()<<"------------------------";
+//    qDebug()<<pixelScreenX<<pixelScreenY;
+//    qDebug()<<pixelCameraX<<pixelCameraY;
+//    qDebug()<<pixelCameraXA<<pixelCameraYA;
 }
 
 void Window::mouseReleaseEvent(QMouseEvent *event)
