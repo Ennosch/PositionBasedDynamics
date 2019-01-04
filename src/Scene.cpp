@@ -165,7 +165,7 @@ DynamicsWorld* Scene::dynamicsWorld()
     return &m_DynamicsWorld;
 }
 
-void Scene::rayIt(float pixelX, float pixelY)
+void Scene::rayItOld(float pixelX, float pixelY)
 {
 //    QVector3D rayCamreaSpace = QVector3D(pixelX, pixelY, -5.0);
     QVector3D ScreenSpace = QVector3D(0.5, 0.5, 0.0);
@@ -176,7 +176,7 @@ void Scene::rayIt(float pixelX, float pixelY)
 
 
 
-    QVector3D rayEnd = WorldSpace;
+    QVector3D rayEnd = m_arcCamera.toMatrix().inverted() * QVector3D(0,0,-1);
     QVector3D rayStart = m_arcCamera.toMatrixProjection().inverted() * m_projection_matrix.inverted()  * QVector3D(0,0,0);
 
 //    qDebug()<<m_arcCamera.worldPos()<<rayStart<<rayEnd;
@@ -185,38 +185,39 @@ void Scene::rayIt(float pixelX, float pixelY)
     Line newLine, newLine2, l1, l2, l3, l4;
     Line l5, l6, l7, l8;
 
-        newLine.Start =  m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(0.99,0.99,0))  + QVector3D(0,0,0));
-        newLine.End = m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(0,0,0))  + QVector3D(0,0,-10));
+        newLine.Start =  m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(0.9,0.9,0))  + QVector3D(0,0,-1));
+//        newLine.End = m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(0,0,0))  + QVector3D(0,0,-10));
+        newLine.End = m_arcCamera.toMatrix().inverted()  *  QVector3D(0,0,0);
 
-        newLine2.Start = m_arcCamera.toMatrix().inverted() * (newLine.Start + QVector3D(0,0,1));
-        newLine2.End = newLine.End;
 
-    m_Lines.push_back(newLine);
-//    m_Lines.push_back(newLine2);
-    updateLines();
+//    newLine.Start =  m_arcCamera.toMatrix().inverted()  *   QVector3D(0,0,0);
+//    newLine.End = m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(pixelX,pixelY,0))  + QVector3D(0,0,-10));
 
-//    l1.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,1,0);
-//    l1.End = m_arcCamera.toMatrix().inverted() * QVector3D(-1,1,0);
+//    m_Lines.push_back(newLine);
+//    updateLines();
 
-//    l2.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,-1,0);
-//    l2.End = m_arcCamera.toMatrix().inverted() * QVector3D(-1,-1,0);
+//    l1.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,0.9,0));
+//    l1.End = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,0.9,0));
 
-//    l3.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,1,0);
-//    l3.End = m_arcCamera.toMatrix().inverted() * QVector3D(1,-1,0);
+//    l2.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,-0.9,0));
+//    l2.End = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,-0.9,0));
 
-//    l4.Start = m_arcCamera.toMatrix().inverted() *QVector3D(-1,1,0);
-//    l4.End = m_arcCamera.toMatrix().inverted() * QVector3D(-1,-1,0);
+//    l3.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,0.9,0));
+//    l3.End = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,-0.9,0));
 
-//    l5.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,1,0);
+//    l4.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,-0.9,0));
+//    l4.End = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,0.9,0));
+
+//    l5.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,0.9,0));
 //    l5.End = rayEnd;
 
-//    l6.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,-1,0);
+//    l6.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,0.9,0));
 //    l6.End = rayEnd;
 
-//    l7.Start = m_arcCamera.toMatrix().inverted() *QVector3D(-1,1,0);
+//    l7.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,-0.9,0));
 //    l7.End = rayEnd;
 
-//    l8.Start = m_arcCamera.toMatrix().inverted() *QVector3D(-1,-1,0);
+//    l8.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,-0.9,0));
 //    l8.End = rayEnd;
 
 //    m_Lines.push_back(l1);
@@ -234,6 +235,38 @@ void Scene::rayIt(float pixelX, float pixelY)
 
 //    currentRayStart  =  rayStart;
 //    currentRayEnd = rayEnd;
+
+}
+
+void Scene::rayIt(float pixelX, float pixelY)
+{
+    QVector4D ray_clip = QVector4D(pixelX,pixelY,-1.0,1);
+
+
+
+    QVector4D ray_eye = m_projection_matrix.inverted() * ray_clip;
+
+    ray_eye = QVector4D(ray_eye.x(), ray_eye.y(), -1, 0);
+
+    QVector4D ray_wor = m_arcCamera.toMatrix().inverted() * ray_eye;
+
+    QVector3D ray_world = QVector3D(ray_wor.x(), ray_wor.y(), ray_wor.z());
+
+    QVector3D origin = m_arcCamera.toMatrix().inverted() * QVector3D(0,0,0);
+//    ray_world = m_arcCamera.toMatrix().inverted() * QVector3D(1,0,0);
+
+    QVector3D jesus = origin + ray_world;
+
+    qDebug()<<ray_world<<origin;
+
+    Line newLine;
+    newLine.Start = origin;
+    newLine.End = jesus;
+    m_Lines.push_back(newLine);
+    updateLines();
+
+    currentRayStart  =  origin;
+    currentRayEnd = jesus;
 
 }
 
@@ -372,7 +405,7 @@ void Scene::resize(int width, int height)
     SCR_HEIGHT = window()->height() * 2;
 
     m_projection_matrix.setToIdentity();
-    m_projection_matrix.perspective(40.0f, width / float(height), 0.1f, 1000.0f);
+    m_projection_matrix.perspective(40.0f, width / float(height), 0.01f, 1000.0f);
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);

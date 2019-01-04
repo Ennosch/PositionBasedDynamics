@@ -405,19 +405,15 @@ void Window::mousePressEvent(QMouseEvent *event)
   float pixelCameraX =  pixelScreenX * aspectRatio;
   float pixelCameraY =  pixelScreenY;
 
-  float angle = tan(40 * (3.14159 / 180));
+  float angle = tan(45 * (3.14159 / 180));
 
   float pixelCameraXA = pixelCameraX * angle ;
   float pixelCameraYA = pixelCameraY * angle;
 
+
   scene()->rayIt(pixelCameraXA, pixelCameraYA);
 
-//  scene()->rayIt(0, 0);
-//  qDebug()<<tan(40 * (3.14159 / 180))<<pixelCameraX<<pixelCameraY<<pixelCameraXA<<pixelCameraYA;
-//    qDebug()<<"------------------------";
-//    qDebug()<<pixelScreenX<<pixelScreenY;
-//    qDebug()<<pixelCameraX<<pixelCameraY;
-//    qDebug()<<pixelCameraXA<<pixelCameraYA;
+//   qDebug()<<pixelCameraXA<<pixelCameraYA;
 }
 
 void Window::mouseReleaseEvent(QMouseEvent *event)

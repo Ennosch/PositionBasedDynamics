@@ -74,6 +74,8 @@ public:
 
   void rayIt(float pixelX, float pixelY);
 
+  void rayItOld(float pixelX, float pixelY);
+
   void updateLines()
   {
       m_lines_vao->bind();
