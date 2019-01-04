@@ -258,6 +258,48 @@ const QMatrix4x4 &Camera3D::toMatrix()
   return m_world;
 }
 
+const QMatrix4x4 &Camera3D::toMatrixProjection()
+{
+  if (m_dirty)
+  {
+    m_dirty = false;
+    m_world.setToIdentity();
+    m_world.translate(m_pivot);
+    m_world.translate(-m_translation);
+//    m_world.rotate(m_rotation);
+
+    m_world *= m_SecondTumble;
+    m_world *= m_tumble;
+
+    m_world.translate(-m_pivot);
+
+    // calc WP
+//    m_worldPos = m_rotation.rotatedVector(m_PreWorldPos);
+//    m_pivotToCam = m_rotation.rotatedVector(m_PrePivotToCam);
+    QMatrix3x3 tmp = m_rotation.toRotationMatrix();
+    float *m = tmp.data();
+    const float data[16]  = {
+            m[0],m[1],m[2],0,
+            m[3],m[4],m[5],0,
+            m[6],m[7],m[8],0,
+               0, 0, 0, 1
+    };
+    const float *ptr = data;
+
+//    QMatrix4x4 myRotMat = QMatrix4x4(ptr);
+
+// only works in 1 axis ?
+//    m_worldPos = -(m_rotation.rotatedVector(-m_translation));
+//    m_worldPos = myRotMat * m_translation;
+//// this line worked:
+//     m_worldPos = myRotMat * (m_translation - m_pivot) + m_pivot;
+
+    QMatrix4x4 myRotMat = m_SecondTumble * m_tumble;
+    m_worldPos = myRotMat.transposed() * (m_translation - m_pivot) + m_pivot;
+  }
+  return m_world;
+}
+
 // Queries
 QVector3D Camera3D::forward() const
 {

@@ -60,6 +60,7 @@ public:
   const QQuaternion& rotation() const;
 //  const QMatrix4x4& rotationMat4() const;
   const QMatrix4x4& toMatrix();
+  const QMatrix4x4& toMatrixProjection();
 
   // Queries
   QVector3D forward() const;

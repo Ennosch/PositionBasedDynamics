@@ -21,9 +21,9 @@ void Scene::initialize()
   SCR_WIDTH = window()->width() * 2;
   SCR_HEIGHT = window()->height() * 2;
   QtOpenGLinitialize();
-  DynamicsInitialize();
+//  DynamicsInitialize();
   setupScene();
-  m_DynamicsWorld.generateData();
+//  m_DynamicsWorld.generateData();
 }
 
 void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, int _size)
@@ -167,12 +167,74 @@ DynamicsWorld* Scene::dynamicsWorld()
 
 void Scene::rayIt(float pixelX, float pixelY)
 {
-    QVector3D rayCamreaSpace = QVector3D(pixelX, pixelY, -10.0);
-    QVector3D rayEnd = m_arcCamera.toMatrix().inverted() * rayCamreaSpace;
-    QVector3D rayStart = m_arcCamera.toMatrix().inverted() * QVector3D(0,0,0);
+//    QVector3D rayCamreaSpace = QVector3D(pixelX, pixelY, -5.0);
+    QVector3D ScreenSpace = QVector3D(0.5, 0.5, 0.0);
+    QVector3D CamreaSpace2D = m_arcCamera.toMatrixProjection().inverted() * ScreenSpace;
+    QVector3D CamreaSpace3D = CamreaSpace2D + QVector3D(0,0,-1);
+    QVector3D WorldSpace = m_arcCamera.toMatrixProjection().inverted() * CamreaSpace3D;
 
-    currentRayStart  =  rayStart;
-    currentRayEnd = rayEnd;
+
+
+
+    QVector3D rayEnd = WorldSpace;
+    QVector3D rayStart = m_arcCamera.toMatrixProjection().inverted() * m_projection_matrix.inverted()  * QVector3D(0,0,0);
+
+//    qDebug()<<m_arcCamera.worldPos()<<rayStart<<rayEnd;
+    qDebug()<<pixelX<<pixelY;
+
+    Line newLine, newLine2, l1, l2, l3, l4;
+    Line l5, l6, l7, l8;
+
+        newLine.Start =  m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(0.99,0.99,0))  + QVector3D(0,0,0));
+        newLine.End = m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(0,0,0))  + QVector3D(0,0,-10));
+
+        newLine2.Start = m_arcCamera.toMatrix().inverted() * (newLine.Start + QVector3D(0,0,1));
+        newLine2.End = newLine.End;
+
+    m_Lines.push_back(newLine);
+//    m_Lines.push_back(newLine2);
+    updateLines();
+
+//    l1.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,1,0);
+//    l1.End = m_arcCamera.toMatrix().inverted() * QVector3D(-1,1,0);
+
+//    l2.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,-1,0);
+//    l2.End = m_arcCamera.toMatrix().inverted() * QVector3D(-1,-1,0);
+
+//    l3.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,1,0);
+//    l3.End = m_arcCamera.toMatrix().inverted() * QVector3D(1,-1,0);
+
+//    l4.Start = m_arcCamera.toMatrix().inverted() *QVector3D(-1,1,0);
+//    l4.End = m_arcCamera.toMatrix().inverted() * QVector3D(-1,-1,0);
+
+//    l5.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,1,0);
+//    l5.End = rayEnd;
+
+//    l6.Start = m_arcCamera.toMatrix().inverted() *QVector3D(1,-1,0);
+//    l6.End = rayEnd;
+
+//    l7.Start = m_arcCamera.toMatrix().inverted() *QVector3D(-1,1,0);
+//    l7.End = rayEnd;
+
+//    l8.Start = m_arcCamera.toMatrix().inverted() *QVector3D(-1,-1,0);
+//    l8.End = rayEnd;
+
+//    m_Lines.push_back(l1);
+//    m_Lines.push_back(l2);
+//    m_Lines.push_back(l3);
+//    m_Lines.push_back(l4);
+//    m_Lines.push_back(l5);
+//    m_Lines.push_back(l6);
+//    m_Lines.push_back(l7);
+//    m_Lines.push_back(l8);
+
+
+
+//    updateLines();
+
+//    currentRayStart  =  rayStart;
+//    currentRayEnd = rayEnd;
+
 }
 
 void Scene::QtOpenGLinitialize()
@@ -277,20 +339,6 @@ void Scene::QtOpenGLinitialize()
     glUniform1i(glGetUniformLocation(id, "screenTexture"), 0);
 
     m_flat_program->bind();
-    Line line1, line2, line3, newLine2;
-    line1.Start = QVector3D(0,0,0);
-    line1.End = QVector3D(0,2,0);
-    line2.Start = QVector3D(0,2.2,0);
-    line2.End = QVector3D(0,3,2);
-    line3.Start = QVector3D(0,3.4,0);
-    line3.End = QVector3D(4,3.4,0);
-
-    newLine2.Start = QVector3D(0,0,0);
-    newLine2.End = QVector3D(-13,-13,-13);
-
-    m_Lines.push_back(line1);
-    m_Lines.push_back(line2);
-    m_Lines.push_back(line3);
 
     m_lines_vao = new QOpenGLVertexArrayObject();
     m_lines_vao->create();
@@ -314,8 +362,8 @@ void Scene::QtOpenGLinitialize()
 
 void Scene::DynamicsInitialize()
 {
-    m_DynamicsWorld  = DynamicsWorld();
-    m_DynamicsWorld.initialize();
+//    m_DynamicsWorld  = DynamicsWorld();
+//    m_DynamicsWorld.initialize();
 }
 
 void Scene::resize(int width, int height)
@@ -516,9 +564,9 @@ void Scene::setupScene()
        // 4  1-4-1
        // 5  3-22-0
 
-       makeDynamic(sceneObject1);
-       makeDynamic(sceneObject2);
-       makeDynamic(sceneObject3);
+//       makeDynamic(sceneObject1);
+//       makeDynamic(sceneObject2);
+//       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject4);
