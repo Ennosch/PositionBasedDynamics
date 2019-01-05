@@ -240,9 +240,8 @@ void Scene::rayItOld(float pixelX, float pixelY)
 
 void Scene::rayIt(float pixelX, float pixelY)
 {
+    // WIP when scaling. pixel Coord still need to be in NDC (-1:1)
     QVector4D ray_clip = QVector4D(pixelX,pixelY,-1.0,1);
-
-
 
     QVector4D ray_eye = m_projection_matrix.inverted() * ray_clip;
 
@@ -261,7 +260,9 @@ void Scene::rayIt(float pixelX, float pixelY)
 
     Line newLine;
     newLine.Start = origin;
-    newLine.End = jesus;
+//    newLine.End = (jesus - origin) * 10;
+//    newLine.End = jesus;
+    newLine.End = jesus + (10 * (jesus-origin));
     m_Lines.push_back(newLine);
     updateLines();
 

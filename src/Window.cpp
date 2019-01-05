@@ -411,7 +411,10 @@ void Window::mousePressEvent(QMouseEvent *event)
   float pixelCameraYA = pixelCameraY * angle;
 
 
-  scene()->rayIt(pixelCameraXA, pixelCameraYA);
+//  scene()->rayIt(pixelCameraXA, pixelCameraYA);
+  scene()->rayIt(pixelScreenX, pixelScreenY);
+
+  qDebug()<<"1: "<<pixelScreenX<<pixelScreenY;
 
 //   qDebug()<<pixelCameraXA<<pixelCameraYA;
 }

@@ -98,8 +98,6 @@ public:
       Line newLine;
       newLine.Start = currentRayStart;
       newLine.End = (currentRayEnd-currentRayStart).normalized() * 10;
-
-
       m_Lines.push_back(newLine);
       updateLines();
   }
