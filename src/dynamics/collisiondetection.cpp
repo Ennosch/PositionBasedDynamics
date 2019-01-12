@@ -50,6 +50,29 @@ bool CollisionDetection::checkRaySphere(const Vec3 &_o, const Vec3 &_d, const Ve
     return true;
 }
 
+float CollisionDetection::checkRaySphereF(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r)
+{
+    Vec3 L = _o - _p;
+    float a = Vec3::dotProduct(_d, _d);
+    float b = 2 * Vec3::dotProduct(_d,L);
+    float c = Vec3::dotProduct(L,L) - pow(r,2);
+
+    float t0, t1;
+    if (!solveQuadratic(a, b, c, t0, t1)) return false;
+
+    if (t0 > t1) std::swap(t0, t1);
+
+            if (t0 < 0) {
+                t0 = t1; // if t0 is negative, let's use t1 instead
+                if (t0 < 0) return 0.0; // both t0 and t1 are negative
+            }
+
+            float t = t0;
+
+//    qDebug()<<t;
+    return t;
+}
+
 bool CollisionDetection::solveQuadratic(const float &a, const float &b, const float &c, float &x0, float &x1)
 {
     float discr = b * b - 4 * a * c;

@@ -26,30 +26,43 @@ Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
 
   //        sender      signal          reviecer    member
-  connect(&m_timer, SIGNAL(timeout()), this, SLOT(loop()));
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(loop()));
+//    connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
+//    connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
 
-  if(format().swapInterval() == -1)
-  {
-      // V_blank synchronization not available (tearing likely to happen)
-      qDebug("Swap Buffers at v_blank not available: refresh at approx 60fps.");
-      m_timer.setInterval(17);
-  }
-  else
-  {
-      // V_blank synchronization available
-      m_timer.setInterval(0);
-  }
+//  if(format().swapInterval() == -1)
+//  {
+//      // V_blank synchronization not available (tearing likely to happen)
+//      qDebug("Swap Buffers at v_blank not available: refresh at approx 60fps.");
+//      m_timer.setInterval(17);
+//  }
+//  else
+//  {
+//      // V_blank synchronization available
+//      m_timer.setInterval(0);
+//  }
 //  m_timer.setInterval();
+  m_timer.setInterval(0);
   m_elpasedTimer.start();
+  second = 0;
+  previous = m_elpasedTimer.elapsed();
   lag = 0.0;
+
+
   m_timer.start();
 
-  //m_elapsTimer.start();
+
+
 }
 
-void Window::testerTimer()
-{
-}
+//Window::~Window()
+//{
+//    qDebug()<<"bye1";
+////    m_elpasedTimer.~QElapsedTimer();
+//    QOpenGLWindow::~QOpenGLWindow();
+//    qDebug()<<"bye";
+//}
+
 
 void Window::processInput()
 {
@@ -206,9 +219,24 @@ Vertex* Window::passSceneData()
     }
 }
 
+void Window::paintEvent(QPaintEvent *event)
+{
+        paintGL();
+        QPainter painter(this);
+
+        QString fps = QString::number(fpsRate) + " fps";
+        QString a = QString::number(second);
+        QString b = QString::number(render);
+        painter.drawText(QRect(5, 5, 100, 50), fps);
+        painter.drawText(QRect(5, 19, 100, 50), a);
+        painter.drawText(QRect(5, 33, 100, 50), b);
+}
+
 void Window::initializeGL()
 {
+
     qDebug("calling init Wind");
+    qDebug()<<context();
   // Init OpenGL Backend  (QOpenGLFunctions)
   if (scene())
     scene()->initialize();
@@ -227,6 +255,8 @@ void Window::initializeGL()
   //--- WIP ----
   // also pass DynamicsWorld to the scene
 }
+
+
 
 void Window::paintGL()
 {
@@ -251,30 +281,66 @@ void Window::teardownGL()
   */
 }
 
+
+void Window::countFPS()
+{
+    current = m_elpasedTimer.elapsed();
+    elapsed = current - previous;
+
+    previous = current;
+
+    lag += elapsed;
+
+    if(second < 1000)
+    {
+        second += elapsed;
+        fpsCount += 1;
+    }
+    else
+    {
+        qDebug()<<"calc"<<elapsed;
+        fpsRate = fpsCount;
+        fpsCount = 0;
+        second = 0;
+    }
+
+}
+
+void Window::update()
+{
+    QOpenGLWindow::update();
+}
+
 void Window::loop()
 {
+    countFPS();
+
     processInput();
-    lag += m_elpasedTimer.elapsed();
 
-    /*
-     * // update step
-     * // MS_PER_UPDATE size of fixed time step
-     *
-     * while() lag >= MS_PER_UPDATE
-     *      update();
-     *      lag -= MS_PER_UPDATE;
-     */
+    int i = 0;
 
+    while(lag >= 10)
+    {
+        lag -= 10;
+        i++;
+    }
+
+
+    QThread::msleep(16);
 
     // physics
 //    scene()->dynamicsWorld()->update();
 
-    QOpenGLWindow::update();
+    if(render < 16)
+    {
+        render += elapsed;
+    }
+    else
+    {
+        render = 0;
+        QOpenGLWindow::update();
+    }
 
-    // calls paintGL and resizeGL of our
-
-
-//    qDebug() << "The slow operation took" << m_Etimer.nsecsElapsed() << "nanoSec"<< m_Etimer.elapsed() << "milliseconds";
 }
 
 void Window::keyPressEvent(QKeyEvent *event)
@@ -335,11 +401,9 @@ void Window::keyPressEvent(QKeyEvent *event)
 //          qDebug()<<"transform[0]: "<<scene()->m_SceneObjects[0]->m_Transform.toMatrix()<<"transform[1]: "<<scene()->m_SceneObjects[1]->m_Transform.toMatrix();;
           break;
       case Qt::Key_M:
-            scene()->moveSphere();
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
           break;
       case Qt::Key_N:
-            scene()->drawRay();
           //scene()->m_arcCamera.rotateAroundPoint(15.0, QVector3D(0,1,0));
           break;
       case Qt::Key_F:
@@ -391,32 +455,17 @@ void Window::keyReleaseEvent(QKeyEvent *event)
 
 void Window::mousePressEvent(QMouseEvent *event)
 {
-//  qDebug()<<"event:"<< event;
   inputManager::registerMousePress(event->button());
-//  qDebug()<<event;
   QPointF pos = event->pos();
+
   float pixelNDCx = (pos.x() + 0.5) / this->width();
   float pixelNDCy = (pos.y() + 0.5) / this->height();
 
   float pixelScreenX = 2 * pixelNDCx - 1;
   float pixelScreenY = 1 - 2 * pixelNDCy;
 
-  float aspectRatio = float(this->width()) / float(this->height());
-  float pixelCameraX =  pixelScreenX * aspectRatio;
-  float pixelCameraY =  pixelScreenY;
-
-  float angle = tan(45 * (3.14159 / 180));
-
-  float pixelCameraXA = pixelCameraX * angle ;
-  float pixelCameraYA = pixelCameraY * angle;
-
-
-//  scene()->rayIt(pixelCameraXA, pixelCameraYA);
-  scene()->rayIt(pixelScreenX, pixelScreenY);
-
-  qDebug()<<"1: "<<pixelScreenX<<pixelScreenY;
-
-//   qDebug()<<pixelCameraXA<<pixelCameraYA;
+  scene()->pickObject(pixelScreenX, pixelScreenY);
+//  scene()->rayIt(pixelScreenX, pixelScreenY);
 }
 
 void Window::mouseReleaseEvent(QMouseEvent *event)

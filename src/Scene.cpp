@@ -120,6 +120,31 @@ MaterialPtr Scene::addMaterial(const QVector3D &_ambient, const QVector3D &_diff
     return pMaterial;
 }
 
+void Scene::addLine(const Line &_line)
+{
+    m_Lines.push_back(_line);
+    updateLinesVBO();
+}
+
+void Scene::addLine(const Ray &_ray, float t=1.0)
+{
+    Line line;
+    line.Start = _ray.Origin;
+//    line.End = (_ray.Dir - _ray.Origin) * t;
+    line.End = _ray.Origin + (_ray.Dir * t);
+    m_Lines.push_back(line);
+    updateLinesVBO();
+}
+
+void Scene::addLine(const QVector3D &_start, const QVector3D &_end)
+{
+    Line line;
+    line.Start = _start;
+    line.End = _end;
+    m_Lines.push_back(line);
+    updateLinesVBO();
+}
+
 void Scene::makeDynamic(pSceneOb _sceneObject)
 {
     qDebug()<<"make Dynamic";
@@ -165,77 +190,52 @@ DynamicsWorld* Scene::dynamicsWorld()
     return &m_DynamicsWorld;
 }
 
-void Scene::rayItOld(float pixelX, float pixelY)
+Ray Scene::castRayFromCamera(float ndcX, float ndcY, float depthZ = -1.0)
 {
-//    QVector3D rayCamreaSpace = QVector3D(pixelX, pixelY, -5.0);
-    QVector3D ScreenSpace = QVector3D(0.5, 0.5, 0.0);
-    QVector3D CamreaSpace2D = m_arcCamera.toMatrixProjection().inverted() * ScreenSpace;
-    QVector3D CamreaSpace3D = CamreaSpace2D + QVector3D(0,0,-1);
-    QVector3D WorldSpace = m_arcCamera.toMatrixProjection().inverted() * CamreaSpace3D;
+    QVector4D ray_clip = QVector4D(ndcX,ndcY,depthZ, 1);
+    QVector4D ray_eye = m_projection_matrix.inverted() * ray_clip;
+    ray_eye = QVector4D(ray_eye.x(), ray_eye.y(), -1, 0);
+    QVector4D ray_wor = m_arcCamera.toMatrix().inverted() * ray_eye;
+    QVector3D ray_world = QVector3D(ray_wor.x(), ray_wor.y(), ray_wor.z());
+    QVector3D origin = m_arcCamera.toMatrix().inverted() * QVector3D(0,0,0);
 
+    Ray cameraRay;
+    cameraRay.Origin = origin;
+    cameraRay.Dir = ray_world;
+    return  cameraRay;
+}
 
+pSceneOb Scene::pickObject(float ndcX, float ndcY)
+{
+    Ray cameraRay = castRayFromCamera(ndcX, ndcY);
+    float min_t = 0.0;
+    float index = 0;
+    for(uint i = 1; i < m_SceneObjects.size(); i++)
+    {
 
-
-    QVector3D rayEnd = m_arcCamera.toMatrix().inverted() * QVector3D(0,0,-1);
-    QVector3D rayStart = m_arcCamera.toMatrixProjection().inverted() * m_projection_matrix.inverted()  * QVector3D(0,0,0);
-
-//    qDebug()<<m_arcCamera.worldPos()<<rayStart<<rayEnd;
-    qDebug()<<pixelX<<pixelY;
-
-    Line newLine, newLine2, l1, l2, l3, l4;
-    Line l5, l6, l7, l8;
-
-        newLine.Start =  m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(0.9,0.9,0))  + QVector3D(0,0,-1));
-//        newLine.End = m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(0,0,0))  + QVector3D(0,0,-10));
-        newLine.End = m_arcCamera.toMatrix().inverted()  *  QVector3D(0,0,0);
-
-
-//    newLine.Start =  m_arcCamera.toMatrix().inverted()  *   QVector3D(0,0,0);
-//    newLine.End = m_arcCamera.toMatrix().inverted()  *   ((m_projection_matrix.inverted() * QVector3D(pixelX,pixelY,0))  + QVector3D(0,0,-10));
-
-//    m_Lines.push_back(newLine);
-//    updateLines();
-
-//    l1.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,0.9,0));
-//    l1.End = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,0.9,0));
-
-//    l2.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,-0.9,0));
-//    l2.End = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,-0.9,0));
-
-//    l3.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,0.9,0));
-//    l3.End = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,-0.9,0));
-
-//    l4.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,-0.9,0));
-//    l4.End = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,0.9,0));
-
-//    l5.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,0.9,0));
-//    l5.End = rayEnd;
-
-//    l6.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,0.9,0));
-//    l6.End = rayEnd;
-
-//    l7.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(0.9,-0.9,0));
-//    l7.End = rayEnd;
-
-//    l8.Start = m_arcCamera.toMatrix().inverted()  *   (m_projection_matrix.inverted() * QVector3D(-0.9,-0.9,0));
-//    l8.End = rayEnd;
-
-//    m_Lines.push_back(l1);
-//    m_Lines.push_back(l2);
-//    m_Lines.push_back(l3);
-//    m_Lines.push_back(l4);
-//    m_Lines.push_back(l5);
-//    m_Lines.push_back(l6);
-//    m_Lines.push_back(l7);
-//    m_Lines.push_back(l8);
-
-
-
-//    updateLines();
-
-//    currentRayStart  =  rayStart;
-//    currentRayEnd = rayEnd;
-
+        float t = m_CollisionDetect.checkRaySphereF(cameraRay.Origin,
+                                                    cameraRay.Dir.normalized(),
+                                                    m_SceneObjects[i]->getPos(),
+                                                    0.5);
+        if(t > 0.0)
+        {
+            if(min_t == 0.0)
+            {
+                m_pickedObject = m_SceneObjects[i];
+                qDebug()<<"set:"<<i<<t;
+                min_t = t;
+                index = i;
+            }
+            if(t < min_t )
+            {
+                m_pickedObject = m_SceneObjects[i];
+                qDebug()<<"set:"<<i<<t;
+                min_t = t;
+                index = i;
+            }
+        }
+    }
+    return m_SceneObjects[index];
 }
 
 void Scene::rayIt(float pixelX, float pixelY)
@@ -256,7 +256,7 @@ void Scene::rayIt(float pixelX, float pixelY)
 
     QVector3D jesus = origin + ray_world;
 
-    qDebug()<<ray_world<<origin;
+//    qDebug()<<ray_world<<origin;
 
     Line newLine;
     newLine.Start = origin;
@@ -264,11 +264,26 @@ void Scene::rayIt(float pixelX, float pixelY)
 //    newLine.End = jesus;
     newLine.End = jesus + (10 * (jesus-origin));
     m_Lines.push_back(newLine);
-    updateLines();
+//    updateLines();
 
     currentRayStart  =  origin;
     currentRayEnd = jesus;
+}
 
+void Scene::updateLinesVBO()
+{
+    m_lines_vao->bind();
+    m_lines_vbo.create();
+    m_lines_vbo.bind();
+    m_lines_vbo.allocate(m_Lines.data(), m_Lines.size() * sizeof(Line));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(QVector3D),
+                          nullptr);
+    m_lines_vao->release();
 }
 
 void Scene::QtOpenGLinitialize()
@@ -291,8 +306,8 @@ void Scene::QtOpenGLinitialize()
     m_screen_program->link();
 
     m_lighting_program = new QOpenGLShaderProgram();
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/tmp.vert");
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/tmp.frag");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/phongWireframe.vert");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/phongWireframe.frag");
     m_lighting_program->link();
 
     m_flat_program = new QOpenGLShaderProgram();
@@ -453,18 +468,32 @@ void Scene::paint()
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             // draw all SceneObjects
-              for(uint i = 1; i < m_SceneObjects.size(); i++)
-              {
-                  uint matID = m_SceneObjects[i]->getMaterialID();
-                  m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
-                  m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
-                  m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
-                  m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-                  m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
-                  m_SceneObjects[i]->draw();
-              }
+                for(uint i = 1; i < m_SceneObjects.size(); i++)
+                {
+                    if(m_pickedObject == m_SceneObjects[i])
+                    {
+                        uint matID = m_SceneObjects[i]->getMaterialID();
+                        m_lighting_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
+                        m_lighting_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
+                        m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
+                        m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
+                        m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
+                        m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+                        m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
+                        m_SceneObjects[i]->draw();
+                        m_lighting_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
+                        m_lighting_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
+                        continue;
+                    }
+                    uint matID = m_SceneObjects[i]->getMaterialID();
+                    m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
+                    m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
+                    m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
+                    m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+                    m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
+                    m_SceneObjects[i]->draw();
+                }
 
-               m_lighting_program->release();
 
         //-------------------------Draw Wireframe---------------------------------------------------------------------------
               m_flat_program->bind();
@@ -478,7 +507,7 @@ void Scene::paint()
                   m_SceneObjects[0]->draw();
               }
 
-         //-------------------------Draw Lines---------------------------------------------------------------------------
+//         //-------------------------Draw Lines---------------------------------------------------------------------------
               {
                 m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
                 m_lines_vao->bind();
@@ -486,7 +515,7 @@ void Scene::paint()
                 m_lines_vao->release();
               }
 
-              m_flat_program->release();
+//              m_flat_program->release();
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);

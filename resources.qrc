@@ -10,6 +10,8 @@
         <file alias="tmp.frag">resources/shaders/tmp.frag</file>
         <file alias="flat.vert">resources/shaders/flat.vert</file>
         <file alias="flat.frag">resources/shaders/flat.frag</file>
+        <file alias="phongWireframe.frag">resources/shaders/phongWireframe.frag</file>
+        <file alias="phongWireframe.vert">resources/shaders/phongWireframe.vert</file>
 
     </qresource>
     <qresource prefix="/"/>

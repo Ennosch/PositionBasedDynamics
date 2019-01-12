@@ -52,6 +52,7 @@ private:
     Scene *pScene;
     DynamicObjectPtr pDynamicObject = nullptr;
 
+
 };
 
 inline uint SceneObject::getMaterialID(){ return m_MaterialID;};

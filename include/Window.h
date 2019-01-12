@@ -4,8 +4,12 @@
 
 // Qt
 #include <QOpenGLWindow>
+#include <QPainter>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QTime>
+#include <QCoreApplication>
+#include <QThread>
 //#include  <QKeyEvent>
 
 // Project
@@ -27,10 +31,14 @@ public:
   void setScene(Scene *_scene);
   Vertex* passSceneData();
 
+  void paintEvent(QPaintEvent *event);
+  void countFPS();
+
 protected slots:
     void teardownGL();
     void loop();
-    void testerTimer();
+    void update();
+
     void processInput();
     void printVersionInformation();
     void keyPressEvent(QKeyEvent *event);
@@ -46,6 +54,8 @@ protected:
 
 private:
   double lag;
+  float fpsRate, fpsCount;
+  double previous, current, elapsed, second, render;
   Scene *m_scene = nullptr;
   QTimer m_timer;
   QElapsedTimer m_elpasedTimer;

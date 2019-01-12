@@ -17,6 +17,7 @@ public:
     Vec3 checkRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o);
 
     bool checkRaySphere(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
+    float checkRaySphereF(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
     bool solveQuadratic(const float &a, const float &b, const float &c, float &x0, float &x1);
 };
 
