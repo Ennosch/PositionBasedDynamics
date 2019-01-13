@@ -3,15 +3,17 @@
 #include <vector>
 
 // Qt
-#include <QGuiApplication>
+#include <QApplication>
 #include <QPropertyAnimation>
 
 #include <QFile>
 #include <QDebug>
 #include <QTextStream>
+#include <QOpenGLWidget>
 
 // Project
 #include "Window.h"
+#include "GLWidget.h"
 #include "Scene.h"
 #include "AbstractScene.h"
 #include "dynamics/dynamicsWorld.h"
@@ -51,26 +53,41 @@ void Read(QString Filename)
 int main(int argc, char *argv[])
 {
 
-  QGuiApplication app(argc, argv);
+  QApplication app(argc, argv);
   Window window;
+  GLWidget glw;
 
   QSurfaceFormat fmt;
   fmt.setMinorVersion(3);
   fmt.setMajorVersion(3);
   fmt.setSamples(4);
   fmt.setSwapInterval(1);
-  
   fmt.setRenderableType(QSurfaceFormat::OpenGL);
   fmt.setProfile(QSurfaceFormat::CoreProfile);
+
+  // needed for widgets (?)
+  QSurfaceFormat::setDefaultFormat(fmt);
+
   window.setFormat(fmt);
+  glw.setFormat(fmt);
 
   Scene scene(&window);
+  Scene scene2(&glw);
+
   window.setScene(&scene);
+  glw.setScene(&scene2);
+
+
 
 // just init crashes !
 // scene.initialize();
   window.resize(720, 720);
   window.show();
+
+  glw.resize(720,720);
+  glw.show();
+
+
 
   return app.exec();
 }

@@ -9,6 +9,11 @@ Scene::Scene(Window *_window) : AbstractScene(_window)
 
 }
 
+Scene::Scene(GLWidget *_widget) : AbstractScene(_widget)
+{
+
+}
+
 Scene::~Scene()
 {
 
@@ -18,8 +23,25 @@ void Scene::initialize()
 {
   m_CollisionDetect =  CollisionDetection();
   AbstractScene::initialize();
-  SCR_WIDTH = window()->width() * 2;
-  SCR_HEIGHT = window()->height() * 2;
+
+  if (window())
+  {
+      SCR_WIDTH = window()->width() * 2;
+      SCR_HEIGHT = window()->height() * 2;
+      qDebug()<<"window"<<SCR_WIDTH<<SCR_HEIGHT;
+  }
+  else if(widget())
+  {
+      SCR_WIDTH = widget()->width() * 2;
+      SCR_HEIGHT = widget()->height() * 2;
+      qDebug()<<"widget"<<SCR_WIDTH<<SCR_HEIGHT;
+  }
+  else
+  {
+      SCR_WIDTH = 720;
+      SCR_HEIGHT = 720;
+  }
+
   QtOpenGLinitialize();
 //  DynamicsInitialize();
   setupScene();
@@ -316,7 +338,8 @@ void Scene::QtOpenGLinitialize()
     m_flat_program->link();
 
     //----prepare a QuadPlane
-    m_quad_vao = new QOpenGLVertexArrayObject(window());
+//    m_quad_vao = new QOpenGLVertexArrayObject(window());
+    m_quad_vao = new QOpenGLVertexArrayObject();
     m_quad_vao->create();
     m_quad_vbo.create();
     m_quad_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -417,8 +440,24 @@ void Scene::DynamicsInitialize()
 
 void Scene::resize(int width, int height)
 {
-    SCR_WIDTH = window()->width() * 2;
-    SCR_HEIGHT = window()->height() * 2;
+    if (window())
+    {
+        SCR_WIDTH = window()->width() * 2;
+        SCR_HEIGHT = window()->height() * 2;
+        qDebug()<<"window"<<SCR_WIDTH<<SCR_HEIGHT;
+    }
+    else if(widget())
+    {
+        SCR_WIDTH = widget()->width() * 2;
+        SCR_HEIGHT = widget()->height() * 2;
+        qDebug()<<"widget"<<SCR_WIDTH<<SCR_HEIGHT;
+    }
+    else
+    {
+        SCR_WIDTH = 720;
+        SCR_HEIGHT = 720;
+    }
+
 
     m_projection_matrix.setToIdentity();
     m_projection_matrix.perspective(40.0f, width / float(height), 0.01f, 1000.0f);
@@ -439,7 +478,7 @@ void Scene::paint()
 {
     // draw to the framebuffer (off-screen render)
     glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
-//    glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
+    //  glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
     glDisable(GL_CULL_FACE);
     // bind old QtWrapper style
     // m_gbuffer_fbo->bind();
@@ -470,6 +509,9 @@ void Scene::paint()
             // draw all SceneObjects
                 for(uint i = 1; i < m_SceneObjects.size(); i++)
                 {
+
+                    int test = m_SceneObjects.size();
+
                     if(m_pickedObject == m_SceneObjects[i])
                     {
                         uint matID = m_SceneObjects[i]->getMaterialID();
@@ -485,6 +527,7 @@ void Scene::paint()
                         m_lighting_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
                         continue;
                     }
+
                     uint matID = m_SceneObjects[i]->getMaterialID();
                     m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
                     m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
@@ -507,7 +550,7 @@ void Scene::paint()
                   m_SceneObjects[0]->draw();
               }
 
-//         //-------------------------Draw Lines---------------------------------------------------------------------------
+       //-------------------------Draw Lines---------------------------------------------------------------------------
               {
                 m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
                 m_lines_vao->bind();
@@ -540,8 +583,6 @@ void Scene::paint()
 
     m_quad_vao->release();
     m_screen_program->release();
-
-
 
 }
 

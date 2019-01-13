@@ -5,14 +5,17 @@
 // Qt
 #include <QOpenGLFunctions>
 #include <QOpenGLWindow>
+#include <QOpenGLWidget>
 
 class AbstractScene : protected QOpenGLFunctions
 {
 
 public:
   AbstractScene(QOpenGLWindow *_window = 0);
+  AbstractScene(QOpenGLWidget *_widget = 0);
   virtual ~AbstractScene();
   QOpenGLWindow* window() const;
+  QOpenGLWidget* widget() const;
   QOpenGLContext* context();
   const QOpenGLContext* context() const;
   virtual void initialize();
@@ -22,6 +25,7 @@ public:
 
 private:
   QOpenGLWindow *m_window = nullptr;
+  QOpenGLWidget *m_widget = nullptr;
 
 };
 

@@ -20,6 +20,7 @@
 // Project
 #include "AbstractScene.h"
 #include "Window.h"
+#include "GLWidget.h"
 #include "transform.h"
 #include "camera.h"
 #include "sceneobject.h"
@@ -35,6 +36,7 @@ class Scene : public AbstractScene
 
 public:
   Scene(Window *_window);
+  Scene(GLWidget *_widget);
   ~Scene();
   void initialize();
   void resize(int width, int height);
@@ -88,6 +90,7 @@ public:
 
 private:
   friend class Window;
+  friend class GLWidget;
 
   DynamicsWorld m_DynamicsWorld;
 
@@ -96,9 +99,9 @@ private:
   QOpenGLShaderProgram* m_lighting_program;
   QOpenGLShaderProgram* m_flat_program;
 
-//  QOpenGLFramebufferObject* m_gbuffer_fbo;
-
+  //  QOpenGLFramebufferObject* m_gbuffer_fbo;
   // fbo raw OpenGL
+
   int SCR_HEIGHT, SCR_WIDTH;
   unsigned int fbo, texture, rbo, intermediateFBO, screenTexture;
 

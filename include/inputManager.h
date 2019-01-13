@@ -48,6 +48,7 @@ private:
     // friend Window so Window can call private members from inputMange
     // yields a friendship for scene and window !!
     friend class Window;
+    friend class GLWidget;
 
 
 };

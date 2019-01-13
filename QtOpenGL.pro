@@ -25,7 +25,8 @@ SOURCES += \
     src/dynamics/particle.cpp \
     src/dynamics/constraint.cpp \
     src/dynamics/collisiondetection.cpp \
-    src/dynamics/abstractconstraint.cpp
+    src/dynamics/abstractconstraint.cpp \
+    src/GLWidget.cpp
 
 OBJECTS_DIR = build/obj
 MOC_DIR = build/moc
@@ -69,7 +70,8 @@ HEADERS += \
     include/dynamics/particle.h \
     include/dynamics/constraint.h \
     include/dynamics/collisiondetection.h \
-    include/dynamics/abstractconstraint.h
+    include/dynamics/abstractconstraint.h \
+    include/GLWidget.h
 
 
 OTHER_FILES += \

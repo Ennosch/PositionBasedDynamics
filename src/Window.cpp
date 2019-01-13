@@ -24,7 +24,6 @@
 
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
-
   //        sender      signal          reviecer    member
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(loop()));
 //    connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -48,11 +47,7 @@ Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
   previous = m_elpasedTimer.elapsed();
   lag = 0.0;
 
-
   m_timer.start();
-
-
-
 }
 
 //Window::~Window()
@@ -236,7 +231,7 @@ void Window::initializeGL()
 {
 
     qDebug("calling init Wind");
-    qDebug()<<context();
+//    qDebug()<<context();
   // Init OpenGL Backend  (QOpenGLFunctions)
   if (scene())
     scene()->initialize();
@@ -298,7 +293,7 @@ void Window::countFPS()
     }
     else
     {
-        qDebug()<<"calc"<<elapsed;
+//        qDebug()<<"calc"<<elapsed;
         fpsRate = fpsCount;
         fpsCount = 0;
         second = 0;
@@ -340,12 +335,12 @@ void Window::loop()
         render = 0;
         QOpenGLWindow::update();
     }
-
 }
 
 void Window::keyPressEvent(QKeyEvent *event)
 {
-
+    qDebug()<<"window:";
+    printVersionInformation();
     if (event->isAutoRepeat())
     {
       event->ignore();
