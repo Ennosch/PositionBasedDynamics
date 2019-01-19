@@ -127,12 +127,12 @@ void SceneObject::setID(uint _id)
 void SceneObject::notify()
 {
     pSceneOb pSO = pScene->getPointerFromSceneObject(this);
-    qDebug()<<"instances: "<<pSO.use_count();
+//    qDebug()<<"instances: "<<pSO.use_count();
 
 
     activeObject->notify(pSO);
 
-    qDebug()<<"instances2: "<<pSO.use_count();
+//    qDebug()<<"instances2: "<<pSO.use_count();
 }
 
 const QMatrix4x4 SceneObject::getMatrix()

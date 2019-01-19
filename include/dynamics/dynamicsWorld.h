@@ -18,6 +18,7 @@
 #include "dynamics/constraint.h"
 
 typedef QVector3D Vec3;
+
 class DynamicsWorld
 {
     public:

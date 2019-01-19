@@ -73,7 +73,7 @@ void GLWidget::loop()
     QThread::msleep(16);
 
     // physics
-//    scene()->dynamicsWorld()->update();
+    scene()->dynamicsWorld()->update(0.1);
 
     if(render < 16)
     {
@@ -212,6 +212,21 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     //      qDebug()<<event;
           inputManager::registerKeyPress(event->key());
           //inputManager::foo();
+        }
+
+        if (event->isAutoRepeat())
+        {
+    //      qDebug("event isAutoRepeat");
+        }
+        else
+        {
+            switch(event->key())
+            {
+              case Qt::Key_Right:
+                qDebug()<<"register and call update";
+                scene()->dynamicsWorld()->update();
+                  break;
+            }
         }
 }
 

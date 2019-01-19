@@ -25,10 +25,8 @@ void MainWindow::setupUi(GLWidget *_glw)
     controlWidget = new ControlWidget();
     glw = _glw;
 
-//    connect(m_activeObject, SIGNAL(transformChanged(const QMatrix4x4, const QVector3D, const QVector3D, const QVector3D)) ,   this,    SLOT(foo(const QMatrix4x4, const QVector3D, const QVector3D, const QVector3D)));
     connect(glw->m_activeObject, SIGNAL(transformChanged(const QMatrix4x4, const QVector3D, const QVector3D, const QVector3D)), controlWidget, SLOT(setTransform(const QMatrix4x4, const QVector3D, const QVector3D, const QVector3D)));
     connect(controlWidget, SIGNAL(matrixChanged(const QVector3D, const QVector3D, const QVector3D)), glw, SLOT(uiTransformChange(const QVector3D, const QVector3D, const QVector3D)));
-    //    connect(controlWidget);
 
     // layout
     layout.addWidget(glw);
@@ -38,6 +36,7 @@ void MainWindow::setupUi(GLWidget *_glw)
 
 //    mainWidget->s
     setCentralWidget(mainWidget);
+    glw->setFocus(Qt::ActiveWindowFocusReason);
 
 //    glw->setParent(mainWidget);
     mainWidget->resize(750,1000);

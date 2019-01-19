@@ -28,30 +28,38 @@
 #include "ControlWidget.h"
 #include "MainWindow.h"
 
+QSurfaceFormat createGLFormat()
+{
+    QSurfaceFormat fmt;
+    fmt.setMinorVersion(3);
+    fmt.setMajorVersion(3);
+    fmt.setSamples(4);
+    fmt.setSwapInterval(1);
+    fmt.setRenderableType(QSurfaceFormat::OpenGL);
+    fmt.setProfile(QSurfaceFormat::CoreProfile);
+    // default format need when using QWidgets (?)
+    QSurfaceFormat::setDefaultFormat(fmt);
+    return fmt;
+}
+
 int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
 
   MainWindow mainWindow;
   GLWidget glw;
+  Scene scene(&glw);
+  DynamicsWorld dynamics;
 
   QFont myFont;
   myFont.setPointSize(12);
   app.setFont(myFont);
 
-  QSurfaceFormat fmt;
-  fmt.setMinorVersion(3);
-  fmt.setMajorVersion(3);
-  fmt.setSamples(4);
-  fmt.setSwapInterval(1);
-  fmt.setRenderableType(QSurfaceFormat::OpenGL);
-  fmt.setProfile(QSurfaceFormat::CoreProfile);
-  // default format need when using QWidgets (?)
-  QSurfaceFormat::setDefaultFormat(fmt);
+  QSurfaceFormat fmt = createGLFormat();
   glw.setFormat(fmt);
 
-  Scene scene(&glw);
   glw.setScene(&scene);
+  scene.setDynamicsWorld(&dynamics);
 
   mainWindow.setupUi(&glw);
   mainWindow.show();

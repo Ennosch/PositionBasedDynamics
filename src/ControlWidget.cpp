@@ -11,14 +11,8 @@ ControlWidget::ControlWidget(QWidget *parent) :
     // QDesigner
 //    ui->setupUi(this);
     setupUi();
-//    this->setMaximumWidth(200);
+    this->setMaximumWidth(200);
 
-//    connect(transform00Edit, SIGNAL(valueChanged(double)), this, SLOT(foo(double)));
-
-
-//    transform00Edit->blockSignals(true);
-    transform00Edit->setValue(10);
-//    transform00Edit->blockSignals(false);
 
     connectWidgets();
 }
@@ -107,8 +101,6 @@ void ControlWidget::connectWidgets()
 
 void ControlWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t, const QVector3D _r, const QVector3D _s)
 {
-    qDebug("gello setTreansform ");
-
     // loop over Units block signal set value allow signals
     transform00Edit->blockSignals(true);
     transform00Edit->setValue(_t.x());
@@ -121,14 +113,11 @@ void ControlWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t, con
     transform02Edit->blockSignals(true);
     transform02Edit->setValue(_t.z());
     transform02Edit->blockSignals(false);
-
-
 }
 
 void ControlWidget::emitTransformChange()
 {
-    qDebug()<<"register value change";
-
+//    qDebug()<<"register value change";
     // prepare data to send back to scene
     QVector3D translation, rotation, scale;
     QMatrix4x4 trs;

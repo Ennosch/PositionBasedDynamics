@@ -85,7 +85,7 @@ private:
   friend class Window;
   friend class GLWidget;
 
-  DynamicsWorld m_DynamicsWorld;
+  DynamicsWorld *m_DynamicsWorld;
 
   QOpenGLShaderProgram* m_program;
   QOpenGLShaderProgram* m_screen_program;

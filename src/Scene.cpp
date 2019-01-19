@@ -45,9 +45,9 @@ void Scene::initialize()
   }
 
   QtOpenGLinitialize();
-//  DynamicsInitialize();
+  DynamicsInitialize();
   setupScene();
-//  m_DynamicsWorld.generateData();
+  m_DynamicsWorld->generateData();
 }
 
 void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, int _size)
@@ -148,8 +148,8 @@ void Scene::makeDynamic(pSceneOb _sceneObject)
 {
     qDebug()<<"make Dynamic";
 //    m_DynamicsWorld.addDynamicObject(_sceneObject);
-    ParticlePtr newParticle = m_DynamicsWorld.addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().y(), _sceneObject->getPos().z());
-    auto newDynamicObject = m_DynamicsWorld.addDynamicObjectAsParticle(_sceneObject, newParticle);
+    ParticlePtr newParticle = m_DynamicsWorld->addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().y(), _sceneObject->getPos().z());
+    auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsParticle(_sceneObject, newParticle);
     _sceneObject->makeDynamic(newDynamicObject);
     //    _sceneObject->
 }
@@ -203,7 +203,7 @@ pSceneOb Scene::getPointerFromSceneObject(const SceneObject *_sceneObject)
 
 DynamicsWorld* Scene::dynamicsWorld()
 {
-    return &m_DynamicsWorld;
+    return m_DynamicsWorld;
 }
 
 Ray Scene::castRayFromCamera(float ndcX, float ndcY, float depthZ = -1.0)
@@ -291,10 +291,10 @@ void Scene::QtOpenGLinitialize()
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_arcCamera.translate(0.0f, 0.0f, 12.0f);
-    m_arcCamera.SetWorldPos(QVector3D(0.0f, 0.0f, 12.0f));
+    m_arcCamera.translate(0.0f, 0.0f, 25.0f);
+    m_arcCamera.SetWorldPos(QVector3D(0.0f, 0.0f, 25.0f));
     m_arcCamera.SetPivot(QVector3D(0.0f, 0.0f, 0.0f));
-    m_arcCamera.SetPivotToCam(QVector3D(0,0,12));
+    m_arcCamera.SetPivotToCam(QVector3D(0,0,25));
     m_arcCamera.arcBallStart();
 
 //----build, compline and link shaders
@@ -356,8 +356,12 @@ void Scene::QtOpenGLinitialize()
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 //    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+
+    //Creating a depth and stencil renderbuffer object
     glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    // attach the renderbuffer object to framebuffer
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -410,8 +414,10 @@ void Scene::QtOpenGLinitialize()
 
 void Scene::DynamicsInitialize()
 {
-//    m_DynamicsWorld  = DynamicsWorld();
-//    m_DynamicsWorld.initialize();
+    if(!m_DynamicsWorld)
+        m_DynamicsWorld = new DynamicsWorld();
+
+    m_DynamicsWorld->initialize();
 }
 
 void Scene::resize(int width, int height)
@@ -586,6 +592,11 @@ void Scene::drawScreenQuad()
     m_screen_program->release();
 }
 
+void Scene::setDynamicsWorld(DynamicsWorld *_world)
+{
+    m_DynamicsWorld = _world;
+}
+
 void Scene::setupScene()
 {
 //        addPointLight(QVector3D(5,0,0), QVector3D(0, 0, 1));
@@ -635,9 +646,9 @@ void Scene::setupScene()
        auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
        auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
        auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
-       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,0,0), QQuaternion(1,0,0,0));
-       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
-       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
+//       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,0,0), QQuaternion(1,0,0,0));
+//       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
+//       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
        //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
 
 //       // in neighbourhood
@@ -653,13 +664,14 @@ void Scene::setupScene()
        // 4  1-4-1
        // 5  3-22-0
 
-//       makeDynamic(sceneObject1);
-//       makeDynamic(sceneObject2);
-//       makeDynamic(sceneObject3);
+       makeDynamic(sceneObject1);
+       makeDynamic(sceneObject2);
+       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject4);
 //       makeDynamic(sceneObject5);
+//       makeDynamic(sceneObject6);
 
 //       auto myModel = m_ModelPool["grid1"];
 

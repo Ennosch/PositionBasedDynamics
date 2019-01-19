@@ -22,7 +22,7 @@ void ActiveObject::notify(int _id)
 
 void ActiveObject::notify(pSceneOb _sender)
 {
-    qDebug()<<"getting notified: "<<_sender.use_count();
+//    qDebug()<<"getting notified: "<<_sender.use_count();
     activeSceneObject = _sender;
 
     emit transformChanged(_sender->getMatrix(),
@@ -33,11 +33,9 @@ void ActiveObject::notify(pSceneOb _sender)
 
 void ActiveObject::setTransform(const QVector3D _t, const QVector3D _r, const QVector3D _s)
 {
-
-    qDebug()<<"set Transform ";
+//    qDebug()<<"set Transform ";
     if(activeSceneObject)
     {
-        qDebug()<<_t<<activeSceneObject->getPos();
        activeSceneObject->setTranslation(_t);
     }
 }
