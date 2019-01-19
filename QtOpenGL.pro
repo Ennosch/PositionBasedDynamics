@@ -26,7 +26,10 @@ SOURCES += \
     src/dynamics/constraint.cpp \
     src/dynamics/collisiondetection.cpp \
     src/dynamics/abstractconstraint.cpp \
-    src/GLWidget.cpp
+    src/GLWidget.cpp \
+    src/ControlWidget.cpp \
+    src/MainWindow.cpp \
+    src/activeobject.cpp
 
 OBJECTS_DIR = build/obj
 MOC_DIR = build/moc
@@ -71,7 +74,10 @@ HEADERS += \
     include/dynamics/constraint.h \
     include/dynamics/collisiondetection.h \
     include/dynamics/abstractconstraint.h \
-    include/GLWidget.h
+    include/GLWidget.h \
+    include/ControlWidget.h \
+    include/MainWindow.h \
+    include/activeobject.h
 
 
 OTHER_FILES += \
@@ -84,6 +90,8 @@ OTHER_FILES += \
 RESOURCES += \
     resources.qrc
 
+FORMS += \
+    resources/Forms/ControlWidget.ui
 
 
 

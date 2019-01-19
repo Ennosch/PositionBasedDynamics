@@ -16,11 +16,18 @@ const QMatrix4x4 &DynamicObject::getTransfrom()
     if(m_IsParticle)
     {
         m_transform.setTranslation(pParticle->position());
-        auto testMat = m_transform.toMatrix();
         return m_transform.toMatrix();
     }
     else
     {
         return m_transform.toMatrix();
+    }
+}
+
+const QVector3D DynamicObject::getTranslation()
+{
+    if(m_IsParticle)
+    {
+        return pParticle->position();
     }
 }

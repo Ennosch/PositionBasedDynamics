@@ -13,7 +13,12 @@ AbstractScene::AbstractScene(QOpenGLWindow *_window)
     m_window = _window;
 }
 
-AbstractScene::AbstractScene(QOpenGLWidget *_widget)
+//AbstractScene::AbstractScene(QOpenGLWidget *_widget)
+//{
+//    m_widget = _widget;
+//}
+
+AbstractScene::AbstractScene(GLWidget *_widget)
 {
     m_widget = _widget;
 }
@@ -28,7 +33,7 @@ QOpenGLWindow *AbstractScene::window() const
     return m_window;
 }
 
-QOpenGLWidget *AbstractScene::widget() const
+GLWidget *AbstractScene::widget() const
 {
     return m_widget;
 }

@@ -4,6 +4,8 @@
 #include "Scene.h"
 
 
+int Scene::numCreation = 0;
+
 Scene::Scene(Window *_window) : AbstractScene(_window)
 {
 
@@ -11,7 +13,7 @@ Scene::Scene(Window *_window) : AbstractScene(_window)
 
 Scene::Scene(GLWidget *_widget) : AbstractScene(_widget)
 {
-
+//    Scene::numCreation = 0;
 }
 
 Scene::~Scene()
@@ -77,38 +79,6 @@ ModelPtr Scene::addModel(Scene *_scene, std::string _name, std::string _path)
     return pModel;
 }
 
-/*
- *
- * // WIP
-pSceneOb Scene::addSceneObject(std::string _shape)
-{
-    pSceneOb newPtr= addSceneObject(_shape, QVector3D(0.0f, 0.0f, 0.0f), QQuaternion::fromAxisAndAngle(0,1,0,0));
-    if(newPtr == nullptr){qDebug()<<"ptr to NULL returned";};
-    return newPtr;
-}
-
-pSceneOb Scene::addSceneObject(std::string _shape, const QVector3D &_pos)
-{
-    pSceneOb newPtr= addSceneObject(_shape, _pos, QQuaternion::fromAxisAndAngle(0,1,0,0));
-    if(newPtr == nullptr){qDebug()<<"ptr to NULL returned";};
-    return newPtr;
-}
-
-pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const QQuaternion &_rot)
-{
-
-        auto pShape = getShapeFromPool(_name);
-        if(pShape == nullptr)
-        {
-          qDebug()<<"WARNING: COULD NOT ADD SceneObject";
-            return nullptr;
-        }
-        auto pSO = std::make_shared<SceneObject>(this, pShape, _pos, _rot);
-        m_SceneObjects.push_back(pSO);
-        return pSO;
-}
-*/
-
 pSceneOb Scene::addSceneObjectFromModel(std::string _name, const uint _materialID,  const QVector3D &_pos, const QQuaternion &_rot)
 {
     auto pModel = getModelFromPool(_name);
@@ -119,6 +89,13 @@ pSceneOb Scene::addSceneObjectFromModel(std::string _name, const uint _materialI
     }
     auto pSO = std::make_shared<SceneObject>(this, pModel, _materialID ,_pos, _rot);
     m_SceneObjects.push_back(pSO);
+
+    pSO->setActiveObject(widget()->m_activeObject);
+    numCreation++;
+    pSO->setID(numCreation);
+
+//    qDebug()<<"creation ----------:"<<pSO->getID();
+
     return pSO;
 }
 
@@ -207,6 +184,23 @@ ModelPtr Scene::getModelFromPool(std::string _key)
     return nullptr;
 }
 
+pSceneOb Scene::getPointerFromSceneObject(const SceneObject *_sceneObject)
+{
+//    auto result = std::find(std::begin(m_SceneObjects), std::end(m_SceneObjects), 'must be a sharedPointer but need to compare data')
+
+//    ShapeMap::const_iterator got = m_ShapePool.find(_key);
+//    std::vector <pSceneOb>::const_iterator it;
+
+
+    for (pSceneOb i : m_SceneObjects)
+    {
+        if(i.get() == _sceneObject)
+            return i;
+    }
+
+    return nullptr;
+}
+
 DynamicsWorld* Scene::dynamicsWorld()
 {
     return &m_DynamicsWorld;
@@ -232,6 +226,11 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
     Ray cameraRay = castRayFromCamera(ndcX, ndcY);
     float min_t = 0.0;
     float index = 0;
+
+    if(m_pickedObject)
+        m_pickedObject->isActive(false);
+    m_pickedObject.reset();
+
     for(uint i = 1; i < m_SceneObjects.size(); i++)
     {
 
@@ -244,52 +243,26 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
             if(min_t == 0.0)
             {
                 m_pickedObject = m_SceneObjects[i];
-                qDebug()<<"set:"<<i<<t;
+                m_pickedObject->isActive(true);
+                 m_pickedObject->m_IsDirty = true;
+//                qDebug()<<"set:"<<i<<t;
                 min_t = t;
                 index = i;
             }
             if(t < min_t )
             {
                 m_pickedObject = m_SceneObjects[i];
-                qDebug()<<"set:"<<i<<t;
+                m_pickedObject->isActive(true);
+                m_pickedObject->m_IsDirty = true;
+//                qDebug()<<"set:"<<i<<t;
                 min_t = t;
                 index = i;
             }
         }
     }
+//    qDebug()<<index<<&m_SceneObjects[index];
+
     return m_SceneObjects[index];
-}
-
-void Scene::rayIt(float pixelX, float pixelY)
-{
-    // WIP when scaling. pixel Coord still need to be in NDC (-1:1)
-    QVector4D ray_clip = QVector4D(pixelX,pixelY,-1.0,1);
-
-    QVector4D ray_eye = m_projection_matrix.inverted() * ray_clip;
-
-    ray_eye = QVector4D(ray_eye.x(), ray_eye.y(), -1, 0);
-
-    QVector4D ray_wor = m_arcCamera.toMatrix().inverted() * ray_eye;
-
-    QVector3D ray_world = QVector3D(ray_wor.x(), ray_wor.y(), ray_wor.z());
-
-    QVector3D origin = m_arcCamera.toMatrix().inverted() * QVector3D(0,0,0);
-//    ray_world = m_arcCamera.toMatrix().inverted() * QVector3D(1,0,0);
-
-    QVector3D jesus = origin + ray_world;
-
-//    qDebug()<<ray_world<<origin;
-
-    Line newLine;
-    newLine.Start = origin;
-//    newLine.End = (jesus - origin) * 10;
-//    newLine.End = jesus;
-    newLine.End = jesus + (10 * (jesus-origin));
-    m_Lines.push_back(newLine);
-//    updateLines();
-
-    currentRayStart  =  origin;
-    currentRayEnd = jesus;
 }
 
 void Scene::updateLinesVBO()
@@ -479,6 +452,7 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
+//    qDebug()<<"paint Start";
     // draw to the framebuffer (off-screen render)
     glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
     //  glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
@@ -589,6 +563,14 @@ void Scene::paint()
 
 }
 
+void Scene::updateSceneObjects()
+{
+    for(uint i = 1; i < m_SceneObjects.size(); i++)
+    {
+        m_SceneObjects[i]->update();
+    }
+}
+
 void Scene::drawScreenQuad()
 {
     glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -653,7 +635,7 @@ void Scene::setupScene()
        auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
        auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
        auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
-       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(1,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,0,0), QQuaternion(1,0,0,0));
        auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
        auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
        //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
@@ -700,7 +682,37 @@ void Scene::setupScene()
 
 
 
+/*
+ *
+ * // WIP
+pSceneOb Scene::addSceneObject(std::string _shape)
+{
+    pSceneOb newPtr= addSceneObject(_shape, QVector3D(0.0f, 0.0f, 0.0f), QQuaternion::fromAxisAndAngle(0,1,0,0));
+    if(newPtr == nullptr){qDebug()<<"ptr to NULL returned";};
+    return newPtr;
+}
 
+pSceneOb Scene::addSceneObject(std::string _shape, const QVector3D &_pos)
+{
+    pSceneOb newPtr= addSceneObject(_shape, _pos, QQuaternion::fromAxisAndAngle(0,1,0,0));
+    if(newPtr == nullptr){qDebug()<<"ptr to NULL returned";};
+    return newPtr;
+}
+
+pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const QQuaternion &_rot)
+{
+
+        auto pShape = getShapeFromPool(_name);
+        if(pShape == nullptr)
+        {
+          qDebug()<<"WARNING: COULD NOT ADD SceneObject";
+            return nullptr;
+        }
+        auto pSO = std::make_shared<SceneObject>(this, pShape, _pos, _rot);
+        m_SceneObjects.push_back(pSO);
+        return pSO;
+}
+*/
 
 
 

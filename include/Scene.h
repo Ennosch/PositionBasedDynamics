@@ -28,11 +28,11 @@
 #include "model.h"
 #include "utils.h"
 #include "dynamics/dynamicsWorld.h"
-
 #include "dynamics/collisiondetection.h"
 
 class Scene : public AbstractScene
 {
+  static int numCreation;
 
 public:
   Scene(Window *_window);
@@ -41,6 +41,7 @@ public:
   void initialize();
   void resize(int width, int height);
   void paint();
+  void updateSceneObjects();
   void drawScreenQuad();
 
   void setDynamicsWorld(DynamicsWorld *_world);
@@ -51,13 +52,6 @@ public:
   // creation
   void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);
   ModelPtr addModel(Scene *_scene, std::string _name, std::string _path);
-
-  /*
-   * WIP
-  pSceneOb addSceneObject(std::string _shape);
-  pSceneOb addSceneObject(std::string _shape, const QVector3D &_pos);
-  pSceneOb addSceneObject(std::string _name, const QVector3D &_pos, const QQuaternion &_rot);
-  */
 
   pSceneOb addSceneObjectFromModel(std::string _name, const uint _materialID, const QVector3D &_pos, const QQuaternion &_rot);
   LightPtr addPointLight();
@@ -73,14 +67,13 @@ public:
   ModelPtr getModelFromPool(std::string _key);
   MaterialPtr getMaterial(int _index);
   pSceneOb getSceneObjectFromIndex(int _index);
+  pSceneOb getPointerFromSceneObject(const SceneObject *_sceneObject);
 
   QVector3D *getData();
   DynamicsWorld* dynamicsWorld();
 
   Ray castRayFromCamera(float ndcX, float ndcY, float depthZ);
   pSceneOb pickObject(float ndcX, float ndcY);
-
-  void rayIt(float pixelX, float pixelY);
 
   void updateLinesVBO();
 
@@ -129,5 +122,12 @@ private:
 inline MaterialPtr Scene::getMaterial(int _index){ return m_Materials[_index]; };
 inline pSceneOb Scene::getSceneObjectFromIndex(int _index){ return m_SceneObjects[_index]; };
 inline LightPtr Scene::addPointLight(){ return addPointLight(QVector3D(0,0,0), QVector3D(1,1,1)); };
+
+/*
+ * WIP
+pSceneOb addSceneObject(std::string _shape);
+pSceneOb addSceneObject(std::string _shape, const QVector3D &_pos);
+pSceneOb addSceneObject(std::string _name, const QVector3D &_pos, const QQuaternion &_rot);
+*/
 
 #endif // SCENE_H

@@ -26,6 +26,7 @@
 
 GLWidget::GLWidget(QWindow *parent) : QOpenGLWidget()
 {
+    this->setUpdateBehavior(QOpenGLWidget::PartialUpdate);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(loop()));
     m_timer.setInterval(0);
     m_elpasedTimer.start();
@@ -35,6 +36,8 @@ GLWidget::GLWidget(QWindow *parent) : QOpenGLWidget()
 
     m_timer.start();
     this->setWindowTitle("QOpenGLWidget");
+
+    m_activeObject = new ActiveObject(this);
 }
 
 void GLWidget::setScene(Scene *_scene)
@@ -58,6 +61,7 @@ void GLWidget::loop()
 
     processInput();
 
+    scene()->updateSceneObjects();
     int i = 0;
 
     while(lag >= 10)
@@ -105,6 +109,19 @@ void GLWidget::countFPS()
     }
 }
 
+void GLWidget::renderText()
+{
+    QPainter painter(this);
+    painter.setPen(QColor(0,0,0));
+
+    QString fps = QString::number(fpsRate) + " fps";
+    QString a = QString::number(second);
+    QString b = QString::number(render);
+    painter.drawText(QRect(5, 5, 100, 50), fps);
+    painter.drawText(QRect(5, 19, 100, 50), a);
+    painter.drawText(QRect(5, 33, 100, 50), b);
+}
+
 void GLWidget::processInput()
 {
     // update() registers keys, add/remove from inputManager containers
@@ -150,6 +167,11 @@ void GLWidget::processInput()
     {
         scene()->m_arcCamera.track(m_inputManger.mousePosition());
     }
+}
+
+void GLWidget::uiTransformChange(const QVector3D _t, const QVector3D _r, const QVector3D _s)
+{
+    m_activeObject->setTransform(_t, _r, _s);
 }
 
 void GLWidget::printVersionInformation()
@@ -217,6 +239,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     float pixelScreenY = 1 - 2 * pixelNDCy;
 
     scene()->pickObject(pixelScreenX, pixelScreenY);
+
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -245,6 +268,7 @@ void GLWidget::paintGL()
 {
     if (scene())
         scene()->paint();
+    renderText();
 }
 
 void GLWidget::resizeGL(int _w, int _h)

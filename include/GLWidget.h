@@ -15,6 +15,7 @@
 // Project
 #include "inputManager.h"
 #include "dynamics/dynamicsWorld.h"
+#include "activeobject.h"
 
 
 // forward declare class Scene, so Window can be constructed with the Scene null-pointer
@@ -34,11 +35,14 @@ public:
 
      Scene* scene() const;
      void countFPS();
+     void renderText();
+     ActiveObject *m_activeObject;
 
 protected slots:
     void update();
     void loop();
     void processInput();
+    void uiTransformChange(const QVector3D _t, const QVector3D _r, const QVector3D _s);
 
     void printVersionInformation();
     void keyPressEvent(QKeyEvent *event);
@@ -60,6 +64,7 @@ private:
   QElapsedTimer m_elpasedTimer;
   Scene *m_scene = nullptr;
   inputManager m_inputManger;
+
 };
 
 #endif // GLWIDGET_H

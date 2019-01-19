@@ -10,13 +10,15 @@
 #include "model.h"
 #include "utils.h"
 #include "dynamics/dynamicObject.h"
+//#include "activeobject.h"
 
 class Scene;
-
+class ActiveObject;
 class Model;
 
 class SceneObject
 {
+
 public:
     SceneObject();
     SceneObject(Scene *_scene, ShapePtr _Shape);
@@ -29,21 +31,38 @@ public:
     void draw();
     void drawOld();
     void release();
+    void update();
+
+    void isActive(bool _isActive);
+    bool isActive();
     void setTranslation(const QVector3D &_dt);
     void translate(const QVector3D &_dt);
     void setScale(const QVector3D &_s);
     void rotate(const QQuaternion &_rot);
     void makeDynamic(DynamicObjectPtr _dynamicObject);
     bool isDynamic();
+    void setActiveObject(ActiveObject *_activeObject);
+    void setID(uint _id);
+    void notify();
 
     const QMatrix4x4 getMatrix();
     const QVector3D getPos();
     const Transform getTransform();
     uint getMaterialID();
     ShapePtr shape();
+    uint getID();
+
+    bool m_IsDirty = true;
 
 private:
     bool m_IsDynamic = false;
+    bool m_IsActive = false;
+//    bool m_IsDirty = true;
+//    bool m_IsActive = false;
+
+    QMatrix4x4 m_ModelMatrix;
+
+    uint m_ID;
     uint m_MaterialID;    
     ShapePtr pShape;
     ModelPtr pModel;
@@ -51,7 +70,7 @@ private:
     Transform m_Transform;
     Scene *pScene;
     DynamicObjectPtr pDynamicObject = nullptr;
-
+    ActiveObject *activeObject;
 
 };
 
@@ -61,10 +80,10 @@ inline std::shared_ptr<Shape> SceneObject::shape(){return pShape; };
 
 inline bool SceneObject::isDynamic(){ return m_IsDynamic; };
 
-inline void SceneObject::setTranslation(const QVector3D &_dt){m_Transform.setTranslation(_dt); };
-inline void SceneObject::translate(const QVector3D &_dt){m_Transform.translate(_dt); };
-inline void SceneObject::rotate(const QQuaternion &_rot){m_Transform.rotate(_rot); };
-inline void SceneObject::setScale(const QVector3D &_s){m_Transform.scale(_s); };
+inline void SceneObject::setTranslation(const QVector3D &_dt){m_Transform.setTranslation(_dt); m_IsDirty=true;};
+inline void SceneObject::translate(const QVector3D &_dt){m_Transform.translate(_dt); m_IsDirty=true;};
+inline void SceneObject::rotate(const QQuaternion &_rot){m_Transform.rotate(_rot); m_IsDirty=true;};
+inline void SceneObject::setScale(const QVector3D &_s){m_Transform.scale(_s); m_IsDirty=true;};
 inline const Transform SceneObject::getTransform(){return m_Transform;};
 
 inline void SceneObject::drawOld(){ pShape->drawOld(); };

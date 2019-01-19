@@ -16,6 +16,7 @@ public:
     DynamicObject();
     DynamicObject( ParticlePtr _particle);
     const QMatrix4x4& getTransfrom();
+    const QVector3D getTranslation();
 private:
     bool m_IsParticle = false;
     Transform m_transform;

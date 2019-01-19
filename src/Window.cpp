@@ -218,6 +218,7 @@ void Window::paintEvent(QPaintEvent *event)
 {
         paintGL();
         QPainter painter(this);
+        painter.setPen(QColor(255,0,0));
 
         QString fps = QString::number(fpsRate) + " fps";
         QString a = QString::number(second);
