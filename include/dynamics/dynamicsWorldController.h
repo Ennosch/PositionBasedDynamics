@@ -7,8 +7,9 @@ class Scene;
 
 class DynamicsWorld;
 
-class DynamicsWorldController
+class DynamicsWorldController : QObject
 {
+Q_OBJECT
 public:
     DynamicsWorldController();
 
