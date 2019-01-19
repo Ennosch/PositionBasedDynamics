@@ -2,27 +2,28 @@
 #include "ui_ControlWidget.h"
 #include <QDebug>
 
+// for Ui file constructor,
+//    ui(new Ui::ControlWidget)
 
-
-ControlWidget::ControlWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::ControlWidget)
+TransformUiWidget::TransformUiWidget(QWidget *parent) :
+    QWidget(parent)
 {
     // QDesigner
 //    ui->setupUi(this);
-    setupUi();
-    this->setMaximumWidth(200);
 
+    setupUi();
+//    this->setMaximumWidth(200);
 
     connectWidgets();
+
+    this->setMinimumHeight(240);
 }
 
-ControlWidget::~ControlWidget()
+TransformUiWidget::~TransformUiWidget()
 {
-    delete ui;
 }
 
-void ControlWidget::setupUi()
+void TransformUiWidget::setupUi()
 {
     createQObjects();
 
@@ -69,7 +70,7 @@ void ControlWidget::setupUi()
     layout->addSpacerItem(layoutSpacer);
 }
 
-void ControlWidget::connectWidgets()
+void TransformUiWidget::connectWidgets()
 {
     connect(transform00Edit, SIGNAL(valueChanged(double)), this, SLOT(emitTransformChange()));
     connect(transform01Edit, SIGNAL(valueChanged(double)), this, SLOT(emitTransformChange()));
@@ -99,7 +100,7 @@ void ControlWidget::connectWidgets()
     connect(mat33Edit, SIGNAL(valueChanged(double)), this, SLOT(emitTransformChange()));
 }
 
-void ControlWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t, const QVector3D _r, const QVector3D _s)
+void TransformUiWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t, const QVector3D _r, const QVector3D _s)
 {
     // loop over Units block signal set value allow signals
     transform00Edit->blockSignals(true);
@@ -115,7 +116,7 @@ void ControlWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t, con
     transform02Edit->blockSignals(false);
 }
 
-void ControlWidget::emitTransformChange()
+void TransformUiWidget::emitTransformChange()
 {
 //    qDebug()<<"register value change";
     // prepare data to send back to scene
@@ -136,7 +137,7 @@ void ControlWidget::emitTransformChange()
     emit matrixChanged(translation, rotation, scale);
 }
 
-void ControlWidget::createQObjects()
+void TransformUiWidget::createQObjects()
 {
     layoutWidget = new QWidget(this);
     transGridLayoutWidget = new QWidget(this);
@@ -194,4 +195,55 @@ DoubleSpinBox::DoubleSpinBox(uint _row, uint _column, QWidget *parent)  :
 void DoubleSpinBox::emitValueChangedRowColum(double _v)
 {
 //    emit valueChangedRowColum(_v, row, column);
+}
+
+ControlWidget::ControlWidget(QWidget *parent) :
+        QWidget(parent),
+        ui(new Ui::ControlWidget)
+{
+//        ui->setupUi(this);
+//        transformWidget = new TransformUiWidget;
+    setupUi();
+
+}
+
+void ControlWidget::setupUi()
+{
+    this->setMaximumWidth(270);
+    layout = new QVBoxLayout;
+    transformWidget = new TransformUiWidget(this);
+    dynamicsWidget =  new DynamicsUiWidget;
+//    spacer = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    layout->addWidget(transformWidget);
+    layout->addWidget(dynamicsWidget);
+    layout->addStretch(1);
+//    layout->addSpacerItem(spacer);
+    this->setLayout(layout);
+}
+
+DynamicsUiWidget::DynamicsUiWidget(QWidget *parent)
+{
+    setupUi();
+}
+
+void DynamicsUiWidget::setupUi()
+{
+    startSim = new QPushButton("stop");
+    stepSim = new QPushButton("step");
+    resetSim = new QPushButton("reset");
+
+    stepSizeLabel = new QLabel("step size");
+    stepSizeEdit = new DoubleSpinBox(0,0);
+    stepSizeEdit->setValue(0.05);
+
+//    spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+    layout.addWidget(startSim,0,0);
+    layout.addWidget(stepSim,0,1);
+    layout.addWidget(resetSim,0,2);
+    layout.addWidget(stepSizeLabel,1,0);
+    layout.addWidget(stepSizeEdit,1,1);
+//    layout.addItem(spacer,1,0);
+
+    this->setLayout(&layout);
 }

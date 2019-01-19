@@ -16,6 +16,7 @@
 #include "dynamics/particle.h"
 #include "dynamics/collisiondetection.h"
 #include "dynamics/constraint.h"
+#include "dynamicsWorldController.h"
 
 typedef QVector3D Vec3;
 
@@ -24,8 +25,12 @@ class DynamicsWorld
     public:
         DynamicsWorld();
         void initialize();
-        void update(float dt = 0.5);
+        void update();
         void info();
+        DynamicsWorldController* controller();
+        void setSimulate(bool _isSimulating);
+        void reset();
+        void step();
 
         void addDynamicObject(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject, ParticlePtr _particle);
@@ -39,11 +44,16 @@ class DynamicsWorld
 
         void generateData();
 
+        void foo(){ qDebug("foo"); }
+
         int pCount = 0;
         int objectCount = 0;
 
 //    private:
+        bool m_simulate;
         int m_ID = 0;
+        float m_dt;
+        DynamicsWorldController         *m_DynamicsWorldController;
         std::vector <DynamicObjectPtr>  m_DynamicObjects;
         std::vector <ParticlePtr>       m_Particles;
         std::vector <Plane>             m_Planes;

@@ -9,6 +9,9 @@ DynamicsWorld::DynamicsWorld()
     : m_hashGrid()
 {
     qDebug()<<"DynaicsWorld ctor";
+    m_simulate = true;
+    m_dt = 0.01;
+    m_DynamicsWorldController = new DynamicsWorldController(this);
 }
 
 void DynamicsWorld::initialize()
@@ -30,10 +33,14 @@ void DynamicsWorld::initialize()
     }
 }
 
-void DynamicsWorld::update(float dt)
+void DynamicsWorld::update()
 {
-  // PBD Loop start
+    float dt = m_dt;
 
+    if(!m_simulate)
+        return;
+
+    // PBD Loop start
     // explicit Euler integration step (5)
     for( ParticlePtr p : m_Particles)
     {
@@ -123,6 +130,25 @@ void DynamicsWorld::update(float dt)
 void DynamicsWorld::info()
 {
     qDebug()<<"p1: "<<m_Particles[0]->x<<m_Particles[0]->ID<<m_Particles[0]->r;
+}
+
+DynamicsWorldController* DynamicsWorld::controller()
+{
+    if(m_DynamicsWorldController)
+        return m_DynamicsWorldController;
+    return nullptr;
+}
+
+void DynamicsWorld::setSimulate(bool _isSimulating)
+{
+    m_simulate = _isSimulating;
+}
+
+void DynamicsWorld::step()
+{
+    m_simulate = true;
+    update();
+    m_simulate = false;
 }
 
 /*
@@ -239,7 +265,6 @@ void DynamicsWorld::generateData()
     nSpring2->setRestLength(4.5);
     m_Particles[0]->m_Constraints.push_back(nSpring2);
     m_Particles[2]->m_Constraints.push_back(nSpring2);
-
 }
 
 void DynamicsWorld::checkSpherePlane(ParticlePtr p1, const Plane &_plane)

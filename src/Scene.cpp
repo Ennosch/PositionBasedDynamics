@@ -90,11 +90,10 @@ pSceneOb Scene::addSceneObjectFromModel(std::string _name, const uint _materialI
     auto pSO = std::make_shared<SceneObject>(this, pModel, _materialID ,_pos, _rot);
     m_SceneObjects.push_back(pSO);
 
-    pSO->setActiveObject(widget()->m_activeObject);
+    // pass them the activeObject instance, so they can notify their observer
+    pSO->setActiveObject(widget()->activeObject());
     numCreation++;
     pSO->setID(numCreation);
-
-//    qDebug()<<"creation ----------:"<<pSO->getID();
 
     return pSO;
 }
@@ -646,7 +645,7 @@ void Scene::setupScene()
        auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
        auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
        auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
-//       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,0,0), QQuaternion(1,0,0,0));
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
 //       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
        //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
@@ -677,21 +676,6 @@ void Scene::setupScene()
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*

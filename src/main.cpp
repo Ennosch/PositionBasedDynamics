@@ -61,7 +61,9 @@ int main(int argc, char *argv[])
   glw.setScene(&scene);
   scene.setDynamicsWorld(&dynamics);
 
-  mainWindow.setupUi(&glw);
+  mainWindow.setGLController(&glw);
+  mainWindow.setDynamicsController(dynamics.controller());
+  mainWindow.setupUi();
   mainWindow.show();
 
   return app.exec();

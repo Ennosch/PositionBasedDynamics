@@ -36,7 +36,8 @@ public:
      Scene* scene() const;
      void countFPS();
      void renderText();
-     ActiveObject *m_activeObject;
+     ActiveObject* activeObject();
+
 
 protected slots:
     void update();
@@ -60,6 +61,7 @@ private:
   double lag;
   float fpsRate, fpsCount;
   double previous, current, elapsed, second, render;
+  ActiveObject *m_activeObject;
   QTimer m_timer;
   QElapsedTimer m_elpasedTimer;
   Scene *m_scene = nullptr;

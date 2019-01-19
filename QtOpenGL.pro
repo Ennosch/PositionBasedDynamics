@@ -26,11 +26,13 @@ SOURCES += \
     src/dynamics/constraint.cpp \
     src/dynamics/collisiondetection.cpp \
     src/dynamics/abstractconstraint.cpp \
+    src/dynamics/dynamicsWorldController.cpp \
     src/GLWidget.cpp \
     src/ControlWidget.cpp \
     src/MainWindow.cpp \
     src/activeobject.cpp \
-    src/dynamics/dynamicsWorldController.cpp \
+    src/ui/DynamicsUiWidget.cpp
+
 
 OBJECTS_DIR = build/obj
 MOC_DIR = build/moc
@@ -45,8 +47,6 @@ DEPENDPATH += /usr/local/include
 
 HEADERS += \
     include/*.h \
-    include/dynamics/dynamicObject.h \
-    include/dynamics/dynamicsWorld.h \
     include/AbstractScene.h \
     include/camera.h \
     include/inputManager.h \
@@ -58,6 +58,9 @@ HEADERS += \
     include/utils.h \
     include/Window.h \
     include/hashgrid.h \
+    include/dynamics/dynamicsWorldController.h \
+    include/dynamics/dynamicObject.h \
+    include/dynamics/dynamicsWorld.h \
     include/dynamics/particle.h \
     include/dynamics/constraint.h \
     include/dynamics/collisiondetection.h \
@@ -66,7 +69,7 @@ HEADERS += \
     include/ControlWidget.h \
     include/MainWindow.h \
     include/activeobject.h \
-    include/dynamics/dynamicsWorldController.h \
+    include/ui/DynamicsUiWidget.h
 
 
 

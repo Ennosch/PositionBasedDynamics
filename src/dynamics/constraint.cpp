@@ -16,7 +16,7 @@ HalfSpaceConstraint::HalfSpaceConstraint(
     p(_p),
     qc(_qc)
 {
-            qDebug()<<"INit Halfspace Constraint";
+//            qDebug()<<"INit Halfspace Constraint";
 }
 
 void HalfSpaceConstraint::project()
@@ -100,7 +100,7 @@ void DistanceEqualityConstraint::project()
 
     float c2 = constraintFunction();
 
-    qDebug()<<"projecting";
+//    qDebug()<<"projecting";
 }
 
 void DistanceEqualityConstraint::setRestLength(float _d)

@@ -25,8 +25,8 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="lineEdit_2"/>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEdit"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_5">
@@ -35,9 +35,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit"/>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_4">
         <property name="text">
@@ -45,31 +42,15 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEdit_2"/>
       </item>
      </layout>
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
-      </item>
-      <item row="1" column="3">
-       <widget class="QSpinBox" name="spinBox_2"/>
-      </item>
-      <item row="2" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_5"/>
+      <item row="1" column="4">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_4"/>
       </item>
       <item row="0" column="1">
        <widget class="QLabel" name="label">
@@ -87,8 +68,26 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_4"/>
+      <item row="1" column="3">
+       <widget class="QSpinBox" name="spinBox_2"/>
+      </item>
+      <item row="2" column="4">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_5"/>
+      </item>
+      <item row="0" column="3">
+       <widget class="QSpinBox" name="spinBox"/>
+      </item>
+      <item row="2" column="3">
+       <widget class="QSpinBox" name="spinBox_4"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+      </item>
+      <item row="0" column="4">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QSpinBox" name="spinBox_3"/>
       </item>
       <item row="2" column="1">
        <widget class="QLabel" name="label_3">
@@ -104,33 +103,8 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
-      </item>
-      <item row="2" column="3">
-       <widget class="QSpinBox" name="spinBox_4"/>
-      </item>
       <item row="1" column="2">
        <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
-      </item>
-      <item row="2" column="2">
-       <widget class="QSpinBox" name="spinBox_3"/>
-      </item>
-      <item row="0" column="3">
-       <widget class="QSpinBox" name="spinBox"/>
-      </item>
-      <item row="0" column="5">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </item>
@@ -148,6 +122,68 @@
      </spacer>
     </item>
    </layout>
+  </widget>
+  <widget class="QWidget" name="widget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>300</y>
+     <width>161</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <widget class="QScrollBar" name="verticalScrollBar">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>10</y>
+      <width>16</width>
+      <height>160</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QScrollBar" name="horizontalScrollBar">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>60</y>
+      <width>160</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QSlider" name="horizontalSlider">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>30</y>
+      <width>160</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>114</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

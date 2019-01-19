@@ -73,7 +73,7 @@ void GLWidget::loop()
     QThread::msleep(16);
 
     // physics
-    scene()->dynamicsWorld()->update(0.1);
+    scene()->dynamicsWorld()->update();
 
     if(render < 16)
     {
@@ -120,6 +120,14 @@ void GLWidget::renderText()
     painter.drawText(QRect(5, 5, 100, 50), fps);
     painter.drawText(QRect(5, 19, 100, 50), a);
     painter.drawText(QRect(5, 33, 100, 50), b);
+}
+
+ActiveObject *GLWidget::activeObject()
+{
+    if(m_activeObject)
+        return  m_activeObject;
+
+    return nullptr;
 }
 
 void GLWidget::processInput()

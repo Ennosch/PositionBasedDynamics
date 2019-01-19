@@ -8,11 +8,13 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QSpacerItem>
+//#include <Q>
 #include <QDoubleSpinBox>
 #include <QMatrix4x4>
 #include <QMatrix3x3>
 #include <QVector3D>
 
+class MainWindow;
 
 namespace Ui {
 class ControlWidget;
@@ -36,13 +38,14 @@ private:
     uint row, column;
 };
 
-class ControlWidget : public QWidget
+
+class TransformUiWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ControlWidget(QWidget *parent = nullptr);
-    ~ControlWidget();
+    explicit TransformUiWidget(QWidget *parent = nullptr);
+    ~TransformUiWidget();
     void setupUi();
     void connectWidgets();
 
@@ -61,7 +64,6 @@ protected:
     void createQObjects();
 
 private:
-    Ui::ControlWidget *ui;
     QWidget *layoutWidget;
     QWidget *transGridLayoutWidget;
     QWidget *matrixGridLayoutWidget;
@@ -76,32 +78,66 @@ private:
     QLabel *scaleLabel;
     QLabel *matrixLabel;
 
-    DoubleSpinBox * transform00Edit;
-    DoubleSpinBox * transform10Edit;
-    DoubleSpinBox * transform20Edit;
-    DoubleSpinBox * transform01Edit;
-    DoubleSpinBox * transform11Edit;
-    DoubleSpinBox * transform21Edit;
-    DoubleSpinBox * transform02Edit;
-    DoubleSpinBox * transform12Edit;
-    DoubleSpinBox * transform22Edit;
+    DoubleSpinBox *transform00Edit;
+    DoubleSpinBox *transform10Edit;
+    DoubleSpinBox *transform20Edit;
+    DoubleSpinBox *transform01Edit;
+    DoubleSpinBox *transform11Edit;
+    DoubleSpinBox *transform21Edit;
+    DoubleSpinBox *transform02Edit;
+    DoubleSpinBox *transform12Edit;
+    DoubleSpinBox *transform22Edit;
 
-    DoubleSpinBox * mat00Edit;
-    DoubleSpinBox * mat01Edit;
-    DoubleSpinBox * mat02Edit;
-    DoubleSpinBox * mat03Edit;
-    DoubleSpinBox * mat10Edit;
-    DoubleSpinBox * mat11Edit;
-    DoubleSpinBox * mat12Edit;
-    DoubleSpinBox * mat13Edit;
-    DoubleSpinBox * mat20Edit;
-    DoubleSpinBox * mat21Edit;
-    DoubleSpinBox * mat22Edit;
-    DoubleSpinBox * mat23Edit;
-    DoubleSpinBox * mat30Edit;
-    DoubleSpinBox * mat31Edit;
-    DoubleSpinBox * mat32Edit;
-    DoubleSpinBox * mat33Edit;
+    DoubleSpinBox *mat00Edit;
+    DoubleSpinBox *mat01Edit;
+    DoubleSpinBox *mat02Edit;
+    DoubleSpinBox *mat03Edit;
+    DoubleSpinBox *mat10Edit;
+    DoubleSpinBox *mat11Edit;
+    DoubleSpinBox *mat12Edit;
+    DoubleSpinBox *mat13Edit;
+    DoubleSpinBox *mat20Edit;
+    DoubleSpinBox *mat21Edit;
+    DoubleSpinBox *mat22Edit;
+    DoubleSpinBox *mat23Edit;
+    DoubleSpinBox *mat30Edit;
+    DoubleSpinBox *mat31Edit;
+    DoubleSpinBox *mat32Edit;
+    DoubleSpinBox *mat33Edit;
+};
+
+
+class DynamicsUiWidget : public QWidget
+{
+Q_OBJECT
+public:
+    explicit DynamicsUiWidget(QWidget *parent = nullptr);
+    void setupUi();
+private:
+    friend MainWindow;
+    QGridLayout layout;
+    QSpacerItem *spacer;
+    QPushButton *startSim;
+    QPushButton *stepSim;
+    QPushButton *resetSim;
+    QLabel *stepSizeLabel;
+    DoubleSpinBox *stepSizeEdit;
+};
+
+class ControlWidget : public QWidget
+{
+Q_OBJECT
+public:
+    explicit ControlWidget(QWidget *parent = nullptr);
+    void setupUi();
+
+private:
+    friend MainWindow;
+    Ui::ControlWidget *ui;
+    QVBoxLayout* layout;
+    TransformUiWidget *transformWidget;
+    DynamicsUiWidget *dynamicsWidget;
+//    QSpacerItem *spacer;
 };
 
 #endif // CONTROLWIDGET_H
