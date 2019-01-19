@@ -310,6 +310,9 @@ void Scene::updateLinesVBO()
 
 void Scene::QtOpenGLinitialize()
 {
+    if(widget())
+        widget()->makeCurrent();
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);

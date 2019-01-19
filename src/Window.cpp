@@ -320,7 +320,6 @@ void Window::loop()
         i++;
     }
 
-
     QThread::msleep(16);
 
     // physics

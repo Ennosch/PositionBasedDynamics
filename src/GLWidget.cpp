@@ -34,6 +34,7 @@ GLWidget::GLWidget(QWindow *parent) : QOpenGLWidget()
     lag = 0.0;
 
     m_timer.start();
+    this->setWindowTitle("QOpenGLWidget");
 }
 
 void GLWidget::setScene(Scene *_scene)
@@ -207,6 +208,15 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     inputManager::registerMousePress(event->button());
+    QPointF pos = event->pos();
+
+    float pixelNDCx = (pos.x() + 0.5) / this->width();
+    float pixelNDCy = (pos.y() + 0.5) / this->height();
+
+    float pixelScreenX = 2 * pixelNDCx - 1;
+    float pixelScreenY = 1 - 2 * pixelNDCy;
+
+    scene()->pickObject(pixelScreenX, pixelScreenY);
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -243,7 +253,7 @@ void GLWidget::resizeGL(int _w, int _h)
     if (scene())
     {
 //        qDebug()<<"resize 2 w"<<_w<<_h;
-//      scene()->resize(_w, _h);
+      scene()->resize(_w, _h);
 //      qDebug()<<"resize  3 w"<<_w<<_h;
     }
 }
