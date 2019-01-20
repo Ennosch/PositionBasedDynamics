@@ -48,6 +48,9 @@ public:
   void QtOpenGLinitialize();
   void DynamicsInitialize();
   void setupScene();
+  void updateLinesVBO();
+
+  void debug();
 
   // creation
   void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);
@@ -69,13 +72,10 @@ public:
   pSceneOb getSceneObjectFromIndex(int _index);
   pSceneOb getPointerFromSceneObject(const SceneObject *_sceneObject);
 
-  QVector3D *getData();
   DynamicsWorld* dynamicsWorld();
 
   Ray castRayFromCamera(float ndcX, float ndcY, float depthZ);
   pSceneOb pickObject(float ndcX, float ndcY);
-
-  void updateLinesVBO();
 
   CollisionDetection m_CollisionDetect;
   QVector3D currentRayStart = QVector3D(0,0,0);

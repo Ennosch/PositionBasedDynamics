@@ -9,7 +9,7 @@ DynamicsWorld::DynamicsWorld()
     : m_hashGrid()
 {
     qDebug()<<"DynaicsWorld ctor";
-    m_simulate = true;
+    m_simulate = false;
     m_dt = 0.01;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
@@ -198,60 +198,6 @@ void DynamicsWorld::checkSphereSphere(ParticlePtr p1, ParticlePtr p2)
 
 }
 
-void DynamicsWorld::checkSpherePlaneOld(ParticlePtr p1, const Plane &_plane)
-{
-    float dist = QVector3D::dotProduct(p1->p, _plane.Normal);
-
-    if(dist < p1->r)
-    {
-        float d,C, t;
-        QVector3D o,n, qc, dp, p, x, l;
-
-        p = p1->p;
-        x = p1->x;
-        n = _plane.Normal.normalized();
-        // make plane relative to point
-        o = _plane.Offset + (p1->r * n);
-
-        l = (p-x).normalized();
-        float devisor = QVector3D::dotProduct(l,n);
-
-//        if(devisor > 0.001)
-//        {
-//            qDebug()<<"NEARLY DIVISION BY 123";
-//            return;
-//        }
-
-        t = (QVector3D::dotProduct((o-x), n)) / devisor;
-
-        qc = (x + t*l);
-
-        C = QVector3D::dotProduct((p-qc), n);
-
-        dp = C * n;
-
-        p1->p = p += (-dp);
-
-//        p1->pp = p +- (dp);
-
-        p1->qc = qc;
-
-        qDebug()<<"Old Cor: C: "<<C<<" qc "<<qc<<"dp"<<dp<<" t: "<<t;
-
-        float er = 5.0;
-
-//        HalfSpaceConstraint myConstr(p1->p, qc, n);
-        //  fake solver
-//        qDebug()<<"Solve:";
-//        qDebug()<<"d ="<< d<<"D: "<<D<<" qc = "<<qc;
-//        for(int i = 0; i < 1; i++)
-        {
-//            dp = myConstr.project(p1->p);
-//            p1->p = p1->p + dp;
-        }
-    }
-}
-
 void DynamicsWorld::generateData()
 {
     qDebug()<<"genData";
@@ -265,6 +211,32 @@ void DynamicsWorld::generateData()
     nSpring2->setRestLength(4.5);
     m_Particles[0]->m_Constraints.push_back(nSpring2);
     m_Particles[2]->m_Constraints.push_back(nSpring2);
+
+//    m_debugLines.push_back(&test1);
+    m_debugLines.push_back(&m_Particles[0]->x);
+    m_debugLines.push_back(&m_Particles[1]->x);
+    m_debugLines.push_back(&m_Particles[0]->x);
+    m_debugLines.push_back(&m_Particles[2]->x);
+
+    QVector3D** ptr = m_debugLines.data();
+    QVector3D*  ptr2 = *ptr;
+    QVector3D result = *ptr2;
+//    auto something  = ptr2[4];
+
+    qDebug()<<m_Particles[0]->x<<m_Particles[1]->x<<m_Particles[2]->x;
+
+
+    qDebug()<<"result-=-=-=-==-=: "<< result;
+
+
+}
+
+QVector3D* DynamicsWorld::debugDrawLineData()
+{
+//    auto pp9 =  m_debugLines.data();
+//    QVector3D* ptr = *pp9;
+//    qDebug()<<"DEBUG: ---------------"<<typeid(pp9).name();
+    return nullptr;
 }
 
 void DynamicsWorld::checkSpherePlane(ParticlePtr p1, const Plane &_plane)

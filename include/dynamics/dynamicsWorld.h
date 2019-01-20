@@ -40,9 +40,10 @@ class DynamicsWorld
 
         void checkSphereSphere(ParticlePtr p1, ParticlePtr p2);
         void checkSpherePlane(ParticlePtr p1, const Plane &_plane);
-        void checkSpherePlaneOld(ParticlePtr p1, const Plane &_plane);
 
         void generateData();
+
+        QVector3D* debugDrawLineData();
 
         void foo(){ qDebug("foo"); }
 
@@ -57,6 +58,8 @@ class DynamicsWorld
         std::vector <DynamicObjectPtr>  m_DynamicObjects;
         std::vector <ParticlePtr>       m_Particles;
         std::vector <Plane>             m_Planes;
+
+        std::vector<QVector3D*>         m_debugLines;
 
         HashGrid m_hashGrid;
         CollisionDetection m_CollisionDetect;

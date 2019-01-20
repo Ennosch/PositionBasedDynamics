@@ -2,5 +2,5 @@
 
 AbstractConstraint::AbstractConstraint()
 {
-    qDebug()<<"INit abstract Constraint";
+//    qDebug()<<"INit abstract Constraint";
 }

@@ -48,6 +48,26 @@ void Scene::initialize()
   DynamicsInitialize();
   setupScene();
   m_DynamicsWorld->generateData();
+
+//  qDebug()<<"=-=-==-start=-=-=-=";
+
+//  QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
+
+//  QVector3D* ptr2 = *ptr;
+
+//  QVector3D result = *ptr2;
+
+
+
+//  QVector3D* test1 = m_DynamicsWorld->m_debugLines[0];
+//   QVector3D* test2 = m_DynamicsWorld->m_debugLines[1];
+
+//   QVector3D res1 = *test1;
+//   QVector3D res2 = *test2;
+
+
+//  qDebug()<<"=-=-==-end=-=-=-="<<ptr2<<&res1<<&res2;
+
 }
 
 void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, int _size)
@@ -121,7 +141,7 @@ MaterialPtr Scene::addMaterial(const QVector3D &_ambient, const QVector3D &_diff
 void Scene::addLine(const Line &_line)
 {
     m_Lines.push_back(_line);
-    updateLinesVBO();
+//    updateLinesVBO();
 }
 
 void Scene::addLine(const Ray &_ray, float t=1.0)
@@ -131,7 +151,7 @@ void Scene::addLine(const Ray &_ray, float t=1.0)
 //    line.End = (_ray.Dir - _ray.Origin) * t;
     line.End = _ray.Origin + (_ray.Dir * t);
     m_Lines.push_back(line);
-    updateLinesVBO();
+//    updateLinesVBO();
 }
 
 void Scene::addLine(const QVector3D &_start, const QVector3D &_end)
@@ -140,7 +160,7 @@ void Scene::addLine(const QVector3D &_start, const QVector3D &_end)
     line.Start = _start;
     line.End = _end;
     m_Lines.push_back(line);
-    updateLinesVBO();
+//    updateLinesVBO();
 }
 
 void Scene::makeDynamic(pSceneOb _sceneObject)
@@ -269,15 +289,35 @@ void Scene::updateLinesVBO()
     m_lines_vao->bind();
     m_lines_vbo.create();
     m_lines_vbo.bind();
-    m_lines_vbo.allocate(m_Lines.data(), m_Lines.size() * sizeof(Line));
+
+    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
+    QVector3D* ptr2 = *ptr;
+    QVector3D result = *ptr2;
+
+    m_lines_vbo.allocate(*(m_DynamicsWorld->m_debugLines.data()),  m_DynamicsWorld->m_debugLines.size() * sizeof(QVector3D));
+
+
+//    qDebug()<<result;
+
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(QVector3D),
+    glVertexAttribPointer(0,                 // index
+                          3,                 // size of attr
+                          GL_FLOAT,          // datatype of each component
+                          GL_FALSE,          // normalized
+                          sizeof(QVector3D), //byte offset between consecutive generic vertex attributes
                           nullptr);
     m_lines_vao->release();
+
+}
+
+void Scene::debug()
+{
+//    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
+
+//     QVector3D* ptr2 = *ptr;
+
+//     QVector3D result = *ptr2;
+//     qDebug()<<result;
 }
 
 void Scene::QtOpenGLinitialize()
@@ -457,6 +497,9 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
+
+
+
 //    qDebug()<<"paint Start";
     // draw to the framebuffer (off-screen render)
     glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
@@ -533,10 +576,14 @@ void Scene::paint()
               }
 
        //-------------------------Draw Lines---------------------------------------------------------------------------
+//              debug();
+              updateLinesVBO();
+//              debug();
               {
                 m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
                 m_lines_vao->bind();
-                glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
+//                 glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
+                glDrawArrays(GL_LINES, 0, dynamicsWorld()->m_debugLines.size() * 4);
                 m_lines_vao->release();
               }
 
@@ -645,7 +692,7 @@ void Scene::setupScene()
        auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
        auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
        auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
-       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-3,0,0), QQuaternion(1,0,0,0));
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
 //       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
        //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
@@ -674,6 +721,7 @@ void Scene::setupScene()
 
 //       auto myModel = m_ModelPool["grid1"];
 
+       addLine(QVector3D(0,0,0), QVector3D(0,5,0));
 
 }
 
