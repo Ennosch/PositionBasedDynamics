@@ -286,18 +286,24 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
 
 void Scene::updateLinesVBO()
 {
+
+    m_LinesB.clear();
+    for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
+    {
+        QVector3D vec = *_vec;
+
+        m_LinesB.push_back(vec);
+    }
     m_lines_vao->bind();
     m_lines_vbo.create();
     m_lines_vbo.bind();
 
-    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
-    QVector3D* ptr2 = *ptr;
-    QVector3D result = *ptr2;
+//    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
+//    QVector3D* ptr2 = *ptr;
+//    QVector3D result = *ptr2;
 
-    m_lines_vbo.allocate(*(m_DynamicsWorld->m_debugLines.data()),  m_DynamicsWorld->m_debugLines.size() * sizeof(QVector3D));
+    m_lines_vbo.allocate(m_LinesB.data(),  m_LinesB.size() * sizeof(QVector3D));
 
-
-//    qDebug()<<result;
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0,                 // index
@@ -583,7 +589,7 @@ void Scene::paint()
                 m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
                 m_lines_vao->bind();
 //                 glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
-                glDrawArrays(GL_LINES, 0, dynamicsWorld()->m_debugLines.size() * 4);
+                glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
                 m_lines_vao->release();
               }
 

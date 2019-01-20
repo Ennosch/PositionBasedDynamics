@@ -115,6 +115,7 @@ private:
   std::vector <MaterialPtr> m_Materials;
   std::vector <pSceneOb> m_SceneObjects;
   std::vector <Line> m_Lines;
+  std::vector <QVector3D> m_LinesB;
 
   pSceneOb m_pickedObject;
 };

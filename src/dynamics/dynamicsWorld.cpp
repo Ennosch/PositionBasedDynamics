@@ -10,7 +10,7 @@ DynamicsWorld::DynamicsWorld()
 {
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
-    m_dt = 0.01;
+    m_dt = 0.05;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
 
@@ -218,15 +218,15 @@ void DynamicsWorld::generateData()
     m_debugLines.push_back(&m_Particles[0]->x);
     m_debugLines.push_back(&m_Particles[2]->x);
 
-    QVector3D** ptr = m_debugLines.data();
-    QVector3D*  ptr2 = *ptr;
-    QVector3D result = *ptr2;
+//    QVector3D** ptr = m_debugLines.data();
+//    QVector3D*  ptr2 = *ptr;
+//    QVector3D result = *ptr2;
 //    auto something  = ptr2[4];
 
-    qDebug()<<m_Particles[0]->x<<m_Particles[1]->x<<m_Particles[2]->x;
+//    qDebug()<<m_Particles[0]->x<<m_Particles[1]->x<<m_Particles[2]->x;
 
 
-    qDebug()<<"result-=-=-=-==-=: "<< result;
+//    qDebug()<<"result-=-=-=-==-=: "<< result;
 
 
 }
