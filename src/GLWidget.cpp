@@ -73,7 +73,7 @@ void GLWidget::loop()
     QThread::msleep(16);
 
     // physics
-    scene()->dynamicsWorld()->update();
+//    scene()->dynamicsWorld()->update();
 
     if(render < 16)
     {

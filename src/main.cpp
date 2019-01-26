@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
   MainWindow mainWindow;
   GLWidget glw;
   Scene scene(&glw);
-  DynamicsWorld dynamics;
+//  DynamicsWorld dynamics;
 
   QFont myFont;
   myFont.setPointSize(12);
@@ -59,10 +59,10 @@ int main(int argc, char *argv[])
   glw.setFormat(fmt);
 
   glw.setScene(&scene);
-  scene.setDynamicsWorld(&dynamics);
+//  scene.setDynamicsWorld(&dynamics);
 
   mainWindow.setGLController(&glw);
-  mainWindow.setDynamicsController(dynamics.controller());
+//  mainWindow.setDynamicsController(dynamics.controller());
   mainWindow.setupUi();
   mainWindow.show();
 

@@ -45,29 +45,8 @@ void Scene::initialize()
   }
 
   QtOpenGLinitialize();
-  DynamicsInitialize();
+//  DynamicsInitialize();
   setupScene();
-  m_DynamicsWorld->generateData();
-
-//  qDebug()<<"=-=-==-start=-=-=-=";
-
-//  QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
-
-//  QVector3D* ptr2 = *ptr;
-
-//  QVector3D result = *ptr2;
-
-
-
-//  QVector3D* test1 = m_DynamicsWorld->m_debugLines[0];
-//   QVector3D* test2 = m_DynamicsWorld->m_debugLines[1];
-
-//   QVector3D res1 = *test1;
-//   QVector3D res2 = *test2;
-
-
-//  qDebug()<<"=-=-==-end=-=-=-="<<ptr2<<&res1<<&res2;
-
 }
 
 void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, int _size)
@@ -286,33 +265,33 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
 
 void Scene::updateLinesVBO()
 {
+//// Get lines from dynamicsWorld
+//    m_LinesB.clear();
+//    for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
+//    {
+//        QVector3D vec = *_vec;
 
-    m_LinesB.clear();
-    for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
-    {
-        QVector3D vec = *_vec;
-
-        m_LinesB.push_back(vec);
-    }
-    m_lines_vao->bind();
-    m_lines_vbo.create();
-    m_lines_vbo.bind();
+//        m_LinesB.push_back(vec);
+//    }
+//    m_lines_vao->bind();
+//    m_lines_vbo.create();
+//    m_lines_vbo.bind();
 
 //    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
 //    QVector3D* ptr2 = *ptr;
 //    QVector3D result = *ptr2;
 
-    m_lines_vbo.allocate(m_LinesB.data(),  m_LinesB.size() * sizeof(QVector3D));
+//    m_lines_vbo.allocate(m_LinesB.data(),  m_LinesB.size() * sizeof(QVector3D));
 
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,                 // index
-                          3,                 // size of attr
-                          GL_FLOAT,          // datatype of each component
-                          GL_FALSE,          // normalized
-                          sizeof(QVector3D), //byte offset between consecutive generic vertex attributes
-                          nullptr);
-    m_lines_vao->release();
+//    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(0,                 // index
+//                          3,                 // size of attr
+//                          GL_FLOAT,          // datatype of each component
+//                          GL_FALSE,          // normalized
+//                          sizeof(QVector3D), //byte offset between consecutive generic vertex attributes
+//                          nullptr);
+//    m_lines_vao->release();
 
 }
 
@@ -582,16 +561,14 @@ void Scene::paint()
               }
 
        //-------------------------Draw Lines---------------------------------------------------------------------------
-//              debug();
-              updateLinesVBO();
-//              debug();
-              {
-                m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
-                m_lines_vao->bind();
-//                 glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
-                glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
-                m_lines_vao->release();
-              }
+//              updateLinesVBO();
+//              {
+//                m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
+//                m_lines_vao->bind();
+////                 glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
+//                glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
+//                m_lines_vao->release();
+//              }
 
 //              m_flat_program->release();
 
@@ -716,9 +693,9 @@ void Scene::setupScene()
        // 4  1-4-1
        // 5  3-22-0
 
-       makeDynamic(sceneObject1);
-       makeDynamic(sceneObject2);
-       makeDynamic(sceneObject3);
+//       makeDynamic(sceneObject1);
+//       makeDynamic(sceneObject2);
+//       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject4);
