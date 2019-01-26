@@ -36,6 +36,7 @@ public:
     void isActive(bool _isActive);
     bool isActive();
     void setTranslation(const QVector3D &_dt);
+    void setRotation(const QVector3D &_rt);
     void translate(const QVector3D &_dt);
     void setScale(const QVector3D &_s);
     void rotate(const QQuaternion &_rot);
@@ -81,6 +82,7 @@ inline std::shared_ptr<Shape> SceneObject::shape(){return pShape; };
 inline bool SceneObject::isDynamic(){ return m_IsDynamic; };
 
 inline void SceneObject::setTranslation(const QVector3D &_dt){m_Transform.setTranslation(_dt); m_IsDirty=true;};
+inline void SceneObject::setRotation(const QVector3D &_dt){m_Transform.setRotation(_dt); m_IsDirty=true;};
 inline void SceneObject::translate(const QVector3D &_dt){m_Transform.translate(_dt); m_IsDirty=true;};
 inline void SceneObject::rotate(const QQuaternion &_rot){m_Transform.rotate(_rot); m_IsDirty=true;};
 inline void SceneObject::setScale(const QVector3D &_s){m_Transform.scale(_s); m_IsDirty=true;};

@@ -13,9 +13,12 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QtGui/QOpenGLShaderProgram>
+#include <QtGui/QOpenGLShader>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QOpenGLTexture>
+#include <QDir>
+#include <QFile>
 
 // Project
 #include "AbstractScene.h"
@@ -91,9 +94,14 @@ private:
   QOpenGLShaderProgram* m_screen_program;
   QOpenGLShaderProgram* m_lighting_program;
   QOpenGLShaderProgram* m_flat_program;
+  QOpenGLShaderProgram* m_geometry_program;
 
   //  QOpenGLFramebufferObject* m_gbuffer_fbo;
   // fbo raw OpenGL
+
+  std::vector<QVector3D> somePoints;
+  QOpenGLVertexArrayObject* pointsVAO;
+  QOpenGLBuffer pointsVBO;
 
   int SCR_HEIGHT, SCR_WIDTH;
   unsigned int fbo, texture, rbo, intermediateFBO, screenTexture;

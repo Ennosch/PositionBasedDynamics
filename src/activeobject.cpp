@@ -37,5 +37,7 @@ void ActiveObject::setTransform(const QVector3D _t, const QVector3D _r, const QV
     if(activeSceneObject)
     {
        activeSceneObject->setTranslation(_t);
+       activeSceneObject->setRotation(_r);
+//       activeSceneObject->setScale(_s);
     }
 }

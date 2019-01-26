@@ -1,5 +1,6 @@
 #include "transform.h"
 #include <QDebug>
+#include <math.h>
 
 // Transform By (Add/Scale)
 void Transform::translate(const QVector3D &dt)
@@ -37,6 +38,11 @@ void Transform::setScale(const QVector3D &s)
 {
   m_dirty = true;
   m_scale = s;
+}
+
+void Transform::setRotation(const QVector3D &_eulerAngles)
+{
+    m_rotation =  QQuaternion::fromEulerAngles(_eulerAngles.x(), _eulerAngles.y(), _eulerAngles.z());
 }
 
 void Transform::setRotation(const QQuaternion &r)

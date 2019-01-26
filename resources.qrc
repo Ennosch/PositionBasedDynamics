@@ -1,7 +1,8 @@
 <RCC>
     <qresource prefix="/shader">
-        <file alias="geom.frag">resources/shaders/geom.frag</file>
-        <file alias="geom.vert">resources/shaders/geom.vert</file>
+        <file alias="geometry.vert">resources/shaders/geometry.vert</file>
+        <file alias="geometry.geom">resources/shaders/geometry.geom</file>
+        <file alias="geometry.frag">resources/shaders/geometry.frag</file>
         <file alias="simple.frag">resources/shaders/simple.frag</file>
         <file alias="simple.vert">resources/shaders/simple.vert</file>
         <file alias="screen.vert">resources/shaders/screen.vert</file>
@@ -12,7 +13,6 @@
         <file alias="flat.frag">resources/shaders/flat.frag</file>
         <file alias="phongWireframe.frag">resources/shaders/phongWireframe.frag</file>
         <file alias="phongWireframe.vert">resources/shaders/phongWireframe.vert</file>
-
     </qresource>
     <qresource prefix="/"/>
 </RCC>

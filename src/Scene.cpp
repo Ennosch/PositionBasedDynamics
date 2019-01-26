@@ -337,8 +337,28 @@ void Scene::QtOpenGLinitialize()
     m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
     m_flat_program->link();
 
+    QOpenGLShader vertshader(QOpenGLShader::Vertex);
+    QOpenGLShader geoShader(QOpenGLShader::Geometry);
+    QOpenGLShader fragShader(QOpenGLShader::Fragment);
+
+    bool success1 = vertshader.compileSourceFile(":/shader/geometry.vert");
+    bool success2 = geoShader.compileSourceFile(":/shader/geometry.geom");
+    bool success3 = fragShader.compileSourceFile(":/shader/geometry.frag");
+
+    m_geometry_program = new QOpenGLShaderProgram();
+    m_geometry_program->addShader(&vertshader);
+    m_geometry_program->addShader(&geoShader);
+    m_geometry_program->addShader(&fragShader);
+    bool success4 = m_geometry_program->link();
+
+    if(!success1 || !success2 || !success3 || !success4)
+    {
+        qDebug()<<"---------------SHADER DID NOT COMPILE"<<"VS: "<<success1<<"GS: "<<success2<<"FS: "<<success3<<"Link: "<<success4;
+        qDebug()<<m_geometry_program->log();
+    }
+
     //----prepare a QuadPlane
-//    m_quad_vao = new QOpenGLVertexArrayObject(window());
+//    m_quad_vao = new QOpenGLVertexArrayObject(window());    
     m_quad_vao = new QOpenGLVertexArrayObject();
     m_quad_vao->create();
     m_quad_vbo.create();
@@ -411,29 +431,32 @@ void Scene::QtOpenGLinitialize()
 
 //    m_screen_program->setUniformValue("screenTexture", 0);
 
-    GLuint id = m_screen_program->programId();
-    glUniform1i(glGetUniformLocation(id, "screenTexture"), 0);
+//    GLuint id = m_screen_program->programId();
+//    glUniform1i(glGetUniformLocation(id, "screenTexture"), 0);
 
-    m_flat_program->bind();
+    somePoints.push_back(QVector3D(0,2,0));
 
-    m_lines_vao = new QOpenGLVertexArrayObject();
-    m_lines_vao->create();
-    m_lines_vao->bind();
-
-    m_lines_vbo.create();
-    m_lines_vbo.bind();
-//    m_lines_vbo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    m_lines_vbo.allocate(m_Lines.data(), m_Lines.size() * sizeof(Line));
+//        somePoints.push_back(QVector3D(0,2,0));
+//    somePoints.push_back(QVector3D(1,2,0));
+//    somePoints.push_back(QVector3D(0,2,1));
 
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(QVector3D),
-                          nullptr);
-    m_flat_program->release();
+    pointsVAO = new QOpenGLVertexArrayObject();
+    pointsVAO->create();
+    pointsVBO.create();
+    pointsVBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    pointsVAO->bind();
+    pointsVBO.bind();
+    pointsVBO.allocate(somePoints.data(), somePoints.size() * sizeof (QVector3D));
+    m_geometry_program->setAttributeBuffer("Position",
+                                           GL_FLOAT,                    // type
+                                           0,                           // offset = start
+                                           3,                           // tuplesize num of components per vert
+                                           3 * sizeof(GLfloat));        //stride num of bytes between verts. 0 = densly packed
+    m_geometry_program->enableAttributeArray("Position");
+    pointsVBO.release();
+    pointsVAO->release();
+
 }
 
 void Scene::DynamicsInitialize()
@@ -519,9 +542,6 @@ void Scene::paint()
             // draw all SceneObjects
                 for(uint i = 1; i < m_SceneObjects.size(); i++)
                 {
-
-                    int test = m_SceneObjects.size();
-
                     if(m_pickedObject == m_SceneObjects[i])
                     {
                         uint matID = m_SceneObjects[i]->getMaterialID();
@@ -560,17 +580,15 @@ void Scene::paint()
                   m_SceneObjects[0]->draw();
               }
 
-       //-------------------------Draw Lines---------------------------------------------------------------------------
-//              updateLinesVBO();
-//              {
-//                m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
-//                m_lines_vao->bind();
-////                 glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
-//                glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
-//                m_lines_vao->release();
-//              }
-
-//              m_flat_program->release();
+        //------------------Geometry Shader testing -----------------------------------------------
+              glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+             m_geometry_program->bind();
+             m_geometry_program->setUniformValue("projection", m_projection_matrix);
+             m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
+             m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
+             pointsVAO->bind();
+             glDrawArrays(GL_POINTS, 0, somePoints.size());
+             pointsVAO->release();
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
@@ -672,10 +690,10 @@ void Scene::setupScene()
 //       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
 
        // 1 Cell
-       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
-       auto sceneObject2 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
-       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
-       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-3,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject2 = addSceneObjectFromModel("bunny", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
+//       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
+//       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-3,0,0), QQuaternion(1,0,0,0));
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
 //       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
        //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));

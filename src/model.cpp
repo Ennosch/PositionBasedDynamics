@@ -24,8 +24,8 @@ void Model::loadModel(std::string _path)
 //                                             aiProcess_JoinIdenticalVertices |
                                              aiProcess_FlipUVs |
                                              aiProcess_CalcTangentSpace |                                             
-                                             aiProcess_GenNormals |
-//                                             aiProcess_GenSmoothNormals |
+//                                             aiProcess_GenNormals |
+                                             aiProcess_GenSmoothNormals |
                                              aiProcess_FixInfacingNormals);
 
 ////------------------- exporter test

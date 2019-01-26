@@ -32,6 +32,8 @@ public:
   void setScale(const QVector3D &s);
   void setScale(float x, float y, float z);
   void setScale(float k);
+
+  void setRotation(const QVector3D &_eulerAngles);
   void setRotation(const QQuaternion &r);
   void setRotation(float angle, const QVector3D &axis);
   void setRotation(float angle, float ax, float ay, float az);
