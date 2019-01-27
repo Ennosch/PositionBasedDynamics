@@ -1,28 +1,26 @@
 #version 330 core
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec3 barycentric;
 
+out vec3 vFragPos;
+out vec3 vColor;
+out vec3 vNormal;
+out vec3 vBC;
 
-layout (triangles) in;
-layout (line_strip, max_vertices = 6) out;
+//out vec3 wireFrameColor;
+//out vec4 overlayColorl;
 
-in VS_OUT {
-    vec3 normal;
-} gs_in[];
-
-const float MAGNITUDE = 0.2;
-
-void GenerateLine(int index)
-{
-    gl_Position = gl_in[index].gl_Position;
-    EmitVertex();
-    gl_Position = gl_in[index].gl_Position + vec4(gs_in[index].normal, 0.0) * MAGNITUDE;
-    EmitVertex();
-    EndPrimitive();
-}
+uniform mat4 ProjectionMatrix;
+uniform mat4 ViewMatrix;
+uniform mat4 ModelMatrix;
 
 void main()
 {
-    GenerateLine(0); // first vertex normal
-    GenerateLine(1); // second vertex normal
-    GenerateLine(2); // third vertex normal
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(position, 1.0);
+    vFragPos = vec3(ModelMatrix * vec4(position, 1.0) );
+    vColor = vec3(0.2f , 0.0f , 0.5f);
+//    vNormal = normal;
+    vBC = barycentric;
+    vNormal = mat3(transpose(inverse( ModelMatrix ))) * normal;
 }
-

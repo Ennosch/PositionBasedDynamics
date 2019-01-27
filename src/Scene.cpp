@@ -322,14 +322,19 @@ void Scene::QtOpenGLinitialize()
     m_arcCamera.arcBallStart();
 
 //----build, compline and link shaders
+    m_activeProgram = new QOpenGLShaderProgram;
+    m_activeProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/phongWireframe.vert");
+    m_activeProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/phongWireframe.frag");
+    m_activeProgram->link();
+
     m_screen_program = new QOpenGLShaderProgram;
     m_screen_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/screen.vert");
     m_screen_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/screen.frag");
     m_screen_program->link();
 
     m_lighting_program = new QOpenGLShaderProgram();
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/phongWireframe.vert");
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/phongWireframe.frag");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/tmp.vert");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/tmp.frag");
     m_lighting_program->link();
 
     m_flat_program = new QOpenGLShaderProgram();
@@ -403,14 +408,16 @@ void Scene::QtOpenGLinitialize()
 
     //Creating a depth and stencil renderbuffer object
     glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     // attach the renderbuffer object to framebuffer
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
       qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//    glDeleteFramebuffers(1, &fbo);(? should be deleted here)
 
     //------------------fbo end-------------------
 
@@ -429,17 +436,8 @@ void Scene::QtOpenGLinitialize()
       qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-//    m_screen_program->setUniformValue("screenTexture", 0);
-
-//    GLuint id = m_screen_program->programId();
-//    glUniform1i(glGetUniformLocation(id, "screenTexture"), 0);
 
     somePoints.push_back(QVector3D(0,2,0));
-
-//        somePoints.push_back(QVector3D(0,2,0));
-//    somePoints.push_back(QVector3D(1,2,0));
-//    somePoints.push_back(QVector3D(0,2,1));
-
 
     pointsVAO = new QOpenGLVertexArrayObject();
     pointsVAO->create();
@@ -542,22 +540,11 @@ void Scene::paint()
             // draw all SceneObjects
                 for(uint i = 1; i < m_SceneObjects.size(); i++)
                 {
+
                     if(m_pickedObject == m_SceneObjects[i])
                     {
-                        uint matID = m_SceneObjects[i]->getMaterialID();
-                        m_lighting_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
-                        m_lighting_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
-                        m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
-                        m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
-                        m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
-                        m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-                        m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
-                        m_SceneObjects[i]->draw();
-                        m_lighting_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
-                        m_lighting_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
                         continue;
                     }
-
                     uint matID = m_SceneObjects[i]->getMaterialID();
                     m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
                     m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
@@ -566,6 +553,37 @@ void Scene::paint()
                     m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
                     m_SceneObjects[i]->draw();
                 }
+
+        //-------------------------Draw Active---------------------------------------------------------------------------
+        if(m_pickedObject)
+        {
+            m_activeProgram->bind();
+            for(uint i = 0; i < m_Pointlights.size(); i++)
+            {
+                  std::string uniFName = "PointLights[" + std::to_string(i) +"]";
+                  m_activeProgram->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
+                  m_activeProgram->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
+            }
+            uint matID = m_pickedObject->getMaterialID();
+            m_activeProgram->bind();
+            m_activeProgram->setUniformValue("ProjectionMatrix", m_projection_matrix);
+            m_activeProgram->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+            m_activeProgram->setUniformValue("viewPos", m_arcCamera.worldPos());
+            m_activeProgram->setUniformValue("numPointLights", int(m_Pointlights.size()));
+            m_activeProgram->setUniformValue("numMaterials", int(m_Materials.size()));
+
+            m_activeProgram->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
+            m_activeProgram->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
+            m_activeProgram->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
+            m_activeProgram->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
+            m_activeProgram->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
+            m_activeProgram->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+            m_activeProgram->setUniformValue("ModelMatrix",  m_pickedObject->getMatrix());
+            m_pickedObject->draw();
+            m_activeProgram->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
+            m_activeProgram->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
+        }
+
 
 
         //-------------------------Draw Wireframe---------------------------------------------------------------------------
@@ -613,6 +631,41 @@ void Scene::paint()
 
     m_quad_vao->release();
     m_screen_program->release();
+
+
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_DEPTH_TEST);
+
+    m_lighting_program->bind();
+    for(uint i = 0; i < m_Pointlights.size(); i++)
+    {
+          std::string uniFName = "PointLights[" + std::to_string(i) +"]";
+          m_lighting_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
+          m_lighting_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
+    }
+    uint matID = m_SceneObjects[4]->getMaterialID();
+    m_lighting_program->bind();
+    m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+    m_lighting_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+    m_lighting_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+    m_lighting_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
+    m_lighting_program->setUniformValue("numMaterials", int(m_Materials.size()));
+
+    m_lighting_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
+    m_lighting_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
+    m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
+    m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
+    m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
+    m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+    m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[4]->getMatrix());
+    m_SceneObjects[4]->draw();
+    m_lighting_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
+    m_lighting_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
+
+
 
 }
 
@@ -680,6 +733,9 @@ void Scene::setupScene()
        addModel(this, "grid", "../Grid100.obj");
 
        addModel(this, "HCube", "resources/objects/HCube.obj");
+       addModel(this, "Tube", "resources/objects/tube12.obj");
+       addModel(this, "Tube2", "../tube12.obj");
+       addModel(this, "Teapot", "resources/objects/teapot.obj");
        addModel(this, "Icosahedron", "../Icosahedronf4.obj");
        addShape(this, "Cube", &CubeWithNormals[0], sizeof(CubeWithNormals));
 
@@ -691,9 +747,10 @@ void Scene::setupScene()
 
        // 1 Cell
        auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2,0,0), QQuaternion(1,0,0,0));
-       auto sceneObject2 = addSceneObjectFromModel("bunny", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
-//       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
-//       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-3,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject2 = addSceneObjectFromModel("bunny", 2, QVector3D(-2,0.0,0), QQuaternion(1,0,0,0));
+       auto sceneObject3 = addSceneObjectFromModel("Tube2", 1, QVector3D(0,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject4 = addSceneObjectFromModel("bunny", 0, QVector3D(0,0,-2), QQuaternion(1,0,0,0));
+       sceneObject4->setScale(QVector3D(0.5,0.5,0.5));
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
 //       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
        //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));

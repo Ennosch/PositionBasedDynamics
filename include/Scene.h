@@ -90,7 +90,7 @@ private:
 
   DynamicsWorld *m_DynamicsWorld;
 
-  QOpenGLShaderProgram* m_program;
+  QOpenGLShaderProgram* m_activeProgram;
   QOpenGLShaderProgram* m_screen_program;
   QOpenGLShaderProgram* m_lighting_program;
   QOpenGLShaderProgram* m_flat_program;

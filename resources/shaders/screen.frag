@@ -8,7 +8,13 @@ uniform sampler2D screenTexture;
 void main()
 {
     vec3 col = texture(screenTexture, vTexCoords).rgb;
-    FragColor = vec4(col, 1.0);
+    vec4 test = texture(screenTexture, vTexCoords);
+//    FragColor = vec4(col, 1.0);
+    if(test[3] < 0.9)
+    {
+        test = vec4(0,1,0,1);
+    }
+    FragColor = test;
 }
 
 

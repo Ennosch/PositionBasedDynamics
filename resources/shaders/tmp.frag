@@ -19,6 +19,9 @@ struct PointLight
     vec3 color;
 };
 
+uniform vec3 wireFrameColor = vec3(0,0,0);
+uniform vec4 overlayColor = vec4(0,0,0,0);
+
 uniform vec3 viewPos;
 
 uniform int numPointLights;
@@ -70,44 +73,23 @@ void main()
         vec3 ambient = PointLights[i].color * mMaterial.ambient;
 
 //        fColor += vec4(diffuse + specular , 1.0);
-        pColor += vec4(ambient + diffuse + specular, 1);
+        fColor += vec4(ambient + diffuse + specular, 1);
     }
 
-    fColor = vec4(0.0, 0.0, 1.0, 1.0);
+//    fColor = vec4(0.0, 0.0, 1.0, 1.0);
 
-    if(any(lessThan(vBC, vec3(0.02))))
-    {
-//        fColor = vec4(0.2, 0.2, 0.2, 1.0);
-        fColor = vec4(0.0, 0.0, 0.0, 1.0);
-    }
-    else
-    {
-        fColor = pColor;
-    }
+//    if(any(lessThan(vBC, vec3(0.02))))
+//    {
+////        fColor = vec4(0.2, 0.2, 0.2, 1.0);
+////        fColor = vec4(0.0, 0.0, 0.0, 1.0);
+//          fColor = vec4(wireFrameColor, 1.0);
+//    }
+//    else
+//    {
+//        fColor = pColor + overlayColor;
+//    }
 
 }
-
-
-// WIP sketch
-/*
-    for(p in pointLights)
-        result += pResult
-
-    for(d in directionalIghts)
-        result += lResult
-
-
-
-
-        ?? Working on Light Vector.
-            how to send to shader (see Tutorial)
-            how to splitt point lights and dir lights
-
-
-
-
-*/
-
 
 
 
