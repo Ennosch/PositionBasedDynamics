@@ -62,7 +62,6 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 
         if(ptrShape->data() != nullptr)
         {
-            auto test = ptrShape->data();
             // (note, pushing_back for objects on the stack calls copy ctor)
             meshes.push_back(ptrShape);
         }
@@ -99,11 +98,6 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
         vertices.push_back(vertex);
 
-//        if(vertex.Position == QVector3D(0, 0, 0))
-//        if(vertex.Position[0] > 1.0)
-//        {
-//            qDebug()<<"hello";
-//        }
     }
 
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)

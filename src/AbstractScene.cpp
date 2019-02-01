@@ -3,6 +3,9 @@
 #include "AbstractScene.h"
 #include <QDebug>
 
+#include <iostream>
+
+
 void AbstractScene::foo()
 {
     qDebug("foo foo ");
@@ -55,6 +58,12 @@ void AbstractScene::initialize()
   qDebug()<<"init openglfucntions :";
   initializeOpenGLFunctions();
   qDebug()<<"init openglfucntions end";
+
+//  const uint test = &this->glBindTexture;
+//  printf("address of function funct() is : %p\n", this->glBindTexture());
+
+
+
 }
 
 

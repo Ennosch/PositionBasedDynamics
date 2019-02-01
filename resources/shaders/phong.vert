@@ -17,11 +17,7 @@ uniform mat4 ModelMatrix;
 
 void main()
 {
-    vec3 camTranslation = ViewMatrix[3].xyz;
-    vec3 modelTranslation = ModelMatrix[3].xyz;
-    float d = length(camTranslation - modelTranslation) / 2;
-
-    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(d * position, 1.0);
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(position, 1.0);
     vFragPos = vec3(ModelMatrix * vec4(position, 1.0) );
     vColor = vec3(0.2f , 0.0f , 0.5f);
 //    vNormal = normal;

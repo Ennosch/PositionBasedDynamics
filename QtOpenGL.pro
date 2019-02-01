@@ -31,7 +31,9 @@ SOURCES += \
     src/ControlWidget.cpp \
     src/MainWindow.cpp \
     src/activeobject.cpp \
-    src/ui/DynamicsUiWidget.cpp
+    src/ui/DynamicsUiWidget.cpp \
+    src/manipulator.cpp \
+    src/Framebuffer.cpp
 
 
 OBJECTS_DIR = build/obj
@@ -69,7 +71,9 @@ HEADERS += \
     include/ControlWidget.h \
     include/MainWindow.h \
     include/activeobject.h \
-    include/ui/DynamicsUiWidget.h
+    include/ui/DynamicsUiWidget.h \
+    include/manipulator.h \
+    include/Framebuffer.h
 
 
 

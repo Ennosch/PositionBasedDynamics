@@ -4,6 +4,15 @@
 #include "Scene.h"
 
 
+#include <iostream>
+
+
+struct Color{
+    float r;
+    float g;
+    float b;
+};
+
 int Scene::numCreation = 0;
 
 Scene::Scene(Window *_window) : AbstractScene(_window)
@@ -152,6 +161,16 @@ void Scene::makeDynamic(pSceneOb _sceneObject)
     //    _sceneObject->
 }
 
+uint Scene::width()
+{
+    return  SCR_WIDTH;
+}
+
+uint Scene::height()
+{
+    return  SCR_HEIGHT;
+}
+
 ShapePtr Scene::getShapeFromPool(std::string _key)
 {
     ShapeMap::const_iterator got = m_ShapePool.find(_key);
@@ -263,46 +282,67 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
     return m_SceneObjects[index];
 }
 
+void Scene::readPixel(uint _x, uint _y)
+{
+//    framebuffer->readPixel(_x, _y);
+
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+    Color Pixel;
+    std::vector< unsigned char > pixels( 1 * 1 * 3);
+//    glReadPixels(0, 0, SCR_WIDTH, SCR_HEIGHT, GL_RGB, GL_FLOAT, &image);
+//    glReadPixels(_x, _y, 1, 1, GL_RGB, GL_FLOAT, &Pixel);
+//    glReadPixels(_x, _y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]);
+
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, intermediateFBO);
+
+    qDebug()<<"ReadPixel: "<<_x<<_y<<Pixel.r<<Pixel.g<<Pixel.b;
+//    qDebug()<<pixels[0]<<pixels[1]<<pixels[2];
+//        return Pixel;
+
+}
+
 void Scene::updateLinesVBO()
 {
-//// Get lines from dynamicsWorld
+
+// Get lines from dynamicsWorld
 //    m_LinesB.clear();
 //    for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
 //    {
 //        QVector3D vec = *_vec;
-
-//        m_LinesB.push_back(vec);
+//        m_LinesB.push_back(QVector3D(0,0,0));
+//        m_LinesB.push_back(QVector3D(2,2,2));
 //    }
-//    m_lines_vao->bind();
-//    m_lines_vbo.create();
-//    m_lines_vbo.bind();
+    m_lines_vao->bind();
+    m_lines_vbo.create();
+    m_lines_vbo.bind();
+
 
 //    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
 //    QVector3D* ptr2 = *ptr;
 //    QVector3D result = *ptr2;
 
-//    m_lines_vbo.allocate(m_LinesB.data(),  m_LinesB.size() * sizeof(QVector3D));
+    m_lines_vbo.allocate(m_LinesB.data(),  m_LinesB.size() * sizeof(QVector3D));
 
-
-//    glEnableVertexAttribArray(0);
-//    glVertexAttribPointer(0,                 // index
-//                          3,                 // size of attr
-//                          GL_FLOAT,          // datatype of each component
-//                          GL_FALSE,          // normalized
-//                          sizeof(QVector3D), //byte offset between consecutive generic vertex attributes
-//                          nullptr);
-//    m_lines_vao->release();
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,                 // index
+                          3,                 // size of attr
+                          GL_FLOAT,          // datatype of each component
+                          GL_FALSE,          // normalized
+                          sizeof(QVector3D), //byte offset between consecutive generic vertex attributes
+                          nullptr);
+    m_lines_vao->release();
 
 }
 
-void Scene::debug()
+void Scene::initFramebuffer()
 {
-//    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
+    qDebug()<<"start";
 
-//     QVector3D* ptr2 = *ptr;
-
-//     QVector3D result = *ptr2;
-//     qDebug()<<result;
+    framebuffer->debug();
 }
 
 void Scene::QtOpenGLinitialize()
@@ -333,14 +373,24 @@ void Scene::QtOpenGLinitialize()
     m_screen_program->link();
 
     m_lighting_program = new QOpenGLShaderProgram();
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/tmp.vert");
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/tmp.frag");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/phong.vert");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/phong.frag");
     m_lighting_program->link();
 
     m_flat_program = new QOpenGLShaderProgram();
     m_flat_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/flat.vert");
     m_flat_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/flat.frag");
     m_flat_program->link();
+
+    m_manipulator_program = new QOpenGLShaderProgram();
+    m_manipulator_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/manipulator.vert");
+    m_manipulator_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/manipulator.frag");
+    m_manipulator_program->link();
+
+    m_picking_program = new QOpenGLShaderProgram();
+    m_picking_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/picking.vert");
+    m_picking_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/picking.frag");
+    m_picking_program->link();
 
     QOpenGLShader vertshader(QOpenGLShader::Vertex);
     QOpenGLShader geoShader(QOpenGLShader::Geometry);
@@ -455,6 +505,11 @@ void Scene::QtOpenGLinitialize()
     pointsVBO.release();
     pointsVAO->release();
 
+
+    framebuffer = new Framebuffer(this);
+    bool success = framebuffer->init();
+
+    qDebug()<<"Dimensions"<<SCR_HEIGHT<<SCR_WIDTH;
 }
 
 void Scene::DynamicsInitialize()
@@ -485,7 +540,6 @@ void Scene::resize(int width, int height)
         SCR_HEIGHT = 720;
     }
 
-
     m_projection_matrix.setToIdentity();
     m_projection_matrix.perspective(40.0f, width / float(height), 0.01f, 1000.0f);
 
@@ -503,8 +557,84 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
+//    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+//    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
+//    glClear(GL_COLOR_BUFFER_BIT);
+//    glClear(GL_DEPTH_BUFFER_BIT);
+
+//    glEnable(GL_DEPTH_TEST);
+
+//    framebuffer->bind();
+////        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+//    m_picking_program->bind();
+//    m_picking_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+//    m_picking_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//    if(mainpulator)
+//        mainpulator->drawPickingBuffer();
+
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->fbo());
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 
+//    return;
+
+
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+//    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
+//    glClear(GL_COLOR_BUFFER_BIT);
+//    glClear(GL_DEPTH_BUFFER_BIT);
+//    m_picking_program->bind();
+//    m_picking_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+//    m_picking_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//    if(mainpulator)
+//        mainpulator->drawPickingBuffer();
+
+//    return;
+
+
+//    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+//    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
+//    glClear(GL_COLOR_BUFFER_BIT);
+//    glClear(GL_DEPTH_BUFFER_BIT);
+
+//    glEnable(GL_DEPTH_TEST);
+
+//    m_manipulator_program->bind();
+//    for(uint i = 0; i < m_Pointlights.size(); i++)
+//    {
+//          std::string uniFName = "PointLights[" + std::to_string(i) +"]";
+//          m_manipulator_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
+//          m_manipulator_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
+//    }
+////    uint matID = m_SceneObjects[4]->getMaterialID();
+//    m_manipulator_program->bind();
+//    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+//    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+//    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
+//    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
+
+//    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
+//    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
+
+//    if(mainpulator)
+//    {
+//        mainpulator->draw();
+//    }
+//    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
+//    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
+//    return;
+
+
+
+
+
+
+
+    //----------------------------------------------actual drawing ----------------------------------------
 
 //    qDebug()<<"paint Start";
     // draw to the framebuffer (off-screen render)
@@ -515,44 +645,82 @@ void Scene::paint()
     // m_gbuffer_fbo->bind();
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-      glEnable(GL_DEPTH_TEST);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->fbo());
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-              m_lighting_program->bind();
-              m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-              m_lighting_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-              m_lighting_program->setUniformValue("viewPos", m_arcCamera.worldPos());
-              m_lighting_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
-              m_lighting_program->setUniformValue("numMaterials", int(m_Materials.size()));
 
-              // set Position + color for all pointsLights
-              for(uint i = 0; i < m_Pointlights.size(); i++)
+//    return;
+
+
+        //-------------------------Draw Wireframe---------------------------------------------------------------------------
+              m_flat_program->bind();
+              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
+              if(m_SceneObjects[0])
               {
-                    std::string uniFName = "PointLights[" + std::to_string(i) +"]";
-                    m_lighting_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
-                    m_lighting_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
+                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
+                  m_SceneObjects[0]->draw();
               }
 
-              m_lighting_program->setUniformValue("objectColor", 1.0f, 0.5f, 0.31f);
+        //------------------Geometry Shader testing -----------------------------------------------
+              glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+             m_geometry_program->bind();
+             m_geometry_program->setUniformValue("projection", m_projection_matrix);
+             m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
+             m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
+             pointsVAO->bind();
+             glDrawArrays(GL_POINTS, 0, somePoints.size());
+             pointsVAO->release();
 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            // draw all SceneObjects
-                for(uint i = 1; i < m_SceneObjects.size(); i++)
-                {
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-                    if(m_pickedObject == m_SceneObjects[i])
-                    {
-                        continue;
-                    }
-                    uint matID = m_SceneObjects[i]->getMaterialID();
-                    m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
-                    m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
-                    m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
-                    m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-                    m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
-                    m_SceneObjects[i]->draw();
-                }
+
+
+
+//    glBindTexture(GL_TEXTURE_2D, texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    m_quad_vao->release();
+    m_screen_program->release();
+
+
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_DEPTH_TEST);
+
+    m_manipulator_program->bind();
+    for(uint i = 0; i < m_Pointlights.size(); i++)
+    {
+          std::string uniFName = "PointLights[" + std::to_string(i) +"]";
+          m_manipulator_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
+          m_manipulator_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
+    }
+//    uint matID = m_SceneObjects[4]->getMaterialID();
+    m_manipulator_program->bind();
+    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
+    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
+
+    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
+    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
+
+    if(mainpulator)
+    {
+        mainpulator->draw();
+    }
+    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
+    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
 
         //-------------------------Draw Active---------------------------------------------------------------------------
         if(m_pickedObject)
@@ -583,8 +751,6 @@ void Scene::paint()
             m_activeProgram->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
             m_activeProgram->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
         }
-
-
 
         //-------------------------Draw Wireframe---------------------------------------------------------------------------
               m_flat_program->bind();
@@ -639,33 +805,30 @@ void Scene::paint()
 
     glEnable(GL_DEPTH_TEST);
 
-    m_lighting_program->bind();
+    m_manipulator_program->bind();
     for(uint i = 0; i < m_Pointlights.size(); i++)
     {
           std::string uniFName = "PointLights[" + std::to_string(i) +"]";
-          m_lighting_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
-          m_lighting_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
+          m_manipulator_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
+          m_manipulator_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
     }
-    uint matID = m_SceneObjects[4]->getMaterialID();
-    m_lighting_program->bind();
-    m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-    m_lighting_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-    m_lighting_program->setUniformValue("viewPos", m_arcCamera.worldPos());
-    m_lighting_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
-    m_lighting_program->setUniformValue("numMaterials", int(m_Materials.size()));
+//    uint matID = m_SceneObjects[4]->getMaterialID();
+    m_manipulator_program->bind();
+    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
+    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
 
-    m_lighting_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
-    m_lighting_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
-    m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
-    m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
-    m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
-    m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-    m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[4]->getMatrix());
-    m_SceneObjects[4]->draw();
-    m_lighting_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
-    m_lighting_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
+    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
+    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
 
-
+    if(mainpulator)
+    {
+        mainpulator->draw();
+    }
+    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
+    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
 
 }
 
@@ -738,6 +901,7 @@ void Scene::setupScene()
        addModel(this, "Teapot", "resources/objects/teapot.obj");
        addModel(this, "Icosahedron", "../Icosahedronf4.obj");
        addShape(this, "Cube", &CubeWithNormals[0], sizeof(CubeWithNormals));
+       addModel(this, "Vector", "../VectorShape.obj");
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
@@ -748,9 +912,9 @@ void Scene::setupScene()
        // 1 Cell
        auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2,0,0), QQuaternion(1,0,0,0));
        auto sceneObject2 = addSceneObjectFromModel("bunny", 2, QVector3D(-2,0.0,0), QQuaternion(1,0,0,0));
-       auto sceneObject3 = addSceneObjectFromModel("Tube2", 1, QVector3D(0,0,0), QQuaternion(1,0,0,0));
-       auto sceneObject4 = addSceneObjectFromModel("bunny", 0, QVector3D(0,0,-2), QQuaternion(1,0,0,0));
-       sceneObject4->setScale(QVector3D(0.5,0.5,0.5));
+       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(-10,0,0), QQuaternion(1,0,0,0));
+       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));
+
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
 //       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
        //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
@@ -761,14 +925,9 @@ void Scene::setupScene()
 //       // outside
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2.1,22,0), QQuaternion(1,0,0,0));
 
-       // Cells:
-       // 1  1-3-0
-       // 2  1-3-0
-       // 3  1-3-0
-       // 4  1-4-1
-       // 5  3-22-0
-
 //       makeDynamic(sceneObject1);
+//       makeDynamic(sceneObject2);
+//       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
@@ -780,6 +939,20 @@ void Scene::setupScene()
 //       auto myModel = m_ModelPool["grid1"];
 
        addLine(QVector3D(0,0,0), QVector3D(0,5,0));
+
+       ModelPtr _vectorShape = getModelFromPool("Vector");
+       mainpulator = new Manipulator(_vectorShape, m_manipulator_program);
+       mainpulator->setScene(this);
+
+//       sceneObject4->rotate(QQuaternion::fromEulerAngles(QVector3D(45,0,0)));
+//       mainpulator->setTransform(sceneObject4->getTransform());
+
+       ModelPtr _vectorShape = getModelFromPool("Vector");
+       mainpulator = new Manipulator(_vectorShape, m_manipulator_program);
+       mainpulator->setScene(this);
+
+//       sceneObject4->rotate(QQuaternion::fromEulerAngles(QVector3D(45,0,0)));
+//       mainpulator->setTransform(sceneObject4->getTransform());
 
 }
 

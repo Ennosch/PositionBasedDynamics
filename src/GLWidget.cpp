@@ -59,7 +59,7 @@ void GLWidget::loop()
 {
     countFPS();
 
-    processInput();
+//    processInput();
 
     scene()->updateSceneObjects();
     int i = 0;
@@ -209,8 +209,8 @@ void GLWidget::printVersionInformation()
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
-    qDebug()<<"widget:";
-    printVersionInformation();
+//    qDebug()<<"widget:";
+//    printVersionInformation();
         if (event->isAutoRepeat())
         {
           event->ignore();
@@ -234,6 +234,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                 qDebug()<<"register and call update";
                 scene()->dynamicsWorld()->update();
                   break;
+
+                case Qt::Key_W:
+//                    qDebug()<<"register and call update";
+                  scene()->debug();
+                    break;
             }
         }
 }
@@ -263,6 +268,10 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
     scene()->pickObject(pixelScreenX, pixelScreenY);
 
+    qDebug()<<event->pos().x()*2<<event->pos().y()*2;
+//    scene()->readPixel(event->pos().x() * 2, event->pos().y() * 2);
+
+    scene()->readPixel(event->pos().x(), event->pos().y());
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -278,7 +287,7 @@ void GLWidget::wheelEvent(QWheelEvent *event)
     QVector3D nextCamTranslation = camTranslation + (QVector3D(0,0,1) * t * 0.05);
     scene()->m_arcCamera.setTranslation(nextCamTranslation);
 }
-
+//35 1331
 
 void GLWidget::initializeGL()
 {

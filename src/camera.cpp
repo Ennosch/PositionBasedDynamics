@@ -234,15 +234,17 @@ const QMatrix4x4 &Camera3D::toMatrix()
     // calc WP
 //    m_worldPos = m_rotation.rotatedVector(m_PreWorldPos);
 //    m_pivotToCam = m_rotation.rotatedVector(m_PrePivotToCam);
-    QMatrix3x3 tmp = m_rotation.toRotationMatrix();
-    float *m = tmp.data();
-    const float data[16]  = {
-            m[0],m[1],m[2],0,
-            m[3],m[4],m[5],0,
-            m[6],m[7],m[8],0,
-               0, 0, 0, 1
-    };
-    const float *ptr = data;
+
+
+//    QMatrix3x3 tmp = m_rotation.toRotationMatrix();
+//    float *m = tmp.data();
+//    const float data[16]  = {
+//            m[0],m[1],m[2],0,
+//            m[3],m[4],m[5],0,
+//            m[6],m[7],m[8],0,
+//               0, 0, 0, 1
+//    };
+//    const float *ptr = data;
 
 //    QMatrix4x4 myRotMat = QMatrix4x4(ptr);
 
@@ -255,6 +257,9 @@ const QMatrix4x4 &Camera3D::toMatrix()
     QMatrix4x4 myRotMat = m_SecondTumble * m_tumble;
     m_worldPos = myRotMat.transposed() * (m_translation - m_pivot) + m_pivot;
   }
+
+
+
   return m_world;
 }
 

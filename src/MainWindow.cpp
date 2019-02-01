@@ -99,6 +99,14 @@ void MainWindow::setupUi()
     mainWidget->resize(750,1000);
     this->resize(1000,720);
 
+    // who is focusing away :( ?
+    if(glw)
+        glw->setFocus(Qt::ActiveWindowFocusReason);
+
+    // who is focusing away :( ?
+    if(glw)
+        glw->setFocus(Qt::ActiveWindowFocusReason);
+
 }
 
 

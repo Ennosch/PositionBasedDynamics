@@ -30,8 +30,10 @@
 #include "shape.h"
 #include "model.h"
 #include "utils.h"
+#include "manipulator.h"
 #include "dynamics/dynamicsWorld.h"
 #include "dynamics/collisiondetection.h"
+#include "Framebuffer.h"
 
 class Scene : public AbstractScene
 {
@@ -69,6 +71,8 @@ public:
   void makeDynamic(pSceneOb _sceneObject);
 
   // accessor
+  uint width();
+  uint height();
   ShapePtr getShapeFromPool(std::string _key);
   ModelPtr getModelFromPool(std::string _key);
   MaterialPtr getMaterial(int _index);
@@ -79,6 +83,7 @@ public:
 
   Ray castRayFromCamera(float ndcX, float ndcY, float depthZ);
   pSceneOb pickObject(float ndcX, float ndcY);
+  void readPixel(uint _x, uint _y);
 
   CollisionDetection m_CollisionDetect;
   QVector3D currentRayStart = QVector3D(0,0,0);
@@ -87,6 +92,7 @@ public:
 private:
   friend class Window;
   friend class GLWidget;
+  friend class Manipulator;
 
   DynamicsWorld *m_DynamicsWorld;
 
@@ -94,6 +100,9 @@ private:
   QOpenGLShaderProgram* m_screen_program;
   QOpenGLShaderProgram* m_lighting_program;
   QOpenGLShaderProgram* m_flat_program;
+  QOpenGLShaderProgram* m_manipulator_program;
+  QOpenGLShaderProgram* m_picking_program;
+
   QOpenGLShaderProgram* m_geometry_program;
 
   //  QOpenGLFramebufferObject* m_gbuffer_fbo;
@@ -102,6 +111,8 @@ private:
   std::vector<QVector3D> somePoints;
   QOpenGLVertexArrayObject* pointsVAO;
   QOpenGLBuffer pointsVBO;
+
+
 
   int SCR_HEIGHT, SCR_WIDTH;
   unsigned int fbo, texture, rbo, intermediateFBO, screenTexture;
@@ -118,6 +129,9 @@ private:
 
   ShapeMap m_ShapePool;
   ModelMap m_ModelPool;
+
+  Manipulator* mainpulator;
+  Framebuffer* framebuffer;
 
   std::vector <LightPtr> m_Pointlights;
   std::vector <MaterialPtr> m_Materials;
