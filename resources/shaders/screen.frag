@@ -3,17 +3,21 @@ out vec4 FragColor;
 
 in vec2 vTexCoords;
 
-uniform sampler2D screenTexture;
+//uniform sampler2D screenTexture;
+uniform sampler2D textureA;
 
 void main()
 {
-    vec3 col = texture(screenTexture, vTexCoords).rgb;
-    vec4 test = texture(screenTexture, vTexCoords);
+    vec3 col = texture(textureA, vTexCoords).rgb;
+    vec4 test = texture(textureA, vTexCoords);
+
+//    vec3 col = texture(screenTexture, vTexCoords).rgb;
+//    vec4 test = texture(screenTexture, vTexCoords);
 //    FragColor = vec4(col, 1.0);
-    if(test[3] < 0.9)
-    {
-        test = vec4(0,1,0,1);
-    }
+//    if(test[3] < 0.9)
+//    {
+//        test = vec4(0,1,0,1);
+//    }
     FragColor = test;
 }
 

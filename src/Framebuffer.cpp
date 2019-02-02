@@ -26,16 +26,21 @@ Framebuffer::Framebuffer(Scene *_scene) :
 
 bool Framebuffer::init()
 {
+    bool ms = true;
     glGenFramebuffers(1, &m_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
     // Create the texture object for the primitive information buffer
         glGenTextures(1, &m_pickingTexture);
-        glBindTexture(GL_TEXTURE_2D, m_pickingTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, WindowWidth, WindowHeight,
-                    0, GL_RGB, GL_FLOAT, nullptr);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                    m_pickingTexture, 0);
+        if(ms){ glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_pickingTexture);}
+        else{glBindTexture(GL_TEXTURE_2D, m_pickingTexture);}
+
+        if(ms){ glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, WindowWidth, WindowHeight, GL_TRUE);}
+        else{glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WindowWidth, WindowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);}
+
+        if(ms){ glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_pickingTexture, 0);}
+        else{glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pickingTexture, 0);}
+
 
 //         Create the texture object for the depth buffer
         glGenTextures(1, &m_depthTexture);
@@ -52,28 +57,24 @@ bool Framebuffer::init()
 
         // Verify that the FBO is correct
         GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-
-//         GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
-
-        auto error = glGetError();
-        qDebug()<<"glGetError"<<error;
+//        auto error = glGetError();
+//        qDebug()<<"glGetError"<<error;
 
         if (Status != GL_FRAMEBUFFER_COMPLETE) {
             qDebug()<<"FB error, status: 0x%x\n"<< Status;
             return false;
         }
 
-        // Restore the default framebuffer
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//        // Restore the default framebuffer
+//        glBindTexture(GL_TEXTURE_2D, 0);
+//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         return true;
 }
 
 void Framebuffer::bind()
 {
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 }
 
 void Framebuffer::readPixel(uint _x, uint _y)

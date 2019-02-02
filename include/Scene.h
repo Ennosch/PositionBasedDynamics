@@ -55,6 +55,10 @@ public:
   void setupScene();
   void updateLinesVBO();
 
+  void initFramebufferOld();
+  void initFramebuffer();
+  void paintOld();
+
   void debug();
 
   // creation
@@ -90,6 +94,9 @@ public:
   QVector3D currentRayEnd = QVector3D(0,0,0);
 
 private:
+
+    int widthT, heightT, nrComponents;
+
   friend class Window;
   friend class GLWidget;
   friend class Manipulator;

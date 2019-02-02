@@ -26,7 +26,7 @@ void main()
     float d = length(modelTranslation - test) /2;
 
 
-    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(d * position, 1.0);
-//    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4( position, 1.0);
+//    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(d * position, 1.0);
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(20 * position, 1.0);
 
 }
