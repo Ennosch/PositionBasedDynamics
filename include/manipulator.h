@@ -32,7 +32,7 @@ public:
 
     int* var;
 
-private:
+//private:
     friend Scene;
     ModelPtr vecotorModel;
     Transform m_Transform;

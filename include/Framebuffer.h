@@ -14,14 +14,16 @@ class Framebuffer
 public:
     Framebuffer();
     Framebuffer(Scene *_scene);
-    bool init();
+    bool initOld();
     void bind();
     void readPixel(uint _x, uint _y);
     void debug();
     uint fbo();
 
+    void init();
+
     bool isMultisample();
-private:
+//private:
     bool ms;
     uint m_msfbo, m_msColorBuffer, m_msDepthBuffer;
     uint m_fbo, m_colorBuffer;

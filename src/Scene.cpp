@@ -341,6 +341,10 @@ void Scene::updateLinesVBO()
 void Scene::initFramebuffer()
 {
 
+    qDebug()<<"initFramebuffer"<<SCR_WIDTH<<SCR_HEIGHT;
+
+
+
     bool ms = true;
 //    bool ms = false;
 //    glGenFramebuffers(1, &fbo);
@@ -377,7 +381,7 @@ void Scene::initFramebuffer()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum Scene:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+      qCritical()<<"fbo in initFramebuffer"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -395,7 +399,7 @@ void Scene::initFramebuffer()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum Scene2:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+      qCritical()<<"intermediateFBO in initFramebuffer"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
@@ -412,7 +416,7 @@ void Scene::initFramebuffer()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tmpText, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum Scene3:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+      qCritical()<<"tmpFbo in initFramebuffer"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 }
@@ -597,13 +601,68 @@ void Scene::paint()
 //        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 //        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tmpFbo);
 //        glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+// -------------------------------------
+//        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+//       if(widget()->tool() == MANIPULATOR_T && mainpulator)
+//       {
+//           mainpulator->draw();
+//       }
 
-       if(widget()->tool() == MANIPULATOR_T && mainpulator)
-       {
-           mainpulator->drawPickingBuffer();
-       }
+//       glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+////       glBindFramebuffer(GL_READ_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
+//       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+//       glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+//       m_screen_program->bind();
+//       m_quad_vao->bind();
+//       glActiveTexture(GL_TEXTURE0);
+////        glBindTexture(GL_TEXTURE_2D, texture);
+//       glBindTexture(GL_TEXTURE_2D, screenTexture);
+//       glDrawArrays(GL_TRIANGLES, 0, 6);
+//       m_quad_vao->release();
+//       m_screen_program->release();
+
+//       return;
+//    mainpulator
 
 
+
+//    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
+
+    m_manipulator_program->bind();
+    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
+    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
+
+    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
+    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
+
+    if(mainpulator)
+    {
+        mainpulator->draw();
+    }
+    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
+    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
+
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+      m_screen_program->bind();
+      m_quad_vao->bind();
+      glActiveTexture(GL_TEXTURE0);
+    //        glBindTexture(GL_TEXTURE_2D, texture);
+      glBindTexture(GL_TEXTURE_2D, screenTexture);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      m_quad_vao->release();
+      m_screen_program->release();
+
+    return;
     //--------------------------
     //    qDebug()<<"paint Start";
         // draw to the framebuffer (off-screen render)
@@ -764,7 +823,7 @@ void Scene::paint()
 
         if(mainpulator)
         {
-//            mainpulator->draw();
+            mainpulator->draw();
         }
         m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
         m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );

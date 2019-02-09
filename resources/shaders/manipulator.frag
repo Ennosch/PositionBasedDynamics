@@ -38,30 +38,30 @@ void main()
 
 
     vec4 pColor = vec4(0,0,0,0);
-    for(int i = 0; i < numPointLights; i++)
-    {
-        vec3 lightDir = normalize(PointLights[i].position - vFragPos);
-        vec3 normal = normalize(vNormal);
+//    for(int i = 0; i < numPointLights; i++)
+//    {
+//        vec3 lightDir = normalize(PointLights[i].position - vFragPos);
+//        vec3 normal = normalize(vNormal);
 
-        float diff = max(dot(normal, lightDir), 0.0);
-        vec3 diffuse = diff * mMaterial.diffuse * PointLights[i].color;
+//        float diff = max(dot(normal, lightDir), 0.0);
+//        vec3 diffuse = diff * mMaterial.diffuse * PointLights[i].color;
 
-        float specularStrength = 0.5;
-        vec3 viewDir = normalize(viewPos - vFragPos);
-        vec3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 20);
-        vec3 specular = specularStrength * spec * PointLights[i].color;
+//        float specularStrength = 0.5;
+//        vec3 viewDir = normalize(viewPos - vFragPos);
+//        vec3 reflectDir = reflect(-lightDir, normal);
+//        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 20);
+//        vec3 specular = specularStrength * spec * PointLights[i].color;
 
-        vec3 ambient = PointLights[i].color * mMaterial.ambient;
+//        vec3 ambient = PointLights[i].color * mMaterial.ambient;
 
-//        fColor += vec4(diffuse + specular , 1.0);
-        fColor += vec4(ambient + diffuse + specular, 1);
-//        fColor = vec4(vColor, 1);
-    }
+////        fColor += vec4(diffuse + specular , 1.0);
+//        fColor += vec4(ambient + diffuse + specular, 1);
+////        fColor = vec4(vColor, 1);
+//    }
+    fColor = vec4(mMaterial.diffuse,1);
 
 
 }
-
 
 
 
