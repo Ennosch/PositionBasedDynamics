@@ -304,6 +304,7 @@ void Scene::readPixel(uint _x, uint _y)
 //    qDebug()<<pixels[0]<<pixels[1]<<pixels[2];
 //        return Pixel;
 
+    qDebug()<<"ReadPixel: "<<this->width()<<this->height()<<_x<<_y<<pixel.r<<pixel.g<<pixel.b;
 }
 
 void Scene::updateLinesVBO()
@@ -466,6 +467,7 @@ void Scene::initFramebuffer()
 
     glGenTextures(1, &tmpText);
     glBindTexture(GL_TEXTURE_2D, tmpText);
+    qDebug()<<"tmpFBO res"<<SCR_WIDTH<<SCR_HEIGHT;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
