@@ -34,7 +34,6 @@ SOURCES += \
     src/ui/DynamicsUiWidget.cpp \
     src/manipulator.cpp \
     src/Framebuffer.cpp \
-    src/stb_image.cpp
 
 
 OBJECTS_DIR = build/obj

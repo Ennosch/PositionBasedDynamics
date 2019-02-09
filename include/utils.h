@@ -83,6 +83,18 @@ struct int3{
     int i,j,k;
 };
 
+struct Pixel{
+    float r,g,b;
+};
+
+
+enum Tool{
+    CAMERA,
+    MANIPULATOR_T,
+    ROTATELOCALX,
+    TRANSLATELOCALX
+};
+
 typedef std::unordered_map <std::string, std::shared_ptr <Shape>>       ShapeMap;
 typedef std::unordered_map <std::string, std::shared_ptr <Model>>       ModelMap;
 

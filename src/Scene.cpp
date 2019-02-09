@@ -3,15 +3,11 @@
 
 #include "Scene.h"
 
-#include "stb_image.h"
+
 #include <iostream>
 
 
-struct Color{
-    float r;
-    float g;
-    float b;
-};
+
 
 int Scene::numCreation = 0;
 
@@ -284,10 +280,10 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
     return m_SceneObjects[index];
 }
 
-void Scene::readPixel(uint _x, uint _y)
+int3 Scene::readPixel(uint _x, uint _y)
 {
 //    framebuffer->readPixel(_x,_y);
-    Color pixel;
+    int3 pixel;
     glBindFramebuffer(GL_READ_FRAMEBUFFER, tmpFbo);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
 
@@ -304,7 +300,9 @@ void Scene::readPixel(uint _x, uint _y)
 //    qDebug()<<pixels[0]<<pixels[1]<<pixels[2];
 //        return Pixel;
 
-    qDebug()<<"ReadPixel: "<<this->width()<<this->height()<<_x<<_y<<pixel.r<<pixel.g<<pixel.b;
+//    qDebug()<<"ReadPixel: "<<this->width()<<this->height()<<_x<<_y<<pixel.r<<pixel.g<<pixel.b;
+
+    return  pixel;
 }
 
 void Scene::updateLinesVBO()
@@ -340,64 +338,6 @@ void Scene::updateLinesVBO()
 
 }
 
-
-
-void Scene::initFramebufferOld()
-{
-    //--------manual Frame Buffer workflow--------------
-//   int SCR_WIDTH = window()->width()*2;
-//   int SCR_HEIGHT = window()->height()*2;
-
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    //-------------texture as color buffer
-    glGenTextures(1, &texture);
-//    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0); // (?) mistake here ?
-
-    // attach multisampled texture
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture, 0);
-
-    // ------------rbo for depth as stencil buffer------------------
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-
-    //Creating a depth and stencil renderbuffer object
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-
-    // attach the renderbuffer object to framebuffer
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
-
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-//    glDeleteFramebuffers(1, &fbo);(? should be deleted here)
-
-    //------------------fbo end-------------------
-
-    intermediateFBO;
-    glGenFramebuffers(1, &intermediateFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
-
-    glGenTextures(1, &screenTexture);
-    glBindTexture(GL_TEXTURE_2D, screenTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 void Scene::initFramebuffer()
 {
 
@@ -424,13 +364,11 @@ void Scene::initFramebuffer()
     if(ms){ glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture, 0);}
     else{glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);}
 
-
-    unsigned char *data = stbi_load("/Users/enno/Dev/QtOpenGL/resources/objects/test1111.jpg", &widthT, &heightT, &nrComponents, 0);
-
 //    if (data)
 //    {
 //            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthT, heightT, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 //    }
+
 
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -439,7 +377,7 @@ void Scene::initFramebuffer()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+      qCritical()<<"gBuffer FBO not complete! error enum Scene:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -457,7 +395,7 @@ void Scene::initFramebuffer()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+      qCritical()<<"gBuffer FBO not complete! error enum Scene2:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
@@ -474,16 +412,14 @@ void Scene::initFramebuffer()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tmpText, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"gBuffer FBO not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+      qCritical()<<"gBuffer FBO not complete! error enum Scene3:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 }
 
 void Scene::debug()
 {
-//    qDebug()<<"start";
 
-    framebuffer->debug();
 }
 
 void Scene::QtOpenGLinitialize()
@@ -571,7 +507,9 @@ void Scene::QtOpenGLinitialize()
     m_quad_vao->release();
 
 //    initFramebufferOld();
+
     initFramebuffer();
+
 
     somePoints.push_back(QVector3D(0,2,0));
 
@@ -591,11 +529,8 @@ void Scene::QtOpenGLinitialize()
     pointsVBO.release();
     pointsVAO->release();
 
-
-    framebuffer = new Framebuffer(this);
-    bool success = framebuffer->init();
-
     qDebug()<<"Dimensions"<<SCR_HEIGHT<<SCR_WIDTH;
+
 }
 
 void Scene::DynamicsInitialize()
@@ -643,38 +578,30 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
+//        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//        glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
+//        glClear(GL_COLOR_BUFFER_BIT);
+//        glClear(GL_DEPTH_BUFFER_BIT);
 
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClear(GL_DEPTH_BUFFER_BIT);
+//        glDisable(GL_DEPTH_TEST);
 
-        glEnable(GL_DEPTH_TEST);
+////        framebuffer->bind();
+//            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-//        framebuffer->bind();
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+//        m_picking_program->bind();
+//        m_picking_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+//        m_picking_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//        if(mainpulator)
+//            mainpulator->drawPickingBuffer();
 
-        m_picking_program->bind();
-        m_picking_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-        m_picking_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-        if(mainpulator)
-            mainpulator->drawPickingBuffer();
+//        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+//        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tmpFbo);
+//        glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-
-
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tmpFbo);
-        glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-
-
-
-
-
-
-
-
-
+       if(widget()->tool() == MANIPULATOR_T && mainpulator)
+       {
+           mainpulator->drawPickingBuffer();
+       }
 
 
     //--------------------------
@@ -837,208 +764,10 @@ void Scene::paint()
 
         if(mainpulator)
         {
-            mainpulator->draw();
+//            mainpulator->draw();
         }
         m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
         m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
-}
-
-void Scene::paintOld()
-{
-//    qDebug()<<"paint Start";
-    // draw to the framebuffer (off-screen render)
-    glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
-    //  glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
-    glDisable(GL_CULL_FACE);
-    // bind old QtWrapper style
-    // m_gbuffer_fbo->bind();
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->fbo());
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-//    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-
-//    return;
-
-
-        //-------------------------Draw Wireframe---------------------------------------------------------------------------
-              m_flat_program->bind();
-              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
-              if(m_SceneObjects[0])
-              {
-                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
-                  m_SceneObjects[0]->draw();
-              }
-
-        //------------------Geometry Shader testing -----------------------------------------------
-              glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-             m_geometry_program->bind();
-             m_geometry_program->setUniformValue("projection", m_projection_matrix);
-             m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
-             m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
-             pointsVAO->bind();
-             glDrawArrays(GL_POINTS, 0, somePoints.size());
-             pointsVAO->release();
-
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
-    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-
-
-
-//    glBindTexture(GL_TEXTURE_2D, texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, screenTexture);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    m_quad_vao->release();
-    m_screen_program->release();
-
-
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-    glEnable(GL_DEPTH_TEST);
-
-    m_manipulator_program->bind();
-    for(uint i = 0; i < m_Pointlights.size(); i++)
-    {
-          std::string uniFName = "PointLights[" + std::to_string(i) +"]";
-          m_manipulator_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
-          m_manipulator_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
-    }
-//    uint matID = m_SceneObjects[4]->getMaterialID();
-    m_manipulator_program->bind();
-    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
-    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
-    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
-
-    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
-    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
-
-    if(mainpulator)
-    {
-        mainpulator->draw();
-    }
-    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
-    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
-
-        //-------------------------Draw Active---------------------------------------------------------------------------
-        if(m_pickedObject)
-        {
-            m_activeProgram->bind();
-            for(uint i = 0; i < m_Pointlights.size(); i++)
-            {
-                  std::string uniFName = "PointLights[" + std::to_string(i) +"]";
-                  m_activeProgram->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
-                  m_activeProgram->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
-            }
-            uint matID = m_pickedObject->getMaterialID();
-            m_activeProgram->bind();
-            m_activeProgram->setUniformValue("ProjectionMatrix", m_projection_matrix);
-            m_activeProgram->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-            m_activeProgram->setUniformValue("viewPos", m_arcCamera.worldPos());
-            m_activeProgram->setUniformValue("numPointLights", int(m_Pointlights.size()));
-            m_activeProgram->setUniformValue("numMaterials", int(m_Materials.size()));
-
-            m_activeProgram->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
-            m_activeProgram->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
-            m_activeProgram->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
-            m_activeProgram->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
-            m_activeProgram->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
-            m_activeProgram->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-            m_activeProgram->setUniformValue("ModelMatrix",  m_pickedObject->getMatrix());
-            m_pickedObject->draw();
-            m_activeProgram->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
-            m_activeProgram->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
-        }
-
-        //-------------------------Draw Wireframe---------------------------------------------------------------------------
-              m_flat_program->bind();
-              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
-              if(m_SceneObjects[0])
-              {
-                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
-                  m_SceneObjects[0]->draw();
-              }
-
-        //------------------Geometry Shader testing -----------------------------------------------
-              glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-             m_geometry_program->bind();
-             m_geometry_program->setUniformValue("projection", m_projection_matrix);
-             m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
-             m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
-             pointsVAO->bind();
-             glDrawArrays(GL_POINTS, 0, somePoints.size());
-             pointsVAO->release();
-
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
-    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-
-    m_screen_program->bind();
-    m_quad_vao->bind();
-
-//    glBindTexture(GL_TEXTURE_2D, texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, screenTexture);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    m_quad_vao->release();
-    m_screen_program->release();
-
-
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-    glEnable(GL_DEPTH_TEST);
-
-    m_manipulator_program->bind();
-    for(uint i = 0; i < m_Pointlights.size(); i++)
-    {
-          std::string uniFName = "PointLights[" + std::to_string(i) +"]";
-          m_manipulator_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
-          m_manipulator_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
-    }
-//    uint matID = m_SceneObjects[4]->getMaterialID();
-    m_manipulator_program->bind();
-    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
-    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
-    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
-
-    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
-    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
-
-    if(mainpulator)
-    {
-        mainpulator->draw();
-    }
-    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
-    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
-
 }
 
 void Scene::updateSceneObjects()
@@ -1157,8 +886,9 @@ void Scene::setupScene()
 //       mainpulator->setTransform(sceneObject4->getTransform());
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
-       mainpulator = new Manipulator(_vectorShape, m_manipulator_program);
-       mainpulator->setScene(this);
+       mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
+
+
 
 //       sceneObject4->rotate(QQuaternion::fromEulerAngles(QVector3D(45,0,0)));
 //       mainpulator->setTransform(sceneObject4->getTransform());

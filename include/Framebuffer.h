@@ -12,6 +12,7 @@ class Scene;
 class Framebuffer
 {
 public:
+    Framebuffer();
     Framebuffer(Scene *_scene);
     bool init();
     void bind();
@@ -19,8 +20,13 @@ public:
     void debug();
     uint fbo();
 
+    bool isMultisample();
 private:
-    uint m_fbo, m_pickingTexture, m_depthTexture;
+    bool ms;
+    uint m_msfbo, m_msColorBuffer, m_msDepthBuffer;
+    uint m_fbo, m_colorBuffer;
+
+    uint m_pickingTexture, m_depthTexture;
     int WindowWidth;
     int WindowHeight;
     Scene* m_scene;

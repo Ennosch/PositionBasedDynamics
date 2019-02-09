@@ -55,10 +55,6 @@ public:
   void setupScene();
   void updateLinesVBO();
 
-  void initFramebufferOld();
-  void initFramebuffer();
-  void paintOld();
-
   void debug();
 
   // creation
@@ -87,14 +83,13 @@ public:
 
   Ray castRayFromCamera(float ndcX, float ndcY, float depthZ);
   pSceneOb pickObject(float ndcX, float ndcY);
-  void readPixel(uint _x, uint _y);
+  int3 readPixel(uint _x, uint _y);
 
   CollisionDetection m_CollisionDetect;
   QVector3D currentRayStart = QVector3D(0,0,0);
   QVector3D currentRayEnd = QVector3D(0,0,0);
 
 private:
-
     int widthT, heightT, nrComponents;
 
   friend class Window;
@@ -118,8 +113,6 @@ private:
   std::vector<QVector3D> somePoints;
   QOpenGLVertexArrayObject* pointsVAO;
   QOpenGLBuffer pointsVBO;
-
-
 
   int SCR_HEIGHT, SCR_WIDTH;
   unsigned int fbo, texture, rbo, intermediateFBO, screenTexture;

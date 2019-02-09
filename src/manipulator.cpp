@@ -2,9 +2,11 @@
 
 #include "model.h"
 #include "Scene.h"
+#include "GLWidget.h"
 
-Manipulator::Manipulator(ModelPtr _vectorModel, QOpenGLShaderProgram* _program)
-    : vecotorModel(_vectorModel),
+Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProgram* _program)
+    : scene(_scene),
+      vecotorModel(_vectorModel),
       m_shaderProgram(_program)
 {
     localX = QMatrix4x4();
@@ -13,6 +15,10 @@ Manipulator::Manipulator(ModelPtr _vectorModel, QOpenGLShaderProgram* _program)
     localZ = QMatrix4x4();
     localZ.rotate(90, QVector3D(1,0,0));
 
+    m_window = scene->widget();
+//    m_pickingProgram = scene->m_picking_program;
+
+    m_framebuffer = new Framebuffer();
 
 }
 
@@ -39,9 +45,17 @@ void Manipulator::draw()
 
 void Manipulator::drawPickingBuffer()
 {
+    m_framebuffer->bind();
+//    glEnable(GL_DEPTH_TEST);
+//    QVector3D test = scene->m_arcCamera.worldPos();
+//    qDebug()<<test;
+}
+
+void Manipulator::drawPickingBufferOld()
+{
 //    m_pickingProgram->bind();
-    GLfloat a = 0.0;
-     GLfloat b = 0.5;
+    GLfloat a = 1.0;
+     GLfloat b = 2.0;
       GLfloat c = 3.0;
     m_pickingProgram->setUniformValue("gDrawIndex",  5);
     m_pickingProgram->setUniformValue("test",  scene->m_arcCamera.worldPos());
@@ -69,8 +83,30 @@ void Manipulator::setTransform(const Transform &_transform)
     m_Transform = _transform;
 }
 
-void Manipulator::setScene(Scene *_scene)
+//void Manipulator::setScene(Scene *_scene)
+//{
+//    scene = _scene;
+//    m_pickingProgram = scene->m_picking_program;
+//    m_window = scene->widget();
+//}
+
+void Manipulator::update()
 {
-    scene = _scene;
-    m_pickingProgram = scene->m_picking_program;
+    if(m_window)
+    {
+        QPoint screenMouse = m_window->getMouseScreenCoords();
+        int3 pixel = scene->readPixel(screenMouse.x(), screenMouse.y());
+
+        switch(pixel.i)
+        {
+            case TRANSLATE_X:
+                break;
+
+            case TRANSLATE_Y:
+                break;
+        }
+
+
+
+    }
 }

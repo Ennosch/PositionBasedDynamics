@@ -5,50 +5,52 @@
 #include <QDebug>
 #include <iostream>
 
-struct Pixel {
-        float ObjectID;
-        float DrawID;
-        float PrimID;
 
-        Pixel()     {
-            ObjectID = 0.0f;
-            DrawID = 0.0f;
-            PrimID = 0.0f;
-        }
-    };
+
+
+Framebuffer::Framebuffer()
+{
+    WindowWidth = 700;
+    WindowHeight = 700;
+    ms = true;
+    init();
+}
 
 Framebuffer::Framebuffer(Scene *_scene) :
     m_scene(_scene)
 {
-    WindowWidth = m_scene->width();
-    WindowHeight = m_scene->height();
+    WindowWidth = 700;
+    WindowHeight = 700;
+
+    ms = true;
+    init();
 }
 
 bool Framebuffer::init()
 {
-    bool ms = true;
-    glGenFramebuffers(1, &m_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
-    // Create the texture object for the primitive information buffer
-        glGenTextures(1, &m_pickingTexture);
-        if(ms){ glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_pickingTexture);}
-        else{glBindTexture(GL_TEXTURE_2D, m_pickingTexture);}
+    glGenFramebuffers(1, &m_msfbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_msfbo);
+
+    //  Create the texture object for the primitive information buffer
+        glGenTextures(1, &m_msColorBuffer);
+        if(ms){ glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_msColorBuffer);}
+        else{glBindTexture(GL_TEXTURE_2D, m_msColorBuffer);}
 
         if(ms){ glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, WindowWidth, WindowHeight, GL_TRUE);}
         else{glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WindowWidth, WindowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);}
 
-        if(ms){ glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_pickingTexture, 0);}
-        else{glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pickingTexture, 0);}
+        if(ms){ glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_msColorBuffer, 0);}
+        else{glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_msColorBuffer, 0);}
 
 
-//         Create the texture object for the depth buffer
-        glGenTextures(1, &m_depthTexture);
-        glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+    //  Create the texture object for the depth buffer
+        glGenTextures(1, &m_msDepthBuffer);
+        glBindTexture(GL_TEXTURE_2D, m_msDepthBuffer);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, WindowWidth, WindowHeight,
                     0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                    m_depthTexture, 0);
+                    m_msDepthBuffer, 0);
 
 //         Disable reading to avoid problems with older GPUs
 //        glReadBuffer(GL_NONE);
@@ -60,10 +62,28 @@ bool Framebuffer::init()
 //        auto error = glGetError();
 //        qDebug()<<"glGetError"<<error;
 
+            qDebug()<<"testing FB class 1";
         if (Status != GL_FRAMEBUFFER_COMPLETE) {
-            qDebug()<<"FB error, status: 0x%x\n"<< Status;
+            qDebug()<<"FB error, status 1: 0x%x\n"<< Status;
             return false;
         }
+
+        //  create non-multisampled buffer, to blitt to and read from
+        glGenFramebuffers(1, &m_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
+        glGenTextures(1, &m_colorBuffer);
+        glBindTexture(GL_TEXTURE_2D, m_colorBuffer);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WindowWidth, WindowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBuffer, 0);
+
+        qDebug()<<"testing FB class";
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+          qCritical()<<"gBuffer FBO  123 not complete! error enum:"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 //        // Restore the default framebuffer
 //        glBindTexture(GL_TEXTURE_2D, 0);
@@ -82,9 +102,23 @@ void Framebuffer::readPixel(uint _x, uint _y)
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
 
+    Pixel pixel;
+    glReadPixels(_x, _y, 1, 1, GL_RGB, GL_FLOAT, &pixel);
 
-    Pixel Pixel;
-    glReadPixels(_x, _y, 1, 1, GL_RGB, GL_FLOAT, &Pixel);
+//    glReadBuffer(GL_NONE);
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+//    qDebug()<<"ReadPixel: "<<Pixel.ObjectID<<Pixel.DrawID<<Pixel.PrimID;
+    qDebug()<<"FB ReadPixel: "<<_x<<_y<<pixel.r<<pixel.g<<pixel.b;
+
+
+
+
+
+
+//    Color pixel;
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//    glReadBuffer(GL_COLOR_ATTACHMENT0);
 
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -94,34 +128,17 @@ void Framebuffer::readPixel(uint _x, uint _y)
 
 void Framebuffer::debug()
 {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-
-        qDebug()<<WindowHeight<<WindowWidth;
-
-    for(int i = 0; i <= WindowHeight; i++)
-    {
-        for(int j = 0; j<= WindowWidth; j++)
-        {
-            Pixel Pixel;
-            glReadPixels(i, j, 1, 1, GL_RGB, GL_FLOAT, &Pixel);
-            glReadBuffer(GL_NONE);
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-//            if(Pixel.ObjectID < 0.1 && Pixel.DrawID  0.1 && Pixel.PrimID > 0.1)
-            if(Pixel.DrawID > 1.0)
-            {
-                qDebug()<<"ReadPixel: "<<Pixel.ObjectID<<Pixel.DrawID<<Pixel.PrimID<<i<<j;
-                return;
-            };
-        }
-    }
-
 
 }
 
 uint Framebuffer::fbo()
 {
     return m_fbo;
+}
+
+bool Framebuffer::isMultisample()
+{
+    return ms;
 }
 
 

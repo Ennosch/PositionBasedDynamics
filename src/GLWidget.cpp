@@ -130,10 +130,44 @@ ActiveObject *GLWidget::activeObject()
     return nullptr;
 }
 
+QPoint GLWidget::localMouseToGLScreenCoord(const QPoint &_localMouse)
+{
+    //    int pixelOffset = 23;
+        int pixelOffset = 0;
+        return QPoint(_localMouse.x() *2 + pixelOffset, (this->height()*2) - _localMouse.y() *2 + pixelOffset);
+}
+
+QPointF GLWidget::localMouseToGLNDCCoord(const QPointF &_localMouse)
+{
+    float x = (_localMouse.x() + 0.5) / this->width();
+    float y = (_localMouse.y() + 0.5) / this->height();
+    float NDCx = 2 * x - 1;
+    float NDCy = 1 - 2 * y;
+    return QPointF(NDCx,NDCy);
+}
+
+QPoint GLWidget::getMouseScreenCoords()
+{
+    return localMouseToGLScreenCoord(mapFromGlobal(QCursor::pos()));
+}
+
+Tool GLWidget::tool()
+{
+    return m_tool;
+}
+
 void GLWidget::processInput()
 {
     // update() registers keys, add/remove from inputManager containers
 
+    m_tool = MANIPULATOR_T;
+    switch (m_tool) {
+        case MANIPULATOR_T:
+//            QPoint screenMouse = localMouseToGLScreenCoord(mapFromGlobal(QCursor::pos()));
+            if(scene()->mainpulator)
+                scene()->mainpulator->update();
+            break;
+    }
     // convert Mouse window coordinates to have origin (0,0) at center of image
     QPoint _localMousePos = this->mapFromGlobal(QCursor::pos());
     _localMousePos.setX(_localMousePos.x() - (this->width()/2));
@@ -142,7 +176,7 @@ void GLWidget::processInput()
     //if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
     // Handle Mouse button states
     // LeftButton
-    if(inputManager::buttonTriggered(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt))
+    if(inputManager::buttonTriggered(Qt::LeftButton) )
     {
         QPointF toPick = getMouseNDCCoords();
 
@@ -165,7 +199,8 @@ void GLWidget::processInput()
         scene()->m_arcCamera.arcBallStart();
 //        scene()->mainpulator->setState(TRANSLATE_VIEWPLANE);
 
-    if(inputManager::buttonPressed(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt))
+//    && inputManager::keyPressed(Qt::Key_Alt)
+    if(inputManager::buttonPressed(Qt::LeftButton)  )
     {
         int _radius = std::min(this->width(), this->height()) / 2;
 //        scene()->m_arcCamera.rotateArcBall(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition(), _radius);
@@ -173,7 +208,7 @@ void GLWidget::processInput()
 //        scene()->m_arcCamera.orbit(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
 //        scene()->m_arcCamera.correction2(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
     }
-    if(inputManager::buttonTriggered(Qt::RightButton))
+    if(inputManager::buttonTriggered(Qt::RightButton) )
     {
         scene()->m_arcCamera.trackStart(m_inputManger.mousePosition());
     }
@@ -274,16 +309,13 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     inputManager::registerMousePress(event->button());
     QPointF pos = event->pos();
 
-//    int pixelOffset = 23;
-    int pixelOffset = 0;
+    QPointF toPick = localMouseToGLNDCCoord(pos);
 
-    float pixelNDCx = (pos.x() + 0.5) / this->width();
-    float pixelNDCy = (pos.y() + 0.5) / this->height();
+//        scene()->pickObject(toPick.x(), toPick.y());
+    QPoint toPick2 = localMouseToGLScreenCoord(event->pos());
+//    qDebug()<<event->pos();;
 
-    float pixelScreenX = 2 * pixelNDCx - 1;
-    float pixelScreenY = 1 - 2 * pixelNDCy;
-
-    scene()->pickObject(pixelScreenX, pixelScreenY);
+//    scene()->readPixel(toPick2.x() , toPick2.y() );
 
     qDebug()<<event->pos().x()*2<<event->pos().y()*2;
 //    scene()->readPixel(event->pos().x() * 2, event->pos().y() * 2);

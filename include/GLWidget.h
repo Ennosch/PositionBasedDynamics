@@ -37,7 +37,10 @@ public:
      void countFPS();
      void renderText();
      ActiveObject* activeObject();
-
+     QPoint localMouseToGLScreenCoord(const QPoint &_localMouse);
+     QPointF localMouseToGLNDCCoord(const QPointF &_localMouse);
+     QPoint getMouseScreenCoords();
+     Tool tool();
 
 protected slots:
     void update();
