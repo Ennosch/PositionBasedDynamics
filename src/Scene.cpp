@@ -343,8 +343,6 @@ void Scene::initFramebuffer()
 
     qDebug()<<"initFramebuffer"<<SCR_WIDTH<<SCR_HEIGHT;
 
-
-
     bool ms = true;
 //    bool ms = false;
 //    glGenFramebuffers(1, &fbo);
@@ -650,14 +648,16 @@ void Scene::paint()
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mainpulator->m_framebuffer->m_fbo);
     glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
       m_screen_program->bind();
       m_quad_vao->bind();
       glActiveTexture(GL_TEXTURE0);
     //        glBindTexture(GL_TEXTURE_2D, texture);
-      glBindTexture(GL_TEXTURE_2D, screenTexture);
+//      glBindTexture(GL_TEXTURE_2D, screenTexture);
+      glBindTexture(GL_TEXTURE_2D, mainpulator->m_framebuffer->m_colorBuffer);
       glDrawArrays(GL_TRIANGLES, 0, 6);
       m_quad_vao->release();
       m_screen_program->release();

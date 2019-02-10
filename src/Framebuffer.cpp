@@ -13,7 +13,7 @@ Framebuffer::Framebuffer()
     WindowWidth = 1392;
     WindowHeight = 1452;
     ms = true;
-    initOld();
+    init();
 }
 
 Framebuffer::Framebuffer(Scene *_scene) :
@@ -23,10 +23,10 @@ Framebuffer::Framebuffer(Scene *_scene) :
     WindowHeight = 1452;
 
     ms = true;
-    initOld();
+    init();
 }
 
-bool Framebuffer::initOld()
+bool Framebuffer::init()
 {
     qDebug()<<"FRAMEBUFFER::INIT"<<WindowWidth<<WindowHeight;
 //    glGenFramebuffers(1, &m_msfbo);
@@ -65,7 +65,7 @@ bool Framebuffer::initOld()
         }
 
         //  create non-multisampled buffer, to blitt to and read from
-        glGenFramebuffers(1, &m_fbo);
+//        glGenFramebuffers(1, &m_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
         glGenTextures(1, &m_colorBuffer);
@@ -132,39 +132,6 @@ uint Framebuffer::fbo()
     return m_fbo;
 }
 
-void Framebuffer::init()
-{
-    qDebug()<<"bufer"<<m_msfbo;
-//     glGenFramebuffers(1, &m_msfbo);
-    qDebug()<<m_msfbo;
-    glBindFramebuffer(GL_FRAMEBUFFER, m_msfbo);
-    qDebug()<<m_msfbo;
-
-    glGenTextures(1, &m_msColorBuffer);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_msColorBuffer);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, WindowWidth, WindowHeight, GL_TRUE);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_msColorBuffer, 0);
-
-
-    glGenRenderbuffers(1, &m_msDepthBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_msDepthBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WindowWidth, WindowHeight);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_msDepthBuffer);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"fbo in framebuffer class not complete"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
-
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-}
 
 bool Framebuffer::isMultisample()
 {
