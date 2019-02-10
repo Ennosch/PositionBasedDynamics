@@ -341,7 +341,15 @@ void Scene::updateLinesVBO()
 void Scene::initFramebuffer()
 {
 
-    qDebug()<<"initFramebuffer"<<SCR_WIDTH<<SCR_HEIGHT;
+
+//    fbo = 1;
+
+    uint test;
+        glGenFramebuffers(1, &test);
+        glBindFramebuffer(GL_FRAMEBUFFER, test);
+
+    qDebug()<<"initFramebuffer"<<"fbo:"<<fbo<<texture<<rbo<<intermediateFBO<<screenTexture<<tmpFbo<<tmpText;
+    qDebug()<<"test-----------------"<<test;
 
     bool ms = true;
 //    bool ms = false;
@@ -416,7 +424,7 @@ void Scene::initFramebuffer()
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
       qCritical()<<"tmpFbo in initFramebuffer"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        qDebug()<<"initFramebuffer"<<"fbo:"<<fbo<<texture<<rbo<<intermediateFBO<<screenTexture<<tmpFbo<<tmpText;
 }
 
 void Scene::debug()
@@ -580,73 +588,51 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
-//        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-//        glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
-//        glClear(GL_COLOR_BUFFER_BIT);
-//        glClear(GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
-//        glDisable(GL_DEPTH_TEST);
+    if(mtest == 0)
+    {
+        mtest = 1;
+        qDebug()<<"m_msfbo"<<mainpulator->m_framebuffer->m_msfbo;
+        qDebug()<<"fbo"<<fbo;
+        qDebug()<<"m_colorBuffer"<<mainpulator->m_framebuffer->m_colorBuffer;
+        qDebug()<<"screenTexture"<<screenTexture;
 
-////        framebuffer->bind();
-//            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-//        m_picking_program->bind();
-//        m_picking_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-//        m_picking_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-//        if(mainpulator)
-//            mainpulator->drawPickingBuffer();
-
-//        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-//        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tmpFbo);
-//        glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-// -------------------------------------
-//        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-//       if(widget()->tool() == MANIPULATOR_T && mainpulator)
-//       {
-//           mainpulator->draw();
-//       }
-
-//       glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-////       glBindFramebuffer(GL_READ_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
-//       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
-//       glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-//       m_screen_program->bind();
-//       m_quad_vao->bind();
-//       glActiveTexture(GL_TEXTURE0);
-////        glBindTexture(GL_TEXTURE_2D, texture);
-//       glBindTexture(GL_TEXTURE_2D, screenTexture);
-//       glDrawArrays(GL_TRIANGLES, 0, 6);
-//       m_quad_vao->release();
-//       m_screen_program->release();
-
-//       return;
-//    mainpulator
-
+    }
 
 
 //    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
+//    glBindFramebuffer(GL_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
+//    mainpulator->m_framebuffer->bind();
 
-    m_manipulator_program->bind();
-    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
-    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
-    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
+//    m_manipulator_program->bind();
+//    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+//    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
+//    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
+//    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
 
-    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
-    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
+//    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
+//    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
 
-    if(mainpulator)
-    {
-        mainpulator->draw();
-    }
-    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
-    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
+//    if(mainpulator)
+//    {
+//        mainpulator->draw();
+//    }
+//    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
+//    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
 
+        if(mainpulator)
+        {
+//            mainpulator->draw();
+            mainpulator->drawPickingBuffer();
+        }
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
+//    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 
 //    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mainpulator->m_framebuffer->m_fbo);

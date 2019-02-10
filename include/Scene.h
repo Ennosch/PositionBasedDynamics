@@ -90,6 +90,7 @@ public:
   QVector3D currentRayEnd = QVector3D(0,0,0);
 
 private:
+  int mtest = 0;
     int widthT, heightT, nrComponents;
 
   friend class Window;

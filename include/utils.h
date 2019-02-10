@@ -83,6 +83,10 @@ struct int3{
     int i,j,k;
 };
 
+struct float3{
+    int i,j,k;
+};
+
 struct Pixel{
     float r,g,b;
 };
