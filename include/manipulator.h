@@ -24,7 +24,7 @@ public:
 //    Manipulator();
     void draw();
     void drawPickingBuffer();
-    void drawPickingBufferOld();
+
     Transform getTransform();
     void setTransform(const Transform &_transform);
 //    void setScene(Scene*_scene);

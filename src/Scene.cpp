@@ -588,42 +588,10 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
-
-    if(mtest == 0)
-    {
-        mtest = 1;
-        qDebug()<<"m_msfbo"<<mainpulator->m_framebuffer->m_msfbo;
-        qDebug()<<"fbo"<<fbo;
-        qDebug()<<"m_colorBuffer"<<mainpulator->m_framebuffer->m_colorBuffer;
-        qDebug()<<"screenTexture"<<screenTexture;
-
-    }
-
-
-//    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-//    glBindFramebuffer(GL_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
-//    mainpulator->m_framebuffer->bind();
-
-//    m_manipulator_program->bind();
-//    m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-//    m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-//    m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
-//    m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
-//    m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
-
-//    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
-//    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
-
-//    if(mainpulator)
-//    {
-//        mainpulator->draw();
-//    }
-//    m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
-//    m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
 
         if(mainpulator)
         {
@@ -631,38 +599,10 @@ void Scene::paint()
             mainpulator->drawPickingBuffer();
         }
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, mainpulator->m_framebuffer->m_msfbo);
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mainpulator->m_framebuffer->m_fbo);
-    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-      m_screen_program->bind();
-      m_quad_vao->bind();
-      glActiveTexture(GL_TEXTURE0);
-    //        glBindTexture(GL_TEXTURE_2D, texture);
-//      glBindTexture(GL_TEXTURE_2D, screenTexture);
-      glBindTexture(GL_TEXTURE_2D, mainpulator->m_framebuffer->m_colorBuffer);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-      m_quad_vao->release();
-      m_screen_program->release();
-
-    return;
-    //--------------------------
-    //    qDebug()<<"paint Start";
-        // draw to the framebuffer (off-screen render)
-        glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
-        //  glViewport(0,0, SCR_WIDTH, SCR_HEIGHT);
         glDisable(GL_CULL_FACE);
         glEnable(GL_MULTISAMPLE);
-        // bind old QtWrapper style
-        // m_gbuffer_fbo->bind();
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-//        glActiveTexture(GL_TEXTURE0);
-//        glBindTexture(GL_TEXTURE_2D, texture);
-
 
           glEnable(GL_DEPTH_TEST);
           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -789,30 +729,12 @@ void Scene::paint()
 
         glEnable(GL_DEPTH_TEST);
 
-        m_manipulator_program->bind();
-        for(uint i = 0; i < m_Pointlights.size(); i++)
-        {
-              std::string uniFName = "PointLights[" + std::to_string(i) +"]";
-              m_manipulator_program->setUniformValue((uniFName+".position").c_str(), m_Pointlights[i]->position);
-              m_manipulator_program->setUniformValue((uniFName+".color").c_str(), m_Pointlights[i]->color);
-        }
-
-        m_manipulator_program->bind();
-        m_manipulator_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-        m_manipulator_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-        m_manipulator_program->setUniformValue("viewPos", m_arcCamera.worldPos());
-        m_manipulator_program->setUniformValue("numPointLights", int(m_Pointlights.size()));
-        m_manipulator_program->setUniformValue("numMaterials", int(m_Materials.size()));
-
-        m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,1,0) );
-        m_manipulator_program->setUniformValue("overlayColor", QVector4D(0.1,0.5,0.2,1) );
 
         if(mainpulator)
         {
             mainpulator->draw();
         }
-        m_manipulator_program->setUniformValue("wireFrameColor", QVector3D(0,0,0) );
-        m_manipulator_program->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
+
 }
 
 void Scene::updateSceneObjects()

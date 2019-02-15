@@ -12,7 +12,7 @@ Framebuffer::Framebuffer()
 {
     WindowWidth = 1392;
     WindowHeight = 1452;
-    ms = true;
+    ms = false;
     m_msfbo = 33;
     init();
 }
@@ -23,7 +23,7 @@ Framebuffer::Framebuffer(Scene *_scene) :
     WindowWidth = 1392;
     WindowHeight = 1452;
 
-    ms = true;
+    ms = false;
     init();
 }
 
@@ -31,7 +31,7 @@ bool Framebuffer::init()
 {
     qDebug()<<"Framebuffer initFramebuffer"<<m_msfbo<<m_msColorBuffer<<m_msDepthBuffer<<m_fbo<<m_colorBuffer;
 
-    bool ms = true;
+    ms = true;
 //    bool ms = false;
 //    glGenFramebuffers(1, &m_msfbo);
     glBindFramebuffer(GL_FRAMEBUFFER, m_msfbo);
@@ -46,7 +46,7 @@ bool Framebuffer::init()
 
     //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL); // tutorial
     if(ms){ glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, WindowWidth, WindowHeight, GL_TRUE);}
-    else{glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WindowWidth, WindowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);}
+    else{glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32UI, WindowWidth, WindowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);}
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -76,9 +76,11 @@ bool Framebuffer::init()
 
     glGenTextures(1, &m_colorBuffer);
     glBindTexture(GL_TEXTURE_2D, m_colorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WindowWidth, WindowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glTextImgae2D GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height,GLint border,GLenum format,GLenum type,const GLvoid * data
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WindowWidth, WindowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WindowWidth, WindowHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBuffer, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -153,8 +155,8 @@ bool Framebuffer::init()
 
 void Framebuffer::bind()
 {
-//    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_msfbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+//    glBindFramebuffer(GL_FRAMEBUFFER, m_msfbo);
 }
 
 void Framebuffer::readPixel(uint _x, uint _y)
