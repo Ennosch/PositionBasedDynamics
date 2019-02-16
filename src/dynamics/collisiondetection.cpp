@@ -89,3 +89,66 @@ bool CollisionDetection::solveQuadratic(const float &a, const float &b, const fl
 
     return true;
 }
+
+Vec3 CollisionDetection::closetPointFromRayToRay(const Ray &_r1, const Ray &_r2)
+{
+
+    float p,q,r,s,t,d,e;
+    Vec3 a,b,c;
+    a = _r1.Dir.normalized();
+    b = _r2.Dir.normalized();
+    c = _r2.Origin - _r1.Origin;
+
+    p = Vec3::dotProduct(a, b);
+    q = Vec3::dotProduct(a, c);
+    r = Vec3::dotProduct(b, c);
+    s = Vec3::dotProduct(a, a);
+    t = Vec3::dotProduct(b, b);
+
+    d = (-p*r + q*t) / (s*t - p*p);
+    e = (p*q) / (s*t - p*p) - (r / ( t - ((p*p) / s)));
+
+    Vec3 point1 =  _r1.Origin +  (a * d);
+    Vec3 point2 =  _r2.Origin + (b * e);
+
+    Vec3 z = point2 - point1;
+
+    Vec3 result = point1 + z;
+
+//    mlog<<_r2.Origin<<_r2.Dir;
+//    mlog<<"cd:"<<_r1.Origin<<_r1.Dir;
+
+
+    return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -55,7 +55,7 @@ public:
     int* test =  nullptr;
     State currentState = NONE;
 
-    QVector3D m_drag, m_dragStart;
+    QVector3D m_drag, m_dragStart, m_dragStartOffset;
     float logX, logXd;
     debug x, xd;
 

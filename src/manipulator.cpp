@@ -22,6 +22,8 @@ Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProg
     m_framebuffer = new Framebuffer();
 
     m_Transform.setRotation(QVector3D(15,45,45));
+//        m_Transform.setRotation(QVector3D(0,0,45));
+//        m_Transform.setRotation(QVector3D(0,45,0));
 //    m_Transform.setRotation(QVector3D(15,45,45));
 
     timer.start();
@@ -157,7 +159,22 @@ void Manipulator::startDrag()
     QPoint currentMouse = m_window->getMouseScreenCoords();
     m_startMouseDrag = QPoint(currentMouse.x() - (scene->width() / 2) , currentMouse.y() - (scene->height() / 2));
 
+    QPointF currentMouseNDC = m_window->getMouseNDCCoords();
+    Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
+    QQuaternion rot = m_Transform.rotation();
+    QVector3D axis = rot.rotatedVector(QVector3D(1,0,0));
+    axis.normalize();
+    Ray tRay;
+    tRay.Origin = m_Transform.translation();
+    tRay.Dir = axis.normalized();
+    QVector3D closestPoint = scene->m_CollisionDetect.closetPointFromRayToRay(camRay, tRay);
+
+    float d = (closestPoint - m_Transform.translation()).length();
     m_dragStart = m_Transform.translation();
+    m_dragStartOffset = m_Transform.translation() + QVector3D(axis.x() *  d, axis.y() * d, axis.z() * d);
+
+//    mlog<<m_dragStart;
+//    m_dragStart = m_Transform.translation();
     isDraging = true;
 }
 
@@ -169,89 +186,58 @@ void Manipulator::endDrag()
 void Manipulator::drag()
 {
     QPoint currentMouse = m_window->getMouseScreenCoords();
-    QVector3D localX = QVector3D(1,0,0);
-    QMatrix4x4 mvp = scene->m_projection_matrix *  scene->m_arcCamera.toMatrix() * m_Transform.toMatrix();
+    QPointF currentMouseNDC = m_window->getMouseNDCCoords();
+    Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
+
+
     QMatrix4x4 mv =  scene->m_projection_matrix *  scene->m_arcCamera.toMatrix();
-    QVector3D ndcX = mvp * localX;
-    QVector3D axis =  QVector3D(ndcX.x() * scene->width(), ndcX.y() * scene->height(), 0 );
-    axis = QVector3D(1,0,0);
 
     QQuaternion rot = m_Transform.rotation();
-    axis = rot.rotatedVector(QVector3D(1,0,0));
+    QVector3D axis = rot.rotatedVector(QVector3D(1,0,0));
+    Ray tRay;
+    tRay.Origin = m_Transform.translation();
+    tRay.Dir = axis.normalized();
 
-//    mlog<<axis<<ndcX<<localAxis;
+    QVector3D closestPoint = scene->m_CollisionDetect.closetPointFromRayToRay(camRay, tRay);
+//    mlog<<closestPoint;
+    QVector3D target = (m_dragStartOffset - closestPoint);
+    float rdis = target.length()  ;
+
+    double dot = QVector3D::dotProduct(target, axis);
+
+    float sign = signbit(dot) ? 1 : -1;
+
+    float ds = rdis * sign;
+    mlog<<rdis<<ds;
+
 
     QPoint currentMouseDrag = QPoint(currentMouse.x() - (scene->width() / 2) , currentMouse.y() - (scene->height() / 2));
-
     QPoint moveVector = currentMouseDrag - m_startMouseDrag;
-
     QVector3D moveVec = QVector3D(moveVector.x(), moveVector.y(), 0);
 
     float l = moveVec.length();
     moveVec.normalize();
     axis.normalize();
 
-    QVector3D axisDot = QVector3D(axis.x(), axis.y(), 0);
 
     QVector3D axisSS = mv * axis;
-
     float d = QVector3D::dotProduct(moveVec , axisSS);
-
-
-
 
     switch(currentState)
     {
         case NONE:
-
-//            qDebug()<<"setting";
-
             break;
 
         case TRANSLATE_X:
-            mlog<<moveVec<<axis;
-//            qDebug()<<axis<<moveVector<<"d: "<<d<<"l:"<<l<<d*l;
-//              qDebug()<<d*l * 0.01;
-
-            x.move = moveVec;
-            x.axis = axis;
-            x.d =  d;
-            x.l = l;
-            x.xt = d * l * 0.01;
-            x.startD = m_dragStart;
-            x.addD = QVector3D(d*l * 0.01,0,0);
-
-//            QVector3D t = m_dragStart + QVector3D(d*l * 0.01,0,0);
-
-            float add = d*l * 0.01;
-            QVector3D t = m_dragStart + QVector3D(axis.x() *  add, axis.y() * add, axis.z() * add);
-
-            if((x.xt > 0 && xd.xt < 0) || (x.xt < 0 && xd.xt > 0) )
-            {
-                if (flip == true)
-                {
-//                    qDebug()<<"flipp"<<x.xt<<xd.xt<<timer.elapsed();
-                }
-                flip = true;
-            }
-            else
-            {
-                flip = false;
-            }
-
-            m_Transform.Debug = x;
+            float add = d*l * 0.1;
+//            QVector3D t = m_dragStart + QVector3D(axis.x() *  rdis, axis.y() * rdis, axis.z() * rdis) -  m_dragStartOffset;
+            QVector3D t = m_dragStart + (axis * ds);
             m_Transform.setTranslation(t);
 
-            xd = x;
+//            m_Transform.setTranslation(closestPoint);
+//            mlog<<closestPoint;
 
             break;
 
-//        case TRANSLATE_Y:
-
-//            break;
-
-//        case TRANSLATE_Z:
-
-//            break;
     }
 }

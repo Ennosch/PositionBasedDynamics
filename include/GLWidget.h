@@ -40,6 +40,7 @@ public:
      QPoint localMouseToGLScreenCoord(const QPoint &_localMouse);
      QPointF localMouseToGLNDCCoord(const QPointF &_localMouse);
      QPoint getMouseScreenCoords();
+     QPointF getMouseNDCCoords();
      Tool tool();
 
 protected slots:

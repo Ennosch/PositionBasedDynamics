@@ -8,7 +8,6 @@ Transform::Transform() :
     m_dirty(true),
     m_scale(1.0f, 1.0f, 1.0f)
 {
-    m_elpasedTimer.start();
     updateCounter = 0;
 }
 
@@ -40,8 +39,8 @@ void Transform::grow(const QVector3D &ds)
 void Transform::setTranslation(const QVector3D &t)
 {
   m_dirty = true;
-  ptranslation =  m_translation;
-  fromUpdate = updateCounter;
+//  ptranslation =  m_translation;
+//  fromUpdate = updateCounter;
   m_translation = t;
 }
 

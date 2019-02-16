@@ -19,6 +19,8 @@ public:
     bool checkRaySphere(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
     float checkRaySphereF(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
     bool solveQuadratic(const float &a, const float &b, const float &c, float &x0, float &x1);
+
+    Vec3 closetPointFromRayToRay(const Ray &_r1, const Ray &_r2);
 };
 
 

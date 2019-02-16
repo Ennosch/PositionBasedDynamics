@@ -151,6 +151,13 @@ QPoint GLWidget::getMouseScreenCoords()
     return localMouseToGLScreenCoord(mapFromGlobal(QCursor::pos()));
 }
 
+QPointF GLWidget::getMouseNDCCoords()
+{
+    QPoint pos = QCursor::pos();
+    return localMouseToGLNDCCoord(this->mapFromGlobal(pos));
+
+}
+
 Tool GLWidget::tool()
 {
     return m_tool;
@@ -321,8 +328,11 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     QPointF pos = event->pos();
 
     QPointF toPick = localMouseToGLNDCCoord(pos);
+    QPointF toPick3 = getMouseNDCCoords();
 
-//        scene()->pickObject(toPick.x(), toPick.y());
+//    mlog<<toPick<<toPick3;
+
+    scene()->pickObject(toPick3.x(), toPick3.y());
     QPoint toPick2 = localMouseToGLScreenCoord(event->pos());
 //    qDebug()<<event->pos();;
 

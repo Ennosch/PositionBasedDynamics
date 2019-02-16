@@ -50,11 +50,11 @@ public:
   QVector3D up() const;
   QVector3D right() const;
 
-  uint fromUpdate;
-  QElapsedTimer m_elpasedTimer;
-  QVector3D ptranslation;
-
-  debug Debug, pDebug;
+  // Debug vars
+//  uint fromUpdate;
+//  QElapsedTimer m_elpasedTimer;
+//  QVector3D ptranslation;
+//  debug Debug, pDebug;
 
 
 private:

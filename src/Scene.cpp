@@ -824,7 +824,7 @@ void Scene::setupScene()
         auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(1,0,0), QQuaternion(-1,0,0,0));
         sceneObject5->setScale(QVector3D(0.5,0.5,0.5));
         auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,0,0), QQuaternion(-1,0,0,0));
-        sceneObject6->setScale(QVector3D(0.5,0.5,0.5));
+//        sceneObject6->setScale(QVector3D(0.5,0.5,0.5));
 //       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));
 
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
