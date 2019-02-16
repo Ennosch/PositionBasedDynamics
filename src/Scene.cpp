@@ -815,10 +815,17 @@ void Scene::setupScene()
 //       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
 
        // 1 Cell
-       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2,0,0), QQuaternion(1,0,0,0));
-       auto sceneObject2 = addSceneObjectFromModel("bunny", 2, QVector3D(-2,0.0,0), QQuaternion(1,0,0,0));
-       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(-10,0,0), QQuaternion(1,0,0,0));
-       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));
+       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-2,0,0), QQuaternion(-2,0,0,0));
+       sceneObject1->setScale(QVector3D(0.5,0.5,0.5));
+       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-1,0,0), QQuaternion(-1,0,0,0));
+       sceneObject3->setScale(QVector3D(0.5,0.5,0.5));
+        auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,0,0), QQuaternion(-1,0,0,0));
+        sceneObject4->setScale(QVector3D(0.5,0.5,0.5));
+        auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(1,0,0), QQuaternion(-1,0,0,0));
+        sceneObject5->setScale(QVector3D(0.5,0.5,0.5));
+        auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,0,0), QQuaternion(-1,0,0,0));
+        sceneObject6->setScale(QVector3D(0.5,0.5,0.5));
+//       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));
 
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
 //       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));

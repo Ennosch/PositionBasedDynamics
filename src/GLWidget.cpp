@@ -197,10 +197,11 @@ void GLWidget::processInput()
     {
         m_inputManger.setMouseTriggeredPosition();
         scene()->m_arcCamera.arcBallStart();
-//        scene()->mainpulator->setState(TRANSLATE_VIEWPLANE);
+        scene()->mainpulator->startDrag();
+    }
 
 //    && inputManager::keyPressed(Qt::Key_Alt)
-    if(inputManager::buttonPressed(Qt::LeftButton)  )
+    if(inputManager::buttonPressed(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt ))
     {
         int _radius = std::min(this->width(), this->height()) / 2;
 //        scene()->m_arcCamera.rotateArcBall(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition(), _radius);
@@ -208,6 +209,16 @@ void GLWidget::processInput()
 //        scene()->m_arcCamera.orbit(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
 //        scene()->m_arcCamera.correction2(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
     }
+
+    if(inputManager::buttonPressed(Qt::LeftButton) && m_tool == MANIPULATOR_T )
+    {
+        scene()->mainpulator->drag();
+    }
+    if(inputManager::buttonReleased(Qt::LeftButton) && m_tool == MANIPULATOR_T )
+    {
+        scene()->mainpulator->endDrag();
+    }
+
     if(inputManager::buttonTriggered(Qt::RightButton) )
     {
         scene()->m_arcCamera.trackStart(m_inputManger.mousePosition());

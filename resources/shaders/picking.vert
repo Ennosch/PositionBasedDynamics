@@ -18,7 +18,6 @@ uniform mat4 ModelMatrix;
 
 void main()
 {
-
 //    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(position, 1.0);
 
 //    vec3 camTranslation = ViewMatrix[3].xyz;
@@ -28,5 +27,4 @@ void main()
 
 //    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(d * position, 1.0);
     gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(20 * position, 1.0);
-
 }
