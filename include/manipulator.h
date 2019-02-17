@@ -36,6 +36,7 @@ public:
 //    Manipulator();
     void draw();
     void drawPickingBuffer();
+    void drawPickingBufferDebug();
 
     Transform getTransform();
     void setTransform(const Transform &_transform);
@@ -62,12 +63,9 @@ public:
     Framebuffer* m_framebuffer;
     Scene* scene;
     GLWidget *m_window = nullptr;
-    int* test =  nullptr;
-    State currentState = NONE;
 
+    State currentState = NONE;
     QVector3D m_drag, m_dragStart, m_dragStartOffset;
-    float logX, logXd;
-    debug x, xd;
 
     QElapsedTimer timer;
     Transform m_tt;

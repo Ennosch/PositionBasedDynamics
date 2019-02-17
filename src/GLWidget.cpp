@@ -336,7 +336,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     QPoint toPick2 = localMouseToGLScreenCoord(event->pos());
 //    qDebug()<<event->pos();;
 
-//    scene()->readPixel(toPick2.x() , toPick2.y() );
+    scene()->readPixel(toPick2.x() , toPick2.y() );
 
     qDebug()<<event->pos().x()*2<<event->pos().y()*2;
 //    scene()->readPixel(event->pos().x() * 2, event->pos().y() * 2);

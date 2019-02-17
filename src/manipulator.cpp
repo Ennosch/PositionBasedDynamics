@@ -51,10 +51,10 @@ void Manipulator::draw()
     if(currentState == TRANSLATE_Y)
         m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
     vecotorModel->draw();
-//    m_shaderProgram->setUniformValue("color", QVector3D(0,1,0) );
-//    if(currentState == ROTATE_Y)
-//        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-//    circleModel->draw();
+    m_shaderProgram->setUniformValue("color", QVector3D(0,1,0) );
+    if(currentState == ROTATE_Y)
+        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+    circleModel->draw();
 
 
     m_shaderProgram->setUniformValue("mMaterial.ambient",QVector3D(1,0,0) );
@@ -63,10 +63,10 @@ void Manipulator::draw()
     if(currentState == TRANSLATE_X)
         m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
     vecotorModel->draw();
-//    m_shaderProgram->setUniformValue("color", QVector3D(1,0,0) );
-//    if(currentState == ROTATE_X)
-//        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-//    circleModel->draw();
+    m_shaderProgram->setUniformValue("color", QVector3D(1,0,0) );
+    if(currentState == ROTATE_X)
+        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+    circleModel->draw();
 
 
     m_shaderProgram->setUniformValue("mMaterial.ambient",QVector3D(0,0,1) );
@@ -75,17 +75,55 @@ void Manipulator::draw()
     if(currentState == TRANSLATE_Z)
         m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
     vecotorModel->draw();
-//    m_shaderProgram->setUniformValue("color", QVector3D(0,0,1) );
-//    if(currentState == ROTATE_Z)
-//        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-//    circleModel->draw();
+    m_shaderProgram->setUniformValue("color", QVector3D(0,0,1) );
+    if(currentState == ROTATE_Z)
+        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+    circleModel->draw();
 
 }
 
 void Manipulator::drawPickingBuffer()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_fbo);
+//    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     m_pickingProgram->bind();
+
+    m_pickingProgram->setUniformValue("color", QVector3D(0,0,0));
+    m_pickingProgram->setUniformValue("ProjectionMatrix", scene->m_projection_matrix);
+    m_pickingProgram->setUniformValue("ViewMatrix", scene->m_arcCamera.toMatrix());
+
+    m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_Y);
+    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix());
+        vecotorModel->draw();
+    m_pickingProgram->setUniformValue("IDindex",  ROTATE_Y);
+        circleModel->draw();
+
+    m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_X);
+    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localX);
+        vecotorModel->draw();
+    m_pickingProgram->setUniformValue("IDindex",  ROTATE_X);
+        circleModel->draw();
+
+    m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_Z);
+    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localZ);
+        vecotorModel->draw();
+    m_pickingProgram->setUniformValue("IDindex",  ROTATE_Z);
+        circleModel->draw();
+}
+
+void Manipulator::drawPickingBufferDebug()
+{
+//    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
+
+    m_pickingProgram->bind();
+
+
+    m_pickingProgram->setUniformValue("color", QVector3D(1,0,1));
 
     m_pickingProgram->setUniformValue("ProjectionMatrix", scene->m_projection_matrix);
     m_pickingProgram->setUniformValue("ViewMatrix", scene->m_arcCamera.toMatrix());
@@ -141,7 +179,7 @@ void Manipulator::update()
 //        glReadPixels(screenMouse.x(), screenMouse.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &pixelub);
 
 
-//        qDebug()<<"pixelf: "<<pixelf[0]<<pixelf[1]<<pixelf[2]<<uint(pixelf[0])<<TRANSLATE_X;
+//        qDebug()<<"pixelf: "<<pixelf[0]<<pixelf[1]<<pixelf[2]<<uint(pixelf[0]);
 //        qDebug()<<"pixelui: "<<pixelui[0]<<pixelui[1]<<pixelui[2];
 //        qDebug()<<"pixelub: "<<pixelub[0]<<pixelub[1]<<pixelub[2];
 
@@ -152,7 +190,6 @@ void Manipulator::update()
                 break;
 
             case TRANSLATE_X:
-//                qDebug()<<"X:"<<uint(pixelf[0])<<TRANSLATE_X;
                 currentState = TRANSLATE_X;
                 break;
 
@@ -165,8 +202,16 @@ void Manipulator::update()
 //                qDebug()<<"Z:"<<uint(pixelf[0])<<TRANSLATE_Z;
                 currentState = TRANSLATE_Z;
                 break;
+            case ROTATE_X:
+                currentState = ROTATE_X;
+                break;
+            case ROTATE_Y:
+                currentState = ROTATE_Y;
+                break;
+            case ROTATE_Z:
+                currentState = ROTATE_Z;
+                break;
         }
-
     }
 }
 

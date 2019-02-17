@@ -60,7 +60,7 @@ bool Framebuffer::init()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_msDepthBuffer);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"fbo in initFramebuffer"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+      qCritical()<<"msfbo in Framebuffer class"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -76,8 +76,13 @@ bool Framebuffer::init()
 //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBuffer, 0);
 
+    glGenRenderbuffers(1, &m_depthBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WindowWidth, WindowHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer);
+
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      qCritical()<<"intermediateFBO in initFramebuffer"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
+      qCritical()<<"fbo in Framebuffer class"<< (glCheckFramebufferStatus(GL_FRAMEBUFFER));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     qDebug()<<"Framebuffer initFramebuffer"<<m_msfbo<<m_msColorBuffer<<m_msDepthBuffer<<m_fbo<<m_colorBuffer;

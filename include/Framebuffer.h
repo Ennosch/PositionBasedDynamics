@@ -24,7 +24,7 @@ public:
 //private:
     bool ms;
     uint m_msfbo, m_msColorBuffer, m_msDepthBuffer;
-    uint m_fbo, m_colorBuffer;
+    uint m_fbo, m_colorBuffer, m_depthBuffer;
 
     uint m_pickingTexture, m_depthTexture;
     int WindowWidth;

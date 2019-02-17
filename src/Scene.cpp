@@ -593,20 +593,20 @@ void Scene::paint()
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
+        glDisable(GL_MULTISAMPLE);
         if(mainpulator)
         {
-//            mainpulator->draw();
             mainpulator->drawPickingBuffer();
         }
 
         glDisable(GL_CULL_FACE);
         glEnable(GL_MULTISAMPLE);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
           glEnable(GL_DEPTH_TEST);
+          glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-          glClearColor(0.0f, 0.4f, 0.0f, 1.0f);
+
 
                   m_lighting_program->bind();
                   m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
@@ -709,11 +709,20 @@ void Scene::paint()
         glDisable(GL_DEPTH_TEST);
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
+        m_screen_program->bind();
+        m_quad_vao->bind();
+        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, screenTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        m_quad_vao->release();
+        m_screen_program->release();
+
         if(mainpulator)
         {
+//            mainpulator->drawPickingBufferDebug();
             mainpulator->draw();
         }
-
 }
 
 void Scene::updateSceneObjects()
