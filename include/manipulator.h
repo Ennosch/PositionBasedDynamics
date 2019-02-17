@@ -18,7 +18,15 @@ enum State{
     NONE,
     TRANSLATE_X,
     TRANSLATE_Y,
-    TRANSLATE_Z
+    TRANSLATE_Z,
+    TRANSLATE_YZ,
+    TRANSLATE_XZ,
+    TRANSLATE_XY,
+    TRANSLATE_PLANE,
+    ROTATE_X,
+    ROTATE_Y,
+    ROTATE_Z,
+    ROTATE_PLANE
 };
 
 class Manipulator
@@ -44,6 +52,8 @@ public:
     friend Scene;
     bool isDraging;
     ModelPtr vecotorModel;
+    ModelPtr axisModel;
+    ModelPtr circleModel;
     Transform m_Transform;
     QMatrix4x4 localZ, localX;
     QOpenGLShaderProgram* m_shaderProgram;

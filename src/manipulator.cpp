@@ -21,10 +21,13 @@ Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProg
 
     m_framebuffer = new Framebuffer();
 
-    m_Transform.setRotation(QVector3D(15,45,45));
+//    m_Transform.setRotation(QVector3D(15,45,45));
 //        m_Transform.setRotation(QVector3D(0,0,45));
 //        m_Transform.setRotation(QVector3D(0,45,0));
 //    m_Transform.setRotation(QVector3D(15,45,45));
+
+    axisModel = scene->getModelFromPool("Axis");
+    circleModel = scene->getModelFromPool("Circle");
 
     timer.start();
 
@@ -33,7 +36,7 @@ Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProg
 void Manipulator::draw()
 {
 
-//        m_framebuffer->bind();
+//    m_framebuffer->bind();
     glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
 //    m_shaderProgram->setUniformValue("test",  scene->m_arcCamera.translation());
 
@@ -44,30 +47,44 @@ void Manipulator::draw()
     m_shaderProgram->setUniformValue("test",  scene->m_arcCamera.worldPos());
 
     m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix());
-    m_shaderProgram->setUniformValue("mMaterial.shininess", 25 );
-    m_shaderProgram->setUniformValue("mMaterial.specular", QVector3D(0,0,0) );
-    m_shaderProgram->setUniformValue("mMaterial.ambient",QVector3D(0,1,0) );
-    m_shaderProgram->setUniformValue("mMaterial.diffuse", QVector3D(0,1,0) );
+    m_shaderProgram->setUniformValue("color", QVector3D(0,1,0) );
     if(currentState == TRANSLATE_Y)
-        m_shaderProgram->setUniformValue("mMaterial.diffuse", QVector3D(1,1,0) );
+        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
     vecotorModel->draw();
+//    m_shaderProgram->setUniformValue("color", QVector3D(0,1,0) );
+//    if(currentState == ROTATE_Y)
+//        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+//    circleModel->draw();
+
+
     m_shaderProgram->setUniformValue("mMaterial.ambient",QVector3D(1,0,0) );
-    m_shaderProgram->setUniformValue("mMaterial.diffuse", QVector3D(1,0,0) );
+    m_shaderProgram->setUniformValue("color", QVector3D(1,0,0) );
     m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localX);
     if(currentState == TRANSLATE_X)
-        m_shaderProgram->setUniformValue("mMaterial.diffuse", QVector3D(1,1,0) );
+        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
     vecotorModel->draw();
+//    m_shaderProgram->setUniformValue("color", QVector3D(1,0,0) );
+//    if(currentState == ROTATE_X)
+//        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+//    circleModel->draw();
+
+
     m_shaderProgram->setUniformValue("mMaterial.ambient",QVector3D(0,0,1) );
-    m_shaderProgram->setUniformValue("mMaterial.diffuse", QVector3D(0,0,1) );
+    m_shaderProgram->setUniformValue("color", QVector3D(0,0,1) );
     m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localZ);
     if(currentState == TRANSLATE_Z)
-        m_shaderProgram->setUniformValue("mMaterial.diffuse", QVector3D(1,1,0) );
+        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
     vecotorModel->draw();
+//    m_shaderProgram->setUniformValue("color", QVector3D(0,0,1) );
+//    if(currentState == ROTATE_Z)
+//        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+//    circleModel->draw();
+
 }
 
 void Manipulator::drawPickingBuffer()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
     m_pickingProgram->bind();
 
     m_pickingProgram->setUniformValue("ProjectionMatrix", scene->m_projection_matrix);
@@ -199,7 +216,7 @@ void Manipulator::drag()
     tRay.Dir = axis.normalized();
 
     QVector3D closestPoint = scene->m_CollisionDetect.closetPointFromRayToRay(camRay, tRay);
-//    mlog<<closestPoint;
+
     QVector3D target = (m_dragStartOffset - closestPoint);
     float rdis = target.length()  ;
 
@@ -208,8 +225,6 @@ void Manipulator::drag()
     float sign = signbit(dot) ? 1 : -1;
 
     float ds = rdis * sign;
-    mlog<<rdis<<ds;
-
 
     QPoint currentMouseDrag = QPoint(currentMouse.x() - (scene->width() / 2) , currentMouse.y() - (scene->height() / 2));
     QPoint moveVector = currentMouseDrag - m_startMouseDrag;

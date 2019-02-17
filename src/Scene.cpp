@@ -599,14 +599,14 @@ void Scene::paint()
             mainpulator->drawPickingBuffer();
         }
 
-
         glDisable(GL_CULL_FACE);
         glEnable(GL_MULTISAMPLE);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
           glEnable(GL_DEPTH_TEST);
           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-          glClearColor(0.0f, 0.044f, 0.0f, 1.0f);
+          glClearColor(0.0f, 0.4f, 0.0f, 1.0f);
 
                   m_lighting_program->bind();
                   m_lighting_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
@@ -709,27 +709,6 @@ void Scene::paint()
         glDisable(GL_DEPTH_TEST);
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
-        m_screen_program->bind();
-        m_quad_vao->bind();
-
-
-        glActiveTexture(GL_TEXTURE0);
-//        glBindTexture(GL_TEXTURE_2D, texture);
-        glBindTexture(GL_TEXTURE_2D, screenTexture);
-
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        m_quad_vao->release();
-        m_screen_program->release();
-
-
-        glClearColor(0.0f, 0.0f, 0.66f, 1.0f);
-        glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
-            glClear(GL_DEPTH_BUFFER_BIT);
-
-        glEnable(GL_DEPTH_TEST);
-
-
         if(mainpulator)
         {
             mainpulator->draw();
@@ -799,20 +778,15 @@ void Scene::setupScene()
        addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "../bunny.obj");
        addModel(this, "grid", "../Grid100.obj");
-
-       addModel(this, "HCube", "resources/objects/HCube.obj");
-       addModel(this, "Tube", "resources/objects/tube12.obj");
-       addModel(this, "Tube2", "../tube12.obj");
-       addModel(this, "Teapot", "resources/objects/teapot.obj");
        addModel(this, "Icosahedron", "../Icosahedronf4.obj");
-       addShape(this, "Cube", &CubeWithNormals[0], sizeof(CubeWithNormals));
+
        addModel(this, "Vector", "../VectorShape.obj");
+       addModel(this, "Circle", "../TorusShape.obj");
+       addModel(this, "Axis", "../AxisShape.obj");
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
-//       addSceneObjectFromModel("Icosahedron", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
-//       addSceneObjectFromModel("bunny", 1, QVector3D(1.5 , 0 ,0 ), QQuaternion(1,0,0,0));
-//       addSceneObjectFromModel("nanoSuit", 2, QVector3D(-1.2,0,0), QQuaternion(1,0,0,0));
+
 
        // 1 Cell
        auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-2,0,0), QQuaternion(-2,0,0,0));
@@ -904,28 +878,6 @@ pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const Q
 
 
 
-
-
-/*
- * //    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-//    glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
-//    glClear(GL_COLOR_BUFFER_BIT);
-//    glClear(GL_DEPTH_BUFFER_BIT);
-
-//    glEnable(GL_DEPTH_TEST);
-
-//    framebuffer->bind();
-////        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-//    m_picking_program->bind();
-//    m_picking_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-//    m_picking_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-//    if(mainpulator)
-//        mainpulator->drawPickingBuffer();
-
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->fbo());
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-//    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 
 //    glBindFramebuffer(GL_FRAMEBUFFER, 0);

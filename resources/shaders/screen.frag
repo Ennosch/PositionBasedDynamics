@@ -5,11 +5,13 @@ in vec2 vTexCoords;
 
 //uniform sampler2D screenTexture;
 uniform sampler2D textureA;
+uniform sampler2D textureB;
 
 void main()
 {
-    vec3 col = texture(textureA, vTexCoords).rgb;
-    vec4 test = texture(textureA, vTexCoords);
+
+    vec4 texA = texture(textureA, vTexCoords);
+    vec4 texB = texture(textureB, vTexCoords);
 
 //    vec3 col = texture(screenTexture, vTexCoords).rgb;
 //    vec4 test = texture(screenTexture, vTexCoords);
@@ -18,7 +20,8 @@ void main()
 //    {
 //        test = vec4(0,1,0,1);
 //    }
-    FragColor = test;
+    FragColor = texB;
+//    FragColor = vec4(0,1,0,1);
 }
 
 
