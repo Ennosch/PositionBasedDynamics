@@ -427,9 +427,10 @@ void Scene::initFramebuffer()
         qDebug()<<"initFramebuffer"<<"fbo:"<<fbo<<texture<<rbo<<intermediateFBO<<screenTexture<<tmpFbo<<tmpText;
 }
 
-void Scene::debug()
+void Scene::debug(const QVector3D &_pos)
 {
-
+    auto s = addSceneObjectFromModel("Icosahedron", 0, _pos, QQuaternion(-2,0,0,0));
+    s->setScale(QVector3D(0.2,0.2,0.2));
 }
 
 void Scene::QtOpenGLinitialize()

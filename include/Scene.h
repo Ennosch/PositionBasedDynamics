@@ -55,7 +55,7 @@ public:
   void setupScene();
   void updateLinesVBO();
 
-  void debug();
+  void debug(const QVector3D &_pos);
 
   // creation
   void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);

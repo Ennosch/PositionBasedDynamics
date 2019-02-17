@@ -45,6 +45,8 @@ public:
     void startDrag();
     void endDrag();
     void drag();
+    void dragRotate();
+    void dragTranslate();
 
 
     bool flip;
@@ -52,6 +54,8 @@ public:
 //private:
     friend Scene;
     bool isDraging;
+    bool worldSpace;
+
     ModelPtr vecotorModel;
     ModelPtr axisModel;
     ModelPtr circleModel;
@@ -66,6 +70,12 @@ public:
 
     State currentState = NONE;
     QVector3D m_drag, m_dragStart, m_dragStartOffset;
+    QVector3D m_dragStartRotVec;
+    QQuaternion m_dragStartRot;
+    QVector3D localAxis;
+
+    QVector3D pRotVec;
+    QQuaternion pRot;
 
     QElapsedTimer timer;
     Transform m_tt;

@@ -90,6 +90,30 @@ bool CollisionDetection::solveQuadratic(const float &a, const float &b, const fl
     return true;
 }
 
+Vec3 CollisionDetection::intersectRayPlane(const Vec3 &_n, const Vec3 &_pO, const Ray &_ray)
+{
+//    mlog<<_n<<_pO;
+    double t;
+    double denom = Vec3::dotProduct(_n, _ray.Dir);
+    if (denom > 1e-12)
+    {
+//        qDebug()<<"WARNING intersectRayPlane parallel"<<denom;
+    }
+        Vec3 pOlO = _pO - _ray.Origin;
+        t = Vec3::dotProduct(pOlO, _n) / denom;
+        QVector3D v1 = _ray.Origin + (_ray.Dir.normalized() * t);
+        QVector3D resultEnd = v1 + _ray.Dir.normalized();
+        QVector3D precise = intersectLinePlane(_n, _pO, v1, resultEnd);
+        return precise;
+}
+
+Vec3 CollisionDetection::intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, const Vec3 &_A, const Vec3 &_B)
+{
+    Vec3 AB = _B -_A;
+    double t = (_pO.length() - Vec3::dotProduct(_n, _A)) / Vec3::dotProduct(_n, AB);
+    return _A + (t * AB);
+}
+
 Vec3 CollisionDetection::closetPointFromRayToRay(const Ray &_r1, const Ray &_r2)
 {
 

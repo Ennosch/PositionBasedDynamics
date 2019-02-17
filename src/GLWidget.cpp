@@ -304,7 +304,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 
                 case Qt::Key_W:
 //                    qDebug()<<"register and call update";
-                  scene()->debug();
+
                     break;
             }
         }
