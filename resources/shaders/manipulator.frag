@@ -2,12 +2,22 @@
 out vec4 fColor;
 
 uniform vec3 viewPos;
-uniform vec3 color;
 
+
+in vec3 vColor;
+in vec3 behindPlane;
 
 void main()
 {
-    fColor = vec4(color,1);
+//    if(behindPlane.x == 1)
+//    {
+//       fColor = vec4(1,1,1,0);
+//    }
+//    else
+    {
+       fColor = vec4(vColor,1);
+    }
+
 }
 
 

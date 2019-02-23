@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "GLWidget.h"
 
+
 Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProgram* _program)
     : scene(_scene),
       vecotorModel(_vectorModel),
@@ -23,7 +24,6 @@ Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProg
 
     m_framebuffer = new Framebuffer();
 
-
 //    m_Transform.setTranslation(QVector3D(0,-40,0));
 //    m_Transform.setRotation(QVector3D(15,45,45));
 //        m_Transform.setRotation(QVector3D(0,0,45));
@@ -35,16 +35,28 @@ Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProg
 
     timer.start();
     worldSpace = false;
+
+    m_activeObject = scene->widget()->activeObject();
+    m_activeObject->setManipulator(this);
+
 }
 
 void Manipulator::draw()
 {
-
 //    m_framebuffer->bind();
     glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
 //    m_shaderProgram->setUniformValue("test",  scene->m_arcCamera.translation());
 
         m_shaderProgram->bind();
+
+    QVector3D camWorldsPos = scene->m_arcCamera.worldPos();
+    QVector3D camPlaneN = (scene->m_arcCamera.worldPos() - m_Transform.translation()).normalized();
+    QVector3D camPlaneO = m_Transform.translation();
+
+        m_shaderProgram->setUniformValue("test", scene->m_arcCamera.worldPos());
+
+    m_shaderProgram->setUniformValue("pN", camPlaneN);
+    m_shaderProgram->setUniformValue("pO", camPlaneO);
 
     m_shaderProgram->setUniformValue("ProjectionMatrix", scene->m_projection_matrix);
     m_shaderProgram->setUniformValue("ViewMatrix", scene->m_arcCamera.toMatrix());
@@ -150,6 +162,16 @@ Transform Manipulator::getTransform()
 void Manipulator::setTransform(const Transform &_transform)
 {
     m_Transform = _transform;
+}
+
+void Manipulator::setRotation(const QQuaternion &_rot)
+{
+    m_Transform.setRotation(_rot);
+}
+
+void Manipulator::setTranslation(const QVector3D &_translation)
+{
+    m_Transform.setTranslation(_translation);
 }
 
 //void Manipulator::setScene(Scene *_scene)
@@ -298,6 +320,7 @@ void Manipulator::drag()
         dragRotate();
     }
 
+    m_activeObject->notify(m_Transform);
 }
 
 void Manipulator::dragRotate()

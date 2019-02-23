@@ -19,6 +19,7 @@ public:
     ActiveObject(GLWidget *_widget);
     void notify(int _id);
     void notify(pSceneOb _sender);
+    void notify(const Transform &_t);
     void setTransform(const QVector3D _t, const QVector3D _r, const QVector3D _s);
 
 signals:

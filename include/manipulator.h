@@ -8,9 +8,11 @@
 #include "utils.h"
 #include "Framebuffer.h"
 #include "transform.h"
+#include "activeobject.h"
 
 class Scene;
 class GLWidget;
+class ActiveObject;
 
 
 
@@ -40,6 +42,8 @@ public:
 
     Transform getTransform();
     void setTransform(const Transform &_transform);
+    void setRotation(const QQuaternion &_rot);
+    void setTranslation(const QVector3D &_translation);
 //    void setScene(Scene*_scene);
     void update();
     void startDrag();
@@ -47,9 +51,6 @@ public:
     void drag();
     void dragRotate();
     void dragTranslate();
-
-
-    bool flip;
 
 //private:
     friend Scene;
@@ -78,7 +79,9 @@ public:
     QQuaternion pRot;
 
     QElapsedTimer timer;
-    Transform m_tt;
+
+    ActiveObject *m_activeObject;
+
 };
 
 #endif // MANIPULATOR_H

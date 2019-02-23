@@ -18,8 +18,8 @@ CollisionDetection::CollisionDetection(Scene *_scene)
 double CollisionDetection::checkPointPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o)
 {
     Vec3 temp = (_p - _o);
-    float fDist (Vec3::dotProduct(temp, _n));
-    return fDist;
+    double fDist (Vec3::dotProduct(temp, _n));
+    return abs(fDist);
 }
 
 Vec3 CollisionDetection::checkRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o)
@@ -118,10 +118,9 @@ Vec3 CollisionDetection::intersectRayPlane(const Vec3 &_n, const Vec3 &_pO, cons
 Vec3 CollisionDetection::intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, const Vec3 &_A, const Vec3 &_B)
 {
     Vec3 AB = _B -_A;
-    double d = -(checkPointPlane(QVector3D(0,0,0), _n, _pO));
-//    double t = (_pO.length() - Vec3::dotProduct(_n, _A)) / Vec3::dotProduct(_n, AB);
+    double d = (checkPointPlane(QVector3D(0,0,0), _n, _pO));
     double t = (d - Vec3::dotProduct(_n, _A)) / Vec3::dotProduct(_n, AB);
-    mlog<<t<<d;
+
     if (t >= 0.0f && t <= 1.0f )
     {
         return _A + (t * AB);

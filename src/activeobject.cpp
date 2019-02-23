@@ -29,6 +29,15 @@ void ActiveObject::notify(pSceneOb _sender)
                           _sender->getPos(),
                           _sender->getPos(),
                           _sender->getPos());
+
+    m_manipulator->setTranslation(_sender->getTransform().translation());
+    m_manipulator->setRotation(_sender->getTransform().rotation());
+}
+
+void ActiveObject::notify(const Transform &_t)
+{
+    activeSceneObject->setRotation(_t.rotation());
+    activeSceneObject->setTranslation(_t.translation());
 }
 
 void ActiveObject::setTransform(const QVector3D _t, const QVector3D _r, const QVector3D _s)

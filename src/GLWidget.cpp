@@ -168,6 +168,7 @@ void GLWidget::processInput()
     // update() registers keys, add/remove from inputManager containers
 
     m_tool = MANIPULATOR_T;
+
     switch (m_tool) {
         case MANIPULATOR_T:
 //            QPoint screenMouse = localMouseToGLScreenCoord(mapFromGlobal(QCursor::pos()));
@@ -330,23 +331,10 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     inputManager::registerMousePress(event->button());
-    QPointF pos = event->pos();
+    QPointF toPick = getMouseNDCCoords();
 
-    QPointF toPick = localMouseToGLNDCCoord(pos);
-    QPointF toPick3 = getMouseNDCCoords();
-
-//    mlog<<toPick<<toPick3;
-
-    scene()->pickObject(toPick3.x(), toPick3.y());
-    QPoint toPick2 = localMouseToGLScreenCoord(event->pos());
-//    qDebug()<<event->pos();;
-
-    scene()->readPixel(toPick2.x() , toPick2.y() );
-
-    qDebug()<<event->pos().x()*2<<event->pos().y()*2;
-//    scene()->readPixel(event->pos().x() * 2, event->pos().y() * 2);
-
-    scene()->readPixel(event->pos().x(), event->pos().y());
+//    if(scene()->mainpulator->currentState == NONE)
+        scene()->pickObject(toPick.x(), toPick.y());
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
