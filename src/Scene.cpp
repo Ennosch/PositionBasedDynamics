@@ -540,8 +540,14 @@ void Scene::QtOpenGLinitialize()
     pointsVBO.release();
     pointsVAO->release();
 
-    qDebug()<<"Dimensions"<<SCR_HEIGHT<<SCR_WIDTH;
 
+
+    m_lines_vao = new QOpenGLVertexArrayObject();
+    m_lines_vao->create();
+    m_lines_vbo.create();
+    m_lines_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    pointsVAO->bind();
+    updateLinesVBO();
 }
 
 void Scene::DynamicsInitialize()
@@ -589,6 +595,8 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
+
+
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -685,6 +693,17 @@ void Scene::paint()
                       m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
                       m_SceneObjects[0]->draw();
                   }
+
+
+                  //-------------------------Draw Lines--------------------------------------------------------------------------
+                         updateLinesVBO();
+                         {
+                           m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
+                           m_lines_vao->bind();
+           //                 glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
+                           glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
+                           m_lines_vao->release();
+                         }
 
             //------------------Geometry Shader testing -----------------------------------------------
                   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

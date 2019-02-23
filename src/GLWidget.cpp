@@ -303,8 +303,13 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                   break;
 
                 case Qt::Key_W:
-//                    qDebug()<<"register and call update";
-
+                    scene()->m_LinesB.clear();
+                    break;
+                case Qt::Key_S:
+                    QMatrix4x4 i;
+//                   i.setToIdentity();
+                    Transform test;
+                    scene()->mainpulator->setTransform(test);
                     break;
             }
         }

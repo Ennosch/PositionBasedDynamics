@@ -23,6 +23,8 @@ Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProg
 
     m_framebuffer = new Framebuffer();
 
+
+//    m_Transform.setTranslation(QVector3D(0,-40,0));
 //    m_Transform.setRotation(QVector3D(15,45,45));
 //        m_Transform.setRotation(QVector3D(0,0,45));
 //        m_Transform.setRotation(QVector3D(0,45,0));
@@ -187,6 +189,7 @@ void Manipulator::update()
         {
             case NONE:
                 currentState = NONE;
+                localAxis = QVector3D(0,1,0);
                 break;
 
             case TRANSLATE_X:
@@ -278,6 +281,14 @@ void Manipulator::endDrag()
 
 void Manipulator::drag()
 {
+    if(currentState == NONE)
+        return;
+//    QPointF currentMouseNDC = m_window->getMouseNDCCoords();
+//    Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
+//    QVector3D PointRotPlane = scene->m_CollisionDetect.intersectRayPlane(localAxis, m_Transform.translation(), camRay);
+//        scene->debug(PointRotPlane);
+//        return;
+
     if(currentState == TRANSLATE_X || currentState == TRANSLATE_Y || currentState == TRANSLATE_Z )
     {
         dragTranslate();
@@ -295,6 +306,12 @@ void Manipulator::dragRotate()
     Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
     QVector3D PointRotPlane = scene->m_CollisionDetect.intersectRayPlane(localAxis, m_Transform.translation(), camRay);
     QVector3D rotateTo = PointRotPlane - m_Transform.translation();
+
+
+//    scene->debug(PointRotPlane);
+//    return;
+
+//    scene->addLine(m_Transform.translation(), PointRotPlane);
 
 //    QVector3D worldUp = QVector3D(0,1,0);
     QQuaternion WorldtoWorldNew = QQuaternion::rotationTo(m_dragStartRotVec, rotateTo);
@@ -317,7 +334,7 @@ void Manipulator::dragRotate()
 
     QVector3D localTest2 = finalRot.rotatedVector(localAxis);
 
-    mlog<<localTest<<localTest2;
+//    mlog<<localTest<<localTest2;
 //    pRotVec = rotateTo;
     return;
 }

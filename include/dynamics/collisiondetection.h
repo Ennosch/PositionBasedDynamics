@@ -24,6 +24,9 @@ public:
     Vec3 intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, const Vec3 &_A, const Vec3 &_B);
 
     Vec3 closetPointFromRayToRay(const Ray &_r1, const Ray &_r2);
+
+
+    Scene *m_scene;
 };
 
 

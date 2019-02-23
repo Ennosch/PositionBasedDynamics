@@ -9,7 +9,13 @@ CollisionDetection::CollisionDetection()
     qDebug()<<"CollisionDetection  Ctor";
 }
 
-float CollisionDetection::checkPointPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o)
+CollisionDetection::CollisionDetection(Scene *_scene)
+{
+    qDebug()<<"CollisionDetection  Ctor";
+    m_scene = _scene;
+}
+
+double CollisionDetection::checkPointPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o)
 {
     Vec3 temp = (_p - _o);
     float fDist (Vec3::dotProduct(temp, _n));
@@ -95,14 +101,16 @@ Vec3 CollisionDetection::intersectRayPlane(const Vec3 &_n, const Vec3 &_pO, cons
 //    mlog<<_n<<_pO;
     double t;
     double denom = Vec3::dotProduct(_n, _ray.Dir);
-    if (denom > 1e-12)
+    if (denom < 1e-5)
     {
 //        qDebug()<<"WARNING intersectRayPlane parallel"<<denom;
     }
         Vec3 pOlO = _pO - _ray.Origin;
         t = Vec3::dotProduct(pOlO, _n) / denom;
         QVector3D v1 = _ray.Origin + (_ray.Dir.normalized() * t);
-        QVector3D resultEnd = v1 + _ray.Dir.normalized();
+        QVector3D resultEnd = v1 + (_ray.Dir.normalized()*5);
+
+//        m_scene->addLine(v1, resultEnd);
         QVector3D precise = intersectLinePlane(_n, _pO, v1, resultEnd);
         return precise;
 }
@@ -110,8 +118,15 @@ Vec3 CollisionDetection::intersectRayPlane(const Vec3 &_n, const Vec3 &_pO, cons
 Vec3 CollisionDetection::intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, const Vec3 &_A, const Vec3 &_B)
 {
     Vec3 AB = _B -_A;
-    double t = (_pO.length() - Vec3::dotProduct(_n, _A)) / Vec3::dotProduct(_n, AB);
-    return _A + (t * AB);
+    double d = -(checkPointPlane(QVector3D(0,0,0), _n, _pO));
+//    double t = (_pO.length() - Vec3::dotProduct(_n, _A)) / Vec3::dotProduct(_n, AB);
+    double t = (d - Vec3::dotProduct(_n, _A)) / Vec3::dotProduct(_n, AB);
+    mlog<<t<<d;
+    if (t >= 0.0f && t <= 1.0f )
+    {
+        return _A + (t * AB);
+    }
+    return _A;
 }
 
 Vec3 CollisionDetection::closetPointFromRayToRay(const Ray &_r1, const Ray &_r2)
