@@ -159,6 +159,31 @@ void Scene::makeDynamic(pSceneOb _sceneObject)
     //    _sceneObject->
 }
 
+void Scene::drawLines()
+{
+    updateLinesVBO();
+    {
+      m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
+      m_lines_vao->bind();
+//                 glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
+      glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
+      m_lines_vao->release();
+    }
+}
+
+void Scene::drawGeometryShader()
+{
+    //------------------Geometry Shader testing -----------------------------------------------
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+     m_geometry_program->bind();
+     m_geometry_program->setUniformValue("projection", m_projection_matrix);
+     m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
+     m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
+     pointsVAO->bind();
+     glDrawArrays(GL_POINTS, 0, somePoints.size());
+     pointsVAO->release();
+}
+
 uint Scene::width()
 {
     return  SCR_WIDTH;
@@ -595,8 +620,6 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
-
-
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -695,26 +718,6 @@ void Scene::paint()
                   }
 
 
-                  //-------------------------Draw Lines--------------------------------------------------------------------------
-                         updateLinesVBO();
-                         {
-                           m_flat_program->setUniformValue("Color", QVector3D(0.0,0.8,0.0));
-                           m_lines_vao->bind();
-           //                 glDrawArrays(GL_LINES, 0, m_Lines.size() * 2);
-                           glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
-                           m_lines_vao->release();
-                         }
-
-            //------------------Geometry Shader testing -----------------------------------------------
-                  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                 m_geometry_program->bind();
-                 m_geometry_program->setUniformValue("projection", m_projection_matrix);
-                 m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
-                 m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
-                 pointsVAO->bind();
-                 glDrawArrays(GL_POINTS, 0, somePoints.size());
-                 pointsVAO->release();
-
          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
          glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
@@ -812,21 +815,23 @@ void Scene::setupScene()
        addModel(this, "Vector", "../VectorShape.obj");
        addModel(this, "Circle", "../TorusShape.obj");
        addModel(this, "Axis", "../AxisShape.obj");
+       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
+       addModel(this, "bunny", "../bunny.obj");
+       addModel(this, "teapot", "resources/objects/teapot.obj");
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
 
+
        // 1 Cell
-       auto sceneObject1 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-2,0,0), QQuaternion(-2,0,0,0));
-       sceneObject1->setScale(QVector3D(0.5,0.5,0.5));
-       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(-1,0,0), QQuaternion(-1,0,0,0));
+       auto sceneObject1 = addSceneObjectFromModel("teapot", 2, QVector3D(-1.5,0.3,0), QQuaternion(-1,0,0,0));
+       sceneObject1->setScale(QVector3D(0.7,0.7,0.7));
+       auto sceneObject3 = addSceneObjectFromModel("nanoSuit", 0, QVector3D(1,0,0), QQuaternion(-1,0,0,0));
        sceneObject3->setScale(QVector3D(0.5,0.5,0.5));
-        auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(0,0,0), QQuaternion(-1,0,0,0));
+        auto sceneObject4 = addSceneObjectFromModel("bunny", 1, QVector3D(0,0,0), QQuaternion(-1,0,0,0));
         sceneObject4->setScale(QVector3D(0.5,0.5,0.5));
-        auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(1,0,0), QQuaternion(-1,0,0,0));
-        sceneObject5->setScale(QVector3D(0.5,0.5,0.5));
-        auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(2,0,0), QQuaternion(-1,0,0,0));
+
 //        sceneObject6->setScale(QVector3D(0.5,0.5,0.5));
 //       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));
 

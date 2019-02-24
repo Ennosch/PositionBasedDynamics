@@ -320,7 +320,10 @@ void Manipulator::drag()
         dragRotate();
     }
 
-    m_activeObject->notify(m_Transform);
+    if(m_activeObject)
+        m_activeObject->notify(m_Transform);
+
+     mlog<<"hello bug hello bug hello bug ";
 }
 
 void Manipulator::dragRotate()
