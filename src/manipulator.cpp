@@ -258,7 +258,13 @@ void Manipulator::updateLocalView()
     QQuaternion rotY = QQuaternion::rotationTo(QVector3D(0,1,0), camPlaneN);
     QQuaternion rotX = QQuaternion::rotationTo(QVector3D(1,0,0), localUp);
 
+    QQuaternion currentRot = m_Transform.rotation();
+    QMatrix4x4 tmp;
+    tmp.rotate(currentRot);
+    QMatrix4x4 rotInv = tmp.inverted();
+
     localView.setToIdentity();
+    localView = rotInv * localView;
     localView.rotate(rotY);
     localView.rotate(rotX);
     localView.scale(0.4,0.4,0.4);
