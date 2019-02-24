@@ -14,9 +14,6 @@ uniform vec3 pN;
 uniform vec3 pO;
 uniform vec3 color;
 
-//out vec3 wireFrameColor;
-//out vec4 overlayColorl;
-uniform vec3 test;
 uniform mat4 ProjectionMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ModelMatrix;
@@ -40,13 +37,15 @@ void main()
         behindPlane.x = 1;
     }
 
-    if(viewPos == test)
-    {
-        behindPlane.x = 1;
-    }
     gl_Position = screenPos;
 
     vColor = color;
+
+
+//    if(color.x == 0.0f && color.y == 0.0f && color.z == 0.0f)
+//    {
+//        vColor = vec3(1,0,1);
+//    }
 }
 
 //        float diff = max(dot(normal, lightDir), 0.0);

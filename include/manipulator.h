@@ -8,12 +8,10 @@
 #include "utils.h"
 #include "Framebuffer.h"
 #include "transform.h"
-#include "activeobject.h"
 
 class Scene;
 class GLWidget;
 class ActiveObject;
-
 
 
 enum State{
@@ -24,33 +22,33 @@ enum State{
     TRANSLATE_YZ,
     TRANSLATE_XZ,
     TRANSLATE_XY,
-    TRANSLATE_PLANE,
+    TRANSLATE_VIEWPLANE,
     ROTATE_X,
     ROTATE_Y,
     ROTATE_Z,
-    ROTATE_PLANE
+    ROTATE_VIEWPLANE
 };
 
 class Manipulator
 {
 public:
     Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProgram* _program);
-//    Manipulator();
     void draw();
     void drawPickingBuffer();
-    void drawPickingBufferDebug();
 
     Transform getTransform();
     void setTransform(const Transform &_transform);
     void setRotation(const QQuaternion &_rot);
     void setTranslation(const QVector3D &_translation);
-//    void setScene(Scene*_scene);
+
     void update();
+    void updateLocalView();
     void startDrag();
     void endDrag();
     void drag();
     void dragRotate();
     void dragTranslate();
+    void dragTranslateViewPlane();
 
 //private:
     friend Scene;
@@ -60,8 +58,9 @@ public:
     ModelPtr vecotorModel;
     ModelPtr axisModel;
     ModelPtr circleModel;
+    ModelPtr planeModel;
     Transform m_Transform;
-    QMatrix4x4 localZ, localX;
+    QMatrix4x4 localZ, localX, localView;
     QOpenGLShaderProgram* m_shaderProgram;
     QOpenGLShaderProgram* m_pickingProgram;
     QPoint m_startMouseDrag;
@@ -70,15 +69,11 @@ public:
     GLWidget *m_window = nullptr;
 
     State currentState = NONE;
-    QVector3D m_drag, m_dragStart, m_dragStartOffset;
+    QVector3D m_dragStart, m_dragStartOffset;
     QVector3D m_dragStartRotVec;
     QQuaternion m_dragStartRot;
     QVector3D localAxis;
-
-    QVector3D pRotVec;
-    QQuaternion pRot;
-
-    QElapsedTimer timer;
+    QVector3D localUp, localRight;
 
     ActiveObject *m_activeObject;
 

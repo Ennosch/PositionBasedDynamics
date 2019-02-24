@@ -94,9 +94,7 @@ struct Pixel{
 
 enum Tool{
     CAMERA,
-    MANIPULATOR_T,
-    ROTATELOCALX,
-    TRANSLATELOCALX
+    MANIPULATOR_TR
 };
 
 typedef std::unordered_map <std::string, std::shared_ptr <Shape>>       ShapeMap;

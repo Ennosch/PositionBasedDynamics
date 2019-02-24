@@ -167,10 +167,9 @@ void GLWidget::processInput()
 {
     // update() registers keys, add/remove from inputManager containers
 
-    m_tool = MANIPULATOR_T;
-
+    m_tool = MANIPULATOR_TR;
     switch (m_tool) {
-        case MANIPULATOR_T:
+        case MANIPULATOR_TR:
 //            QPoint screenMouse = localMouseToGLScreenCoord(mapFromGlobal(QCursor::pos()));
             if(scene()->mainpulator)
                 scene()->mainpulator->update();
@@ -218,11 +217,11 @@ void GLWidget::processInput()
 //        scene()->m_arcCamera.correction2(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
     }
 
-    if(inputManager::buttonPressed(Qt::LeftButton) && m_tool == MANIPULATOR_T )
+    if(inputManager::buttonPressed(Qt::LeftButton) && m_tool == MANIPULATOR_TR )
     {
         scene()->mainpulator->drag();
     }
-    if(inputManager::buttonReleased(Qt::LeftButton) && m_tool == MANIPULATOR_T )
+    if(inputManager::buttonReleased(Qt::LeftButton) && m_tool == MANIPULATOR_TR )
     {
         scene()->mainpulator->endDrag();
     }

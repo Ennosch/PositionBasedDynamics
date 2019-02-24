@@ -814,6 +814,7 @@ void Scene::setupScene()
 
        addModel(this, "Vector", "../VectorShape.obj");
        addModel(this, "Circle", "../TorusShape.obj");
+       addModel(this, "Plane", "../PlaneShape.obj");
        addModel(this, "Axis", "../AxisShape.obj");
        addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "../bunny.obj");
