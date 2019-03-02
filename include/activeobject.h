@@ -21,6 +21,7 @@ public:
     void notify(pSceneOb _sender);
     void notify(const Transform &_t);
     pSceneOb currentObject();
+    bool isActive();
     void setTransform(const QVector3D _t, const QVector3D _r, const QVector3D _s);
 
 signals:
@@ -29,6 +30,7 @@ signals:
 
 
 private:
+    bool m_isActive;
     pSceneOb activeSceneObject = nullptr;
     GLWidget *m_GLWidget;
 };

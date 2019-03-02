@@ -14,6 +14,24 @@ class GLWidget;
 class ActiveObject;
 
 
+
+//enum Mode{
+//    NOTACTIVE,
+//    TRANSLATE,
+//    ROTATE,
+
+//    VIEWPLANE,
+//    TRANSLATER_ROTATE,
+
+//};
+
+struct ManipulatorMode{
+    bool rotate = false;
+    bool translate = false;
+    bool viewPlane= false;
+    bool active = false;
+};
+
 enum State{
     NONE,
     TRANSLATE_X,
@@ -41,6 +59,8 @@ public:
     void setRotation(const QQuaternion &_rot);
     void setTranslation(const QVector3D &_translation);
     void setState(State _state);
+    void setActive(bool _active);
+    bool isActive();
 
     void update();
     void updateLocalView();
@@ -56,6 +76,9 @@ public:
     friend Scene;
     bool isDraging;
     bool worldSpace;
+    bool m_isActive;
+
+    ManipulatorMode mMode;
 
     ModelPtr vecotorModel;
     ModelPtr axisModel;

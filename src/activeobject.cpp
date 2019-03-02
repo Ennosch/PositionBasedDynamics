@@ -48,6 +48,11 @@ pSceneOb ActiveObject::currentObject()
     return activeSceneObject;
 }
 
+bool ActiveObject::isActive()
+{
+    return m_isActive;
+}
+
 void ActiveObject::setTransform(const QVector3D _t, const QVector3D _r, const QVector3D _s)
 {
 //    qDebug()<<"set Transform ";

@@ -126,19 +126,13 @@ Vec3 CollisionDetection::intersectRayPlaneRec(const Vec3 &_n, const Vec3 &_pO, c
 
     QVector3D result =  _ray.Origin + (_ray.Dir.normalized() * t);
 
-    qDebug()<<"t is:"<<t<<typeid (t).name();
-    qDebug()<<_n<<_pO<<_ray.Origin<<_ray.Dir;
-    qDebug()<<"result :"<<result;
-
     if(t > 0.01)
     {
         Ray _ray2;
         _ray2.Dir = _ray.Dir.normalized();
         _ray2.Origin = result;
-        mlog<<"overwrite result";
         result = intersectRayPlaneRec(_n, _pO, _ray2);
     }
-    qDebug()<<"final result"<<result;
     return result;
 }
 
@@ -166,7 +160,6 @@ Vec3 CollisionDetection::intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, con
 
 Vec3 CollisionDetection::closetPointFromRayToRay(const Ray &_r1, const Ray &_r2)
 {
-
     float p,q,r,s,t,d,e;
     Vec3 a,b,c;
     a = _r1.Dir.normalized();

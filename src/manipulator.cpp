@@ -44,6 +44,8 @@ Manipulator::Manipulator(Scene* _scene, ModelPtr _vectorModel, QOpenGLShaderProg
 
 void Manipulator::draw()
 {
+    if(!isActive())
+        return;
 //    m_framebuffer->bind();
     glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
 //    m_shaderProgram->setUniformValue("test",  scene->m_arcCamera.translation());
@@ -104,6 +106,9 @@ void Manipulator::draw()
 
 void Manipulator::drawPickingBuffer()
 {
+    if(!isActive())
+        return;
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_fbo);
 //    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
 
@@ -174,6 +179,16 @@ void Manipulator::setState(State _state)
     currentState = _state;
 }
 
+void Manipulator::setActive(bool _active)
+{
+    m_isActive = _active;
+}
+
+bool Manipulator::isActive()
+{
+    return m_isActive;
+}
+
 //void Manipulator::setScene(Scene *_scene)
 //{
 //    scene = _scene;
@@ -183,6 +198,9 @@ void Manipulator::setState(State _state)
 
 void Manipulator::update()
 {
+    if(!isActive())
+        return;
+
     if(m_window)
     {
         if(isDraging)
@@ -290,8 +308,58 @@ void Manipulator::startDrag()
 {
     isDraging = true;
 
+    // A ray from a click on the screen into the scene. For Translation and Rotation operations
     QPointF currentMouseNDC = m_window->getMouseNDCCoords();
     Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
+
+    if(currentState == NONE)
+        {
+//            QPointF toPick = m_window->getMouseNDCCoords();
+            if(m_activeObject->currentObject())
+            {
+//                mlog<<m_activeObject->currentObject()->getID();
+            }
+            else
+            {
+//                mlog<<"no object selected";
+            }
+
+//            auto sceneObj = scene->pickObject(toPick.x(), toPick.y());
+//            if(sceneObj)
+//            {
+//                mlog<<"got sO";
+//            }
+
+
+//    //        if(m_activeObject->currentObject())
+//    //        {
+//    //            mlog<<m_activeObject->currentObject()->getTransform().translation();
+//    //            mlog<<m_activeObject->currentObject()->getID();
+//    //        }
+
+//    //        if(sceneObj == m_activeObject->currentObject())
+//            {
+//                currentState =TRANSLATE_VIEWPLANE;
+//                QVector4D null = QVector4D(0,0,0,1);
+//                QVector4D ndcNull = scene->m_projection_matrix * scene->m_arcCamera.toMatrix() * m_Transform.toMatrix() * null ;
+//                ndcNull = ndcNull / ndcNull.w();
+//                m_dragStartOffset = QVector3D(ndcNull.x() - currentMouseNDC.x() ,
+//                                                    ndcNull.y() - currentMouseNDC.y() ,
+//                                                    0);
+//            }
+              return;
+        }
+
+    if(currentState == TRANSLATE_VIEWPLANE)
+    {
+        QVector4D null = QVector4D(0,0,0,1);
+        QVector4D ndcNull = scene->m_projection_matrix * scene->m_arcCamera.toMatrix() * m_Transform.toMatrix() * null ;
+        ndcNull = ndcNull / ndcNull.w();
+        m_dragStartOffset = QVector3D(ndcNull.x() - currentMouseNDC.x() ,
+                                            ndcNull.y() - currentMouseNDC.y() ,
+                                            0);
+        return;
+    }
 
     if(currentState == TRANSLATE_X || currentState == TRANSLATE_Y || currentState == TRANSLATE_Z )
     {
@@ -310,12 +378,6 @@ void Manipulator::startDrag()
         QVector3D PointRotPlane = scene->m_CollisionDetect.intersectRayPlane(localAxis, m_Transform.translation(), camRay);
         m_dragStartRotVec = PointRotPlane - m_Transform.translation();
         m_dragStartRot = m_Transform.rotation();
-
-        mlog<<"point to plane"<<PointRotPlane;
-//        mlog<<" m_dragStartRotVec"<<m_dragStartRotVec;
-//        mlog<<" m_dragStartRot"<<m_dragStartRot;
-//        mlog<<" m_Transform.translation()"<<m_Transform.translation();
-//        mlog<<" camRay"<<camRay.Origin<<camRay.Dir;
     }
 }
 
@@ -418,8 +480,6 @@ void Manipulator::dragTranslate()
 
 void Manipulator::dragTranslateViewPlane()
 {
-
-    return;
     QPointF currentMouseNDC = m_window->getMouseNDCCoords();
     QVector3D null = QVector3D(0,0,0);
     QVector3D ndcNull = scene->m_projection_matrix * scene->m_arcCamera.toMatrix() * m_Transform.toMatrix() * null;
@@ -429,7 +489,6 @@ void Manipulator::dragTranslateViewPlane()
                                         0);
 
 //    QVector3D mouseOffset = QVector3D(currentMouseNDC.x() - mouseToObject.x(), currentMouseNDC.y() - mouseToObject.y(), 0 );
-
 
 //    Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
     Ray camRay = scene->castRayFromCamera(currentMouseNDC.x() + m_dragStartOffset.x(), currentMouseNDC.y() + m_dragStartOffset.y());

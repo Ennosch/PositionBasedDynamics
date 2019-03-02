@@ -285,7 +285,6 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
                 m_pickedObject = m_SceneObjects[i];
                 m_pickedObject->isActive(true);
                  m_pickedObject->m_IsDirty = true;
-//                qDebug()<<"set:"<<i<<t;
                 min_t = t;
                 index = i;
             }
@@ -294,39 +293,23 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
                 m_pickedObject = m_SceneObjects[i];
                 m_pickedObject->isActive(true);
                 m_pickedObject->m_IsDirty = true;
-//                qDebug()<<"set:"<<i<<t;
                 min_t = t;
                 index = i;
             }
         }
     }
-//    qDebug()<<index<<&m_SceneObjects[index];
 
+    widget()->activeObject()->notify(nullptr);
     return m_SceneObjects[index];
 }
 
 int3 Scene::readPixel(uint _x, uint _y)
 {
-//    framebuffer->readPixel(_x,_y);
     int3 pixel;
     glBindFramebuffer(GL_READ_FRAMEBUFFER, tmpFbo);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
 
-    Color Pixel;
-    std::vector< unsigned char > pixels( 1 * 1 * 3);
-//    glReadPixels(0, 0, SCR_WIDTH, SCR_HEIGHT, GL_RGB, GL_FLOAT, &image);
-//    glReadPixels(_x, _y, 1, 1, GL_RGB, GL_FLOAT, &Pixel);
-//    glReadPixels(_x, _y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]);
-
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, intermediateFBO);
-
-    qDebug()<<"ReadPixel: "<<_x<<_y<<Pixel.r<<Pixel.g<<Pixel.b;
-//    qDebug()<<pixels[0]<<pixels[1]<<pixels[2];
-//        return Pixel;
-
-//    qDebug()<<"ReadPixel: "<<this->width()<<this->height()<<_x<<_y<<pixel.r<<pixel.g<<pixel.b;
-
+    glReadPixels(_x, _y, 1, 1, GL_RGB, GL_FLOAT, &pixel);
     return  pixel;
 }
 

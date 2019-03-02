@@ -94,7 +94,9 @@ void SceneObject::update()
         m_ModelMatrix =  m_Transform.toMatrix();
 
         if(m_IsActive)
+        {
             notify();
+        }
     }
 }
 

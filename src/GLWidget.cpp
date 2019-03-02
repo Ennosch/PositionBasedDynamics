@@ -193,8 +193,9 @@ void GLWidget::processInput()
         m_inputManger.setMouseTriggeredPosition();
         scene()->m_arcCamera.arcBallStart();
 //        scene()->mainpulator->setState(TRANSLATE_VIEWPLANE);
-        scene()->mainpulator->startDrag();
 
+//        if notDragging:
+        scene()->mainpulator->startDrag();
     }
     if(inputManager::buttonPressed(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt ))
     {
@@ -299,7 +300,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                         break;
 
                 case Qt::Key_A:{
-                        mlog<<" reset";}
+                            if(m_activeObject->isActive())
+                            {
+                                mlog<<"activeObject id:"<<m_activeObject->currentObject()->getID();
+                            }
+                        }
                         break;
             }
         }
@@ -321,6 +326,10 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     inputManager::registerMousePress(event->button());
 
+//    QPointF toPick = getMouseNDCCoords();
+//    auto sceneObj = scene()->pickObject(toPick.x(), toPick.y());
+
+//    mlog<<sceneObj->getID();
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
