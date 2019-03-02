@@ -454,8 +454,8 @@ void Scene::initFramebuffer()
 
 void Scene::debug(const QVector3D &_pos)
 {
-    auto s = addSceneObjectFromModel("Icosahedron", 0, _pos, QQuaternion(-2,0,0,0));
-    s->setScale(QVector3D(0.2,0.2,0.2));
+    auto s = addSceneObjectFromModel("Icosahedron", 0, _pos, QQuaternion(-1,0,0,0));
+    s->setScale(QVector3D(0.05,0.05,0.05));
 }
 
 void Scene::QtOpenGLinitialize()
@@ -717,6 +717,7 @@ void Scene::paint()
                       m_SceneObjects[0]->draw();
                   }
 
+         drawLines();
 
          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);

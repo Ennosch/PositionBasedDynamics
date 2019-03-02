@@ -25,8 +25,13 @@ void main()
     vec3 viewPos = ViewMatrix[3].xyz;
     float d = length(viewPos - modelPos);
 
+    //    float scale = (d / 8);
+    float scale = 1.0;
+//      float scale = d / 4;
+
+
     vec4 worldPos = ModelMatrix * vec4((d / 8) * position, 1.0);
-    vec4 screenPos = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4((d / 8) * position, 1.0);
+    vec4 screenPos = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(scale * position, 1.0);
 
 
     vec3 temp = (worldPos.xyz - pO);

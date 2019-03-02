@@ -166,11 +166,9 @@ Tool GLWidget::tool()
 void GLWidget::processInput()
 {
     // update() registers keys, add/remove from inputManager containers
-
     m_tool = MANIPULATOR_TR;
     switch (m_tool) {
         case MANIPULATOR_TR:
-//            QPoint screenMouse = localMouseToGLScreenCoord(mapFromGlobal(QCursor::pos()));
             if(scene()->mainpulator)
                 scene()->mainpulator->update();
             break;
@@ -180,22 +178,12 @@ void GLWidget::processInput()
     _localMousePos.setX(_localMousePos.x() - (this->width()/2));
     _localMousePos.setY((_localMousePos.y() - (this->height()/2)) * -1);
 
-    //if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
-    // Handle Mouse button states
-    // LeftButton
+    // handle key press events
     if(inputManager::buttonTriggered(Qt::LeftButton) )
     {
         QPointF toPick = getMouseNDCCoords();
-
         if(scene()->mainpulator->currentState == NONE)
-        {
-            auto picked = scene()->pickObject(toPick.x(), toPick.y());
-            if(picked)
-            {
-                picked->update();
-                scene()->mainpulator->currentState = TRANSLATE_VIEWPLANE;
-            }
-        }
+            scene()->pickObject(toPick.x(), toPick.y());
 
     //if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
     // Handle Mouse button states
@@ -206,8 +194,6 @@ void GLWidget::processInput()
         scene()->m_arcCamera.arcBallStart();
         scene()->mainpulator->startDrag();
     }
-
-//    && inputManager::keyPressed(Qt::Key_Alt)
     if(inputManager::buttonPressed(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt ))
     {
         int _radius = std::min(this->width(), this->height()) / 2;
@@ -216,7 +202,6 @@ void GLWidget::processInput()
 //        scene()->m_arcCamera.orbit(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
 //        scene()->m_arcCamera.correction2(m_inputManger.mousePosition(), m_inputManger.mouseTriggeredPosition());
     }
-
     if(inputManager::buttonPressed(Qt::LeftButton) && m_tool == MANIPULATOR_TR )
     {
         scene()->mainpulator->drag();
@@ -225,7 +210,6 @@ void GLWidget::processInput()
     {
         scene()->mainpulator->endDrag();
     }
-
     if(inputManager::buttonTriggered(Qt::RightButton) )
     {
         scene()->m_arcCamera.trackStart(m_inputManger.mousePosition());
@@ -297,20 +281,24 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
         {
             switch(event->key())
             {
-              case Qt::Key_Right:
-                qDebug()<<"register and call update";
-                scene()->dynamicsWorld()->update();
-                  break;
+                case Qt::Key_Right:{
+                        qDebug()<<"register and call update";
+                        scene()->dynamicsWorld()->update();}
+                          break;
 
-                case Qt::Key_W:
-                    scene()->m_LinesB.clear();
-                    break;
-                case Qt::Key_S:
-                    QMatrix4x4 i;
-//                   i.setToIdentity();
-                    Transform test;
-                    scene()->mainpulator->setTransform(test);
-                    break;
+                case Qt::Key_W:{
+                        scene()->m_LinesB.clear();}
+                        break;
+
+                case Qt::Key_S:{
+                        QMatrix4x4 i;
+                        Transform test;
+                        scene()->mainpulator->setTransform(test);}
+                        break;
+
+                case Qt::Key_A:{
+                        mlog<<" reset";}
+                        break;
             }
         }
 }
@@ -330,10 +318,7 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     inputManager::registerMousePress(event->button());
-    QPointF toPick = getMouseNDCCoords();
 
-//    if(scene()->mainpulator->currentState == NONE)
-        scene()->pickObject(toPick.x(), toPick.y());
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -349,7 +334,6 @@ void GLWidget::wheelEvent(QWheelEvent *event)
     QVector3D nextCamTranslation = camTranslation + (QVector3D(0,0,1) * t * 0.05);
     scene()->m_arcCamera.setTranslation(nextCamTranslation);
 }
-//35 1331
 
 void GLWidget::initializeGL()
 {

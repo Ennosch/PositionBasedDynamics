@@ -43,6 +43,7 @@ public:
 
     void update();
     void updateLocalView();
+    void updateGlobalScale();
     void startDrag();
     void endDrag();
     void drag();
@@ -61,6 +62,8 @@ public:
     ModelPtr planeModel;
     Transform m_Transform;
     QMatrix4x4 localZ, localX, localView;
+    QMatrix4x4 globalScale;
+
     QOpenGLShaderProgram* m_shaderProgram;
     QOpenGLShaderProgram* m_pickingProgram;
     QPoint m_startMouseDrag;
