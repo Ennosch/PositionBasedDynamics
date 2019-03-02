@@ -29,7 +29,6 @@ void ActiveObject::notify(pSceneOb _sender)
                           _sender->getPos(),
                           _sender->getPos(),
                           _sender->getPos());
-
     m_manipulator->setTranslation(_sender->getTransform().translation());
     m_manipulator->setRotation(_sender->getTransform().rotation());
 }

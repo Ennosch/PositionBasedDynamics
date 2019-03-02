@@ -299,7 +299,12 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
         }
     }
 
-    widget()->activeObject()->notify(nullptr);
+    if(index == 0)
+    {
+        widget()->activeObject()->notify(nullptr);
+        return nullptr;
+    }
+
     return m_SceneObjects[index];
 }
 
@@ -805,7 +810,7 @@ void Scene::setupScene()
        addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "../bunny.obj");
        addModel(this, "grid", "../Grid100.obj");
-       addModel(this, "Icosahedron", "../Icosahedronf4.obj");
+       addModel(this, "sphere", "../Icosahedronf4.obj");
 
        addModel(this, "Vector", "../VectorShape.obj");
        addModel(this, "Circle", "../TorusShape.obj");
@@ -821,12 +826,12 @@ void Scene::setupScene()
 
 
        // 1 Cell
-       auto sceneObject1 = addSceneObjectFromModel("teapot", 2, QVector3D(-1.5,0.3,0), QQuaternion(-1,0,0,0));
-       sceneObject1->setScale(QVector3D(0.7,0.7,0.7));
-       auto sceneObject3 = addSceneObjectFromModel("nanoSuit", 0, QVector3D(1,0,0), QQuaternion(-1,0,0,0));
-       sceneObject3->setScale(QVector3D(0.5,0.5,0.5));
-        auto sceneObject4 = addSceneObjectFromModel("bunny", 1, QVector3D(0,0,0), QQuaternion(-1,0,0,0));
-        sceneObject4->setScale(QVector3D(0.5,0.5,0.5));
+       auto sceneObject1 = addSceneObjectFromModel("sphere", 1, QVector3D(-1.0,0.0,0), QQuaternion(-1,0,0,0));
+//       sceneObject1->setScale(QVector3D(0.7,0.7,0.7));
+       auto sceneObject3 = addSceneObjectFromModel("sphere", 2, QVector3D(0,0,0), QQuaternion(-1,0,0,0));
+//       sceneObject3->setScale(QVector3D(0.5,0.5,0.5));
+        auto sceneObject4 = addSceneObjectFromModel("sphere", 0, QVector3D(1,0,0), QQuaternion(-1,0,0,0));
+//        sceneObject4->setScale(QVector3D(0.5,0.5,0.5));
 
 //        sceneObject6->setScale(QVector3D(0.5,0.5,0.5));
 //       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));

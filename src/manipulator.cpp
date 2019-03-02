@@ -312,44 +312,6 @@ void Manipulator::startDrag()
     QPointF currentMouseNDC = m_window->getMouseNDCCoords();
     Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
 
-    if(currentState == NONE)
-        {
-//            QPointF toPick = m_window->getMouseNDCCoords();
-            if(m_activeObject->currentObject())
-            {
-//                mlog<<m_activeObject->currentObject()->getID();
-            }
-            else
-            {
-//                mlog<<"no object selected";
-            }
-
-//            auto sceneObj = scene->pickObject(toPick.x(), toPick.y());
-//            if(sceneObj)
-//            {
-//                mlog<<"got sO";
-//            }
-
-
-//    //        if(m_activeObject->currentObject())
-//    //        {
-//    //            mlog<<m_activeObject->currentObject()->getTransform().translation();
-//    //            mlog<<m_activeObject->currentObject()->getID();
-//    //        }
-
-//    //        if(sceneObj == m_activeObject->currentObject())
-//            {
-//                currentState =TRANSLATE_VIEWPLANE;
-//                QVector4D null = QVector4D(0,0,0,1);
-//                QVector4D ndcNull = scene->m_projection_matrix * scene->m_arcCamera.toMatrix() * m_Transform.toMatrix() * null ;
-//                ndcNull = ndcNull / ndcNull.w();
-//                m_dragStartOffset = QVector3D(ndcNull.x() - currentMouseNDC.x() ,
-//                                                    ndcNull.y() - currentMouseNDC.y() ,
-//                                                    0);
-//            }
-              return;
-        }
-
     if(currentState == TRANSLATE_VIEWPLANE)
     {
         QVector4D null = QVector4D(0,0,0,1);
@@ -412,6 +374,7 @@ void Manipulator::drag()
 
     if(m_activeObject)
         m_activeObject->notify(m_Transform);
+
 }
 
 void Manipulator::dragRotate()

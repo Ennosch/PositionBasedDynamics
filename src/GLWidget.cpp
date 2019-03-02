@@ -182,8 +182,16 @@ void GLWidget::processInput()
     if(inputManager::buttonTriggered(Qt::LeftButton) )
     {
         QPointF toPick = getMouseNDCCoords();
+
         if(scene()->mainpulator->currentState == NONE)
-            scene()->pickObject(toPick.x(), toPick.y());
+        {
+            auto picked = scene()->pickObject(toPick.x(), toPick.y());
+            if(picked)
+            {
+                picked->update();
+                scene()->mainpulator->currentState = TRANSLATE_VIEWPLANE;
+            }
+        }
 
     //if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
     // Handle Mouse button states
@@ -325,11 +333,6 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
     inputManager::registerMousePress(event->button());
-
-//    QPointF toPick = getMouseNDCCoords();
-//    auto sceneObj = scene()->pickObject(toPick.x(), toPick.y());
-
-//    mlog<<sceneObj->getID();
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
