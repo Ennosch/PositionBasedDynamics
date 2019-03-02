@@ -28,7 +28,7 @@ signals:
     void testSignal(int p);
 
 private:
-    pSceneOb activeSceneObject;
+    pSceneOb activeSceneObject = nullptr;
     GLWidget *m_GLWidget;
 };
 

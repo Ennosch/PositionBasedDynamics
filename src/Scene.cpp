@@ -620,6 +620,17 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
+
+
+
+    QVector4D null = QVector4D(0,0,0,1);
+    QMatrix4x4 model;
+    model.setToIdentity();
+
+    QVector4D ndcNull = m_projection_matrix * m_arcCamera.toMatrix() * model * null ;
+//    mlog<<ndcNull;
+
+
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT);

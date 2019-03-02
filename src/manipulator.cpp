@@ -161,6 +161,11 @@ void Manipulator::setTranslation(const QVector3D &_translation)
     m_Transform.setTranslation(_translation);
 }
 
+void Manipulator::setState(State _state)
+{
+    currentState = _state;
+}
+
 //void Manipulator::setScene(Scene *_scene)
 //{
 //    scene = _scene;
@@ -277,39 +282,72 @@ void Manipulator::startDrag()
 {
     isDraging = true;
 
-    if(currentState == NONE)
-    {
-        QPointF toPick = m_window->getMouseNDCCoords();
-        auto sceneObj = scene->pickObject(toPick.x(), toPick.y());
-        if(sceneObj == m_activeObject->currentObject())
-        {
-            currentState =TRANSLATE_VIEWPLANE;
-        }
-    }
-
     QPointF currentMouseNDC = m_window->getMouseNDCCoords();
     Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
 
-    QVector3D axis = localAxis.normalized();
-    Ray tRay;
-    tRay.Origin = m_Transform.translation();
-    tRay.Dir = axis.normalized();
-
-    if(currentState == TRANSLATE_X || currentState == TRANSLATE_Y || currentState == TRANSLATE_Z )
+    if(currentState == NONE)
     {
-        QVector3D closestPoint = scene->m_CollisionDetect.closetPointFromRayToRay(camRay, tRay);
+        QPointF toPick = m_window->getMouseNDCCoords();
+//        if(m_activeObject->currentObject())
+//        {
+//            mlog<<m_activeObject->currentObject()->getTransform().translation();
+//            mlog<<m_activeObject->currentObject()->getID();
+//        }
 
-        float d = (closestPoint - m_Transform.translation()).length();
-        m_dragStart = m_Transform.translation();
-        m_dragStartOffset = m_Transform.translation() + (axis * d);
+        auto sceneObj = scene->pickObject(toPick.x(), toPick.y());
 
+//        if(m_activeObject->currentObject())
+//        {
+//            mlog<<m_activeObject->currentObject()->getTransform().translation();
+//            mlog<<m_activeObject->currentObject()->getID();
+//        }
+
+//        if(sceneObj == m_activeObject->currentObject())
+        {
+            currentState =TRANSLATE_VIEWPLANE;
+            QVector4D null = QVector4D(0,0,0,1);
+            QVector4D ndcNull = scene->m_projection_matrix * scene->m_arcCamera.toMatrix() * m_Transform.toMatrix() * null ;
+            ndcNull = ndcNull / ndcNull.w();
+            m_dragStartOffset = QVector3D(ndcNull.x() - currentMouseNDC.x() ,
+                                                ndcNull.y() - currentMouseNDC.y() ,
+                                                0);
+        }
+          return;
+    }
+
+    // A ray from a click on the screen into the scene. For Translation and Rotation operations
+
+    if(currentState == TRANSLATE_VIEWPLANE)
+    {
+        QVector4D null = QVector4D(0,0,0,1);
+        QVector4D ndcNull = scene->m_projection_matrix * scene->m_arcCamera.toMatrix() * m_Transform.toMatrix() * null ;
+        ndcNull = ndcNull / ndcNull.w();
+        m_dragStartOffset = QVector3D(ndcNull.x() - currentMouseNDC.x() ,
+                                            ndcNull.y() - currentMouseNDC.y() ,
+                                            0);
         return;
     }
 
-    QVector3D PointRotPlane = scene->m_CollisionDetect.intersectRayPlane(localAxis, m_Transform.translation(), camRay);
+    if(currentState == TRANSLATE_X || currentState == TRANSLATE_Y || currentState == TRANSLATE_Z )
+    {
+        QVector3D axis = localAxis.normalized();
+        Ray tRay;
+        tRay.Origin = m_Transform.translation();
+        tRay.Dir = axis.normalized();
+        QVector3D closestPoint = scene->m_CollisionDetect.closetPointFromRayToRay(camRay, tRay);
+        float d = (closestPoint - m_Transform.translation()).length();
+        m_dragStart = m_Transform.translation();
+        m_dragStartOffset = m_Transform.translation() + (axis * d);
+        return;
+    }
 
-    m_dragStartRotVec = PointRotPlane - m_Transform.translation();
-    m_dragStartRot = m_Transform.rotation();
+    if(currentState == ROTATE_X || currentState == ROTATE_Y || currentState == ROTATE_Z)
+    {
+        QVector3D PointRotPlane = scene->m_CollisionDetect.intersectRayPlane(localAxis, m_Transform.translation(), camRay);
+        m_dragStartRotVec = PointRotPlane - m_Transform.translation();
+        m_dragStartRot = m_Transform.rotation();
+        return;
+    }
 }
 
 void Manipulator::endDrag()
@@ -321,6 +359,7 @@ void Manipulator::drag()
 {
     if(currentState == NONE)
         return;
+
 //    QPointF currentMouseNDC = m_window->getMouseNDCCoords();
 //    Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
 //    QVector3D PointRotPlane = scene->m_CollisionDetect.intersectRayPlane(localAxis, m_Transform.translation(), camRay);
@@ -369,7 +408,6 @@ void Manipulator::dragRotate()
 
 void Manipulator::dragTranslate()
 {
-
     QPointF currentMouseNDC = m_window->getMouseNDCCoords();
     Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
 
@@ -405,7 +443,6 @@ void Manipulator::dragTranslate()
             t = m_dragStart + (axis * ds);
             m_Transform.setTranslation(t);
             break;
-
     }
 }
 
@@ -419,14 +456,14 @@ void Manipulator::dragTranslateViewPlane()
                                         ndcNull.y() - currentMouseNDC.y() ,
                                         0);
 
-    QVector3D mouseOffset = QVector3D(currentMouseNDC.x() + mouseToObject.x(), currentMouseNDC.y() + mouseToObject.y(), 0 );
+//    QVector3D mouseOffset = QVector3D(currentMouseNDC.x() - mouseToObject.x(), currentMouseNDC.y() - mouseToObject.y(), 0 );
 
 
 //    Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
-    Ray camRay = scene->castRayFromCamera(mouseOffset.x(), mouseOffset.y());
+    Ray camRay = scene->castRayFromCamera(currentMouseNDC.x() + m_dragStartOffset.x(), currentMouseNDC.y() + m_dragStartOffset.y());
 
     // test worldSpace to NDC
-    mlog<<ndcNull<<currentMouseNDC;
+//    mlog<<"offset:"<<m_dragStartOffset;
 
 
     QVector3D pN = (scene->m_arcCamera.worldPos() - m_Transform.translation()).normalized();

@@ -192,7 +192,9 @@ void GLWidget::processInput()
     {
         m_inputManger.setMouseTriggeredPosition();
         scene()->m_arcCamera.arcBallStart();
+//        scene()->mainpulator->setState(TRANSLATE_VIEWPLANE);
         scene()->mainpulator->startDrag();
+
     }
     if(inputManager::buttonPressed(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt ))
     {

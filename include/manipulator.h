@@ -40,6 +40,7 @@ public:
     void setTransform(const Transform &_transform);
     void setRotation(const QQuaternion &_rot);
     void setTranslation(const QVector3D &_translation);
+    void setState(State _state);
 
     void update();
     void updateLocalView();
