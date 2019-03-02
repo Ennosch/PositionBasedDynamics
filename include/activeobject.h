@@ -29,7 +29,7 @@ signals:
 
 
 private:
-    pSceneOb activeSceneObject;
+    pSceneOb activeSceneObject = nullptr;
     GLWidget *m_GLWidget;
 };
 

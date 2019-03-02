@@ -113,25 +113,32 @@ Vec3 CollisionDetection::intersectRayPlane(const Vec3 &_n, const Vec3 &_pO, cons
 //        m_scene->addLine(v1, resultEnd);
 //        QVector3D precise = intersectLinePlane(_n, _pO, v1, resultEnd);
 //        return precise;
-    intersectRayPlaneRec(_n, _pO, _ray);
+
+    return intersectRayPlaneRec(_n, _pO, _ray);
 }
 
 Vec3 CollisionDetection::intersectRayPlaneRec(const Vec3 &_n, const Vec3 &_pO, const Ray &_ray)
 {
-    double t;
-    double denom = Vec3::dotProduct(_n, _ray.Dir);
+    float denom = Vec3::dotProduct(_n, _ray.Dir);
 
     Vec3 pOlO = _pO - _ray.Origin;
-    t = Vec3::dotProduct(pOlO, _n) / denom;
+    float t = Vec3::dotProduct(pOlO, _n) / denom;
+
     QVector3D result =  _ray.Origin + (_ray.Dir.normalized() * t);
 
-    if(t > 0.001)
+    qDebug()<<"t is:"<<t<<typeid (t).name();
+    qDebug()<<_n<<_pO<<_ray.Origin<<_ray.Dir;
+    qDebug()<<"result :"<<result;
+
+    if(t > 0.01)
     {
         Ray _ray2;
         _ray2.Dir = _ray.Dir.normalized();
         _ray2.Origin = result;
+        mlog<<"overwrite result";
         result = intersectRayPlaneRec(_n, _pO, _ray2);
     }
+    qDebug()<<"final result"<<result;
     return result;
 }
 
