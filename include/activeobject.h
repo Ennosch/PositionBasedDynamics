@@ -27,8 +27,9 @@ signals:
     void transformChanged(const QMatrix4x4 _modelMat, const QVector3D num, const QVector3D num1, const QVector3D num2);
     void testSignal(int p);
 
+
 private:
-    pSceneOb activeSceneObject = nullptr;
+    pSceneOb activeSceneObject;
     GLWidget *m_GLWidget;
 };
 
