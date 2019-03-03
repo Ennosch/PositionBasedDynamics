@@ -19,7 +19,7 @@ double CollisionDetection::checkPointPlane(const Vec3 &_p, const Vec3 &_n, const
 {
     Vec3 temp = (_p - _o);
     double fDist (Vec3::dotProduct(temp, _n));
-    return abs(fDist);
+    return fDist;
 }
 
 Vec3 CollisionDetection::checkRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o)
@@ -139,6 +139,7 @@ Vec3 CollisionDetection::intersectRayPlaneRec(const Vec3 &_n, const Vec3 &_pO, c
 Vec3 CollisionDetection::intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, const Vec3 &_A, const Vec3 &_B)
 {
     Vec3 AB = _B -_A;
+    // this wont work anymore. Update PointPlane check to non abs() distance (goes < 0 now)
     double d = (checkPointPlane(QVector3D(0,0,0), _n, _pO));
     double t = (d - Vec3::dotProduct(_n, _A)) / Vec3::dotProduct(_n, AB);
 

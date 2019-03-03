@@ -284,7 +284,6 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
             {
                 m_pickedObject = m_SceneObjects[i];
                 m_pickedObject->isActive(true);
-                 m_pickedObject->m_IsDirty = true;
                 min_t = t;
                 index = i;
             }
@@ -292,7 +291,6 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
             {
                 m_pickedObject = m_SceneObjects[i];
                 m_pickedObject->isActive(true);
-                m_pickedObject->m_IsDirty = true;
                 min_t = t;
                 index = i;
             }
@@ -716,7 +714,7 @@ void Scene::paint()
                       m_SceneObjects[0]->draw();
                   }
 
-         drawLines();
+//         drawLines();
 
          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
@@ -824,14 +822,10 @@ void Scene::setupScene()
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
 
-
-       // 1 Cell
-       auto sceneObject1 = addSceneObjectFromModel("sphere", 1, QVector3D(-1.0,0.0,0), QQuaternion(-1,0,0,0));
-//       sceneObject1->setScale(QVector3D(0.7,0.7,0.7));
-       auto sceneObject3 = addSceneObjectFromModel("sphere", 2, QVector3D(0,0,0), QQuaternion(-1,0,0,0));
-//       sceneObject3->setScale(QVector3D(0.5,0.5,0.5));
-        auto sceneObject4 = addSceneObjectFromModel("sphere", 0, QVector3D(1,0,0), QQuaternion(-1,0,0,0));
-//        sceneObject4->setScale(QVector3D(0.5,0.5,0.5));
+//        auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
+//        auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
+//        auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
+        auto sceneObject4 = addSceneObjectFromModel("sphere", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
 
 //        sceneObject6->setScale(QVector3D(0.5,0.5,0.5));
 //       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));
@@ -846,9 +840,10 @@ void Scene::setupScene()
 //       // outside
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2.1,22,0), QQuaternion(1,0,0,0));
 
-//       makeDynamic(sceneObject1);
-//       makeDynamic(sceneObject2);
-//       makeDynamic(sceneObject3);
+
+//        makeDynamic(sceneObject1);
+//        makeDynamic(sceneObject2);
+//        makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
@@ -864,14 +859,6 @@ void Scene::setupScene()
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(_vectorShape, m_manipulator_program);
        mainpulator->setScene(this);
-
-//       sceneObject4->rotate(QQuaternion::fromEulerAngles(QVector3D(45,0,0)));
-//       mainpulator->setTransform(sceneObject4->getTransform());
-
-       ModelPtr _vectorShape = getModelFromPool("Vector");
-       mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
-
-
 
 //       sceneObject4->rotate(QQuaternion::fromEulerAngles(QVector3D(45,0,0)));
 //       mainpulator->setTransform(sceneObject4->getTransform());

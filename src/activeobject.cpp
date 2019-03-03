@@ -35,8 +35,11 @@ void ActiveObject::notify(pSceneOb _sender)
 
 void ActiveObject::notify(const Transform &_t)
 {
+
     if(activeSceneObject)
     {
+//        if(activeSceneObject->isDynamic())
+//            activeSceneObject->pDynamicObject->setTransform(_t.toMatrix(0));
         activeSceneObject->setRotation(_t.rotation());
         activeSceneObject->setTranslation(_t.translation());
     }

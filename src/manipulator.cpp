@@ -470,8 +470,6 @@ void Manipulator::dragTranslateViewPlane()
     QVector3D PointRotPlane = scene->m_CollisionDetect.intersectRayPlane(pN, m_Transform.translation(), camRay);
 //    scene->debug(PointRotPlane);
     m_Transform.setTranslation(PointRotPlane);
-    mlog<<m_viewPlaneNormalStart;
-//    mlog<<m_Transform.translation();
 }
 
 

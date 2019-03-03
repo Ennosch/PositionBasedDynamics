@@ -314,6 +314,19 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                             }
                         }
                         break;
+                case Qt::Key_Space:{
+                            if(m_simulating)
+                            {
+                                scene()->dynamicsWorld()->setSimulate(false);
+                                m_simulating = false;
+                            }
+                            else
+                            {
+                                scene()->dynamicsWorld()->setSimulate(true);
+                                m_simulating = true;
+                            }
+                        }
+                        break;
             }
         }
 }
