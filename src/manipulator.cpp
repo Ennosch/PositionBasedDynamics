@@ -59,48 +59,53 @@ void Manipulator::draw()
 
     m_shaderProgram->setUniformValue("pN", camPlaneN);
     m_shaderProgram->setUniformValue("pO", camPlaneO);
-
     m_shaderProgram->setUniformValue("ProjectionMatrix", scene->m_projection_matrix);
     m_shaderProgram->setUniformValue("ViewMatrix", scene->m_arcCamera.toMatrix());
     m_shaderProgram->setUniformValue("test",  scene->m_arcCamera.worldPos());
 
-    m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix()  * globalScale);
-    m_shaderProgram->setUniformValue("color", QVector3D(0,1,0) );
-    if(currentState == TRANSLATE_Y)
-        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-    vecotorModel->draw();
-    m_shaderProgram->setUniformValue("color", QVector3D(0,1,0) );
-    m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix()  * globalScale);
-    if(currentState == ROTATE_Y)
-        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-    circleModel->draw();
+    if(mMode.translate && mMode.rotate)
+    {
+        m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix()  * globalScale);
+        m_shaderProgram->setUniformValue("color", QVector3D(0,1,0) );
+        if(currentState == TRANSLATE_Y)
+            m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+        vecotorModel->draw();
+        m_shaderProgram->setUniformValue("color", QVector3D(0,1,0) );
+        m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix()  * globalScale);
+        if(currentState == ROTATE_Y)
+            m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+        circleModel->draw();
 
-    m_shaderProgram->setUniformValue("color", QVector3D(1,0,0) );
-    m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localX * globalScale);
-    if(currentState == TRANSLATE_X)
-        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-    vecotorModel->draw();
-    m_shaderProgram->setUniformValue("color", QVector3D(1,0,0) );
-    if(currentState == ROTATE_X)
-        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-    circleModel->draw();
+        m_shaderProgram->setUniformValue("color", QVector3D(1,0,0) );
+        m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localX * globalScale);
+        if(currentState == TRANSLATE_X)
+            m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+        vecotorModel->draw();
+        m_shaderProgram->setUniformValue("color", QVector3D(1,0,0) );
+        if(currentState == ROTATE_X)
+            m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+        circleModel->draw();
 
-    m_shaderProgram->setUniformValue("color", QVector3D(0,0,1) );
-    m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localZ * globalScale);
-    if(currentState == TRANSLATE_Z)
-        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-    vecotorModel->draw();
-    m_shaderProgram->setUniformValue("color", QVector3D(0,0,1) );
-    if(currentState == ROTATE_Z)
-        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-    circleModel->draw();
+        m_shaderProgram->setUniformValue("color", QVector3D(0,0,1) );
+        m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localZ * globalScale);
+        if(currentState == TRANSLATE_Z)
+            m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+        vecotorModel->draw();
+        m_shaderProgram->setUniformValue("color", QVector3D(0,0,1) );
+        if(currentState == ROTATE_Z)
+            m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+        circleModel->draw();
+    }
 
-    updateLocalView();
-    m_shaderProgram->setUniformValue("color", QVector3D(0.9,0.8,0) );
-    m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localView * globalScale);
-    if(currentState == TRANSLATE_VIEWPLANE)
-        m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
-    planeModel->draw();
+    if(mMode.viewPlane)
+    {
+        updateLocalView();
+        m_shaderProgram->setUniformValue("color", QVector3D(0.9,0.8,0) );
+        m_shaderProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localView * globalScale);
+        if(currentState == TRANSLATE_VIEWPLANE)
+            m_shaderProgram->setUniformValue("color", QVector3D(1,1,0) );
+        planeModel->draw();
+    }
 
 }
 
@@ -122,34 +127,40 @@ void Manipulator::drawPickingBuffer()
     QMatrix4x4 scaleY;
     scaleY.scale(QVector3D(1,10,1));
 
-    m_pickingProgram->setUniformValue("color", QVector3D(0,0,0));
-    m_pickingProgram->setUniformValue("ProjectionMatrix", scene->m_projection_matrix);
-    m_pickingProgram->setUniformValue("ViewMatrix", scene->m_arcCamera.toMatrix());
+    if(mMode.translate && mMode.rotate)
+    {
+        m_pickingProgram->setUniformValue("color", QVector3D(0,0,0));
+        m_pickingProgram->setUniformValue("ProjectionMatrix", scene->m_projection_matrix);
+        m_pickingProgram->setUniformValue("ViewMatrix", scene->m_arcCamera.toMatrix());
 
-    m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_Y);
-    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * scaleXZ *  globalScale);
-        vecotorModel->draw();
-    m_pickingProgram->setUniformValue("IDindex",  ROTATE_Y);
-    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * scaleY *  globalScale);
-        circleModel->draw();
+        m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_Y);
+        m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * scaleXZ *  globalScale);
+            vecotorModel->draw();
+        m_pickingProgram->setUniformValue("IDindex",  ROTATE_Y);
+        m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * scaleY *  globalScale);
+            circleModel->draw();
 
-    m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_X);
-    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localX * scaleXZ *globalScale);
-        vecotorModel->draw();
-    m_pickingProgram->setUniformValue("IDindex",  ROTATE_X);
-    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localX * scaleY *globalScale);
-        circleModel->draw();
+        m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_X);
+        m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localX * scaleXZ *globalScale);
+            vecotorModel->draw();
+        m_pickingProgram->setUniformValue("IDindex",  ROTATE_X);
+        m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localX * scaleY *globalScale);
+            circleModel->draw();
 
-    m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_Z);
-    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localZ  * scaleXZ * globalScale);
-        vecotorModel->draw();
-    m_pickingProgram->setUniformValue("IDindex",  ROTATE_Z);
-    m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localZ  * scaleY * globalScale);
-        circleModel->draw();
+        m_pickingProgram->setUniformValue("IDindex",  TRANSLATE_Z);
+        m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localZ  * scaleXZ * globalScale);
+            vecotorModel->draw();
+        m_pickingProgram->setUniformValue("IDindex",  ROTATE_Z);
+        m_pickingProgram->setUniformValue("ModelMatrix",  m_Transform.toMatrix() * localZ  * scaleY * globalScale);
+            circleModel->draw();
+    }
 
-    m_pickingProgram->setUniformValue("IDindex", TRANSLATE_VIEWPLANE );
-    m_pickingProgram->setUniformValue("ModelMatrix",   m_Transform.toMatrix() * localView * globalScale);
-    planeModel->draw();
+    if(mMode.viewPlane)
+    {
+        m_pickingProgram->setUniformValue("IDindex", TRANSLATE_VIEWPLANE );
+        m_pickingProgram->setUniformValue("ModelMatrix",   m_Transform.toMatrix() * localView * globalScale);
+        planeModel->draw();
+    }
 
 }
 
@@ -320,6 +331,8 @@ void Manipulator::startDrag()
         m_dragStartOffset = QVector3D(ndcNull.x() - currentMouseNDC.x() ,
                                             ndcNull.y() - currentMouseNDC.y() ,
                                             0);
+
+        m_viewPlaneNormalStart = (scene->m_arcCamera.worldPos() - m_Transform.translation()).normalized();
         return;
     }
 
@@ -450,21 +463,14 @@ void Manipulator::dragTranslateViewPlane()
     QVector3D mouseToObject = QVector3D(ndcNull.x() - currentMouseNDC.x() ,
                                         ndcNull.y() - currentMouseNDC.y() ,
                                         0);
-
-//    QVector3D mouseOffset = QVector3D(currentMouseNDC.x() - mouseToObject.x(), currentMouseNDC.y() - mouseToObject.y(), 0 );
-
-//    Ray camRay = scene->castRayFromCamera(currentMouseNDC.x(), currentMouseNDC.y());
     Ray camRay = scene->castRayFromCamera(currentMouseNDC.x() + m_dragStartOffset.x(), currentMouseNDC.y() + m_dragStartOffset.y());
 
-    // test worldSpace to NDC
-//    mlog<<"offset:"<<m_dragStartOffset;
-
-
-    QVector3D pN = (scene->m_arcCamera.worldPos() - m_Transform.translation()).normalized();
+//    QVector3D pN = (scene->m_arcCamera.worldPos() - m_Transform.translation()).normalized();
+    QVector3D pN = m_viewPlaneNormalStart;
     QVector3D PointRotPlane = scene->m_CollisionDetect.intersectRayPlane(pN, m_Transform.translation(), camRay);
 //    scene->debug(PointRotPlane);
     m_Transform.setTranslation(PointRotPlane);
-
+    mlog<<m_viewPlaneNormalStart;
 //    mlog<<m_Transform.translation();
 }
 

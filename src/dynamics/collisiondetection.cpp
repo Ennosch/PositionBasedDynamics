@@ -126,7 +126,7 @@ Vec3 CollisionDetection::intersectRayPlaneRec(const Vec3 &_n, const Vec3 &_pO, c
 
     QVector3D result =  _ray.Origin + (_ray.Dir.normalized() * t);
 
-    if(t > 0.01)
+    if(t > 0.001)
     {
         Ray _ray2;
         _ray2.Dir = _ray.Dir.normalized();

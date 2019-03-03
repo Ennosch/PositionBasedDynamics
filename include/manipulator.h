@@ -28,8 +28,7 @@ class ActiveObject;
 struct ManipulatorMode{
     bool rotate = false;
     bool translate = false;
-    bool viewPlane= false;
-    bool active = false;
+    bool viewPlane= true;
 };
 
 enum State{
@@ -101,6 +100,7 @@ public:
     QQuaternion m_dragStartRot;
     QVector3D localAxis;
     QVector3D localUp, localRight;
+    QVector3D m_viewPlaneNormalStart;
 
     ActiveObject *m_activeObject;
 
