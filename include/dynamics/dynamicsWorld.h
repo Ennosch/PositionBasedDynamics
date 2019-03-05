@@ -57,6 +57,7 @@ class DynamicsWorld
         DynamicsWorldController         *m_DynamicsWorldController;
         std::vector <DynamicObjectPtr>  m_DynamicObjects;
         std::vector <ParticlePtr>       m_Particles;
+        std::vector <ConstraintPtr>     m_Constraints;
         std::vector <Plane>             m_Planes;
 
         std::vector<QVector3D*>         m_debugLines;

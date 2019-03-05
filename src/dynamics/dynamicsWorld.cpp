@@ -95,15 +95,17 @@ void DynamicsWorld::update()
     // Solver Iteration (9)
     for( ParticlePtr p : m_Particles)
     {
-        for( ConstraintPtr c : p->m_Constraints)
+        for( ConstraintWeakPtr c : p->m_Constraints)
         {
 //            p->p += c->deltaP();
-            c->project();
+            if(auto constraint = c.lock())
+                constraint->project();
         }
 
-        for( ConstraintPtr c : p->m_CollisionConstraints)
+        for( ConstraintWeakPtr c : p->m_CollisionConstraints)
         {
-            p->p += c->deltaP();
+            if(auto constraint = c.lock())
+                p->p += constraint->deltaP();
         }
         p->m_CollisionConstraints.clear();
     }
@@ -251,8 +253,9 @@ void DynamicsWorld::checkSpherePlane(ParticlePtr p1, const Plane &_plane)
 //    auto hsCstr = std::make_shared<ConstraintPtr>
 
     auto hsCstr = std::make_shared<HalfSpaceConstraint>(p1->p, qc, _plane.Normal);
-
-    p1->m_CollisionConstraints.push_back(hsCstr);
+    ConstraintWeakPtr hsCstrWeak= hsCstr;
+    m_Constraints.push_back(hsCstr);
+    p1->m_CollisionConstraints.push_back(hsCstrWeak);
 }
 
 

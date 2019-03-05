@@ -109,6 +109,7 @@ typedef std::shared_ptr <Light>             LightPtr;
 typedef std::shared_ptr <DynamicObject>         DynamicObjectPtr;
 typedef std::shared_ptr <Particle>              ParticlePtr;
 typedef std::shared_ptr <AbstractConstraint>    ConstraintPtr;
+typedef std::weak_ptr <AbstractConstraint>      ConstraintWeakPtr;
 
 
 // (?) utils should become a class to be able to forward declare and have a nameSpace ?
