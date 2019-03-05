@@ -56,6 +56,11 @@ float PinConstraint::constraintFunction()
     return 0.0;
 }
 
+void PinConstraint::setPositon(const QVector3D &_pos)
+{
+    pinPosition = _pos;
+}
+
 QVector3D PinConstraint::deltaP()
 {
     return pinPosition;

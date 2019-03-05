@@ -70,7 +70,9 @@ void ActiveObject::onClicked()
         if(activeSceneObject->isDynamic())
         {
             activeSceneObject->isDynamic(false);
-            activeSceneObject->dynamicObject()->pinToPosition(activeSceneObject->getPos());
+//            activeSceneObject->dynamicObject()->pinToPosition(activeSceneObject->getPos());
+            m_pinConstraint = std::make_shared<PinConstraint>(activeSceneObject->dynamicObject()->particle(), activeSceneObject->getPos());
+            activeSceneObject->dynamicObject()->particle()->m_Constraints.push_back(m_pinConstraint);
             m_pickedDynamic = true;
         }
     }
@@ -81,8 +83,9 @@ void ActiveObject::onPressed()
     if(activeSceneObject)
     {
         {
-            activeSceneObject->dynamicObject()->endPinToPosition();
-            activeSceneObject->dynamicObject()->pinToPosition(activeSceneObject->getPos());
+//            activeSceneObject->dynamicObject()->endPinToPosition();
+//            activeSceneObject->dynamicObject()->pinToPosition(activeSceneObject->getPos());
+            m_pinConstraint->setPositon(activeSceneObject->getPos());
             m_pickedDynamic = true;
         }
     }
@@ -94,8 +97,9 @@ void ActiveObject::onReleased()
     {
         if(m_pickedDynamic)
         {
-            activeSceneObject->dynamicObject()->endPinToPosition();
-            activeSceneObject->isDynamic(true);
+//            activeSceneObject->dynamicObject()->endPinToPosition();
+//            activeSceneObject->dynamicObject()->particle()->m_Constraints.
+//            activeSceneObject->isDynamic(true);
         }
     }
 }

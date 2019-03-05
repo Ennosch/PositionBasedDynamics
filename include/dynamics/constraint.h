@@ -50,6 +50,7 @@ public:
     PinConstraint(const ParticlePtr _particle, const QVector3D &_pos );
     void project();
     float constraintFunction();
+    void setPositon(const QVector3D &_pos);
     QVector3D deltaP();
 private:
     QVector3D pinPosition;

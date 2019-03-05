@@ -18,6 +18,7 @@ public:
     void setTransform(const QMatrix4x4& _mat4);
     void pinToPosition(const QVector3D &_pos);
     void endPinToPosition();
+    ParticlePtr particle();
 
     const QMatrix4x4& getTransfrom();
     const QVector3D getTranslation();

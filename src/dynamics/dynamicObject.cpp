@@ -36,6 +36,11 @@ void DynamicObject::endPinToPosition()
     }
 }
 
+ParticlePtr DynamicObject::particle()
+{
+    return pParticle;
+}
+
 const QMatrix4x4 &DynamicObject::getTransfrom()
 {
     if(m_IsParticle)

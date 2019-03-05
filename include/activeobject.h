@@ -7,6 +7,7 @@
 
 #include "utils.h"
 #include "sceneobject.h"
+#include "dynamics/constraint.h"
 
 class GLWidget;
 
@@ -38,6 +39,8 @@ private:
     bool m_pickedDynamic = false;
     pSceneOb activeSceneObject = nullptr;
     GLWidget *m_GLWidget;
+    Manipulator *m_manipulator;
+    std::shared_ptr<PinConstraint>  m_pinConstraint;
 };
 
 #endif // ACTIVEOBJECT_H
