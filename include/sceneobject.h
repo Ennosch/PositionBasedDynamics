@@ -42,10 +42,12 @@ public:
     void rotate(const QQuaternion &_rot);
     void makeDynamic(DynamicObjectPtr _dynamicObject);
     bool isDynamic();
+    void isDynamic(bool _isDynamic);
     void setActiveObject(ActiveObject *_activeObject);
     void setID(uint _id);
     void notify();
 
+    DynamicObjectPtr dynamicObject();
     const QMatrix4x4 getMatrix();
     const QVector3D getPos();
     const Transform getTransform();
@@ -55,11 +57,13 @@ public:
 
     bool m_IsDirty = true;
 
+
 private:
-    bool m_IsDynamic = false;
+
     bool m_IsActive = false;
-//    bool m_IsDirty = true;
-//    bool m_IsActive = false;
+    bool m_IsDirty = true;
+    bool m_IsDynamic = false;
+
 
     QMatrix4x4 m_ModelMatrix;
 

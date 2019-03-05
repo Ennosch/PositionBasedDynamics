@@ -39,20 +39,26 @@ QVector3D HalfSpaceConstraint::deltaP()
 }
 
 
-PointConstraint::PointConstraint(const QVector3D &_p) :
-    p(_p)
+PinConstraint::PinConstraint(const ParticlePtr _particle, const QVector3D &_pos) :
+    pinPosition(_pos) ,
+    particle(_particle)
 {
 
 }
 
-float PointConstraint::constraintFunction()
+void PinConstraint::project()
 {
-    return 1.0;
+    particle->p = pinPosition;
 }
 
-QVector3D PointConstraint::deltaP()
+float PinConstraint::constraintFunction()
 {
-    return p;
+    return 0.0;
+}
+
+QVector3D PinConstraint::deltaP()
+{
+    return pinPosition;
 }
 
 DistanceEqualityConstraint::DistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2) :

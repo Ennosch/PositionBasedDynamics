@@ -85,6 +85,7 @@ void SceneObject::update()
         m_ModelMatrix = pDynamicObject->getTransfrom();
         setTranslation(pDynamicObject->getTranslation());
 
+//        mlog<<"kept dynamic";
         if(m_IsActive)
             notify();
     }
@@ -114,6 +115,17 @@ void SceneObject::makeDynamic(DynamicObjectPtr _dynamicObject)
     m_IsDynamic = true;
 }
 
+void SceneObject::isDynamic(bool _isDynamic)
+{
+    m_IsDynamic = _isDynamic;
+}
+
+void SceneObject::setRotation(const QQuaternion &_rt)
+{
+    m_Transform.setRotation(_rt);
+//    m_IsDirty = true;
+}
+
 void SceneObject::setActiveObject(ActiveObject *_activeObject)
 {
     activeObject = _activeObject;
@@ -132,7 +144,12 @@ void SceneObject::notify()
 
     activeObject->notify(pSO);
 
-//    qDebug()<<"instances2: "<<pSO.use_count();
+    //    qDebug()<<"instances2: "<<pSO.use_count();
+}
+
+DynamicObjectPtr SceneObject::dynamicObject()
+{
+    return pDynamicObject;
 }
 
 const QMatrix4x4 SceneObject::getMatrix()

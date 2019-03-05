@@ -10,7 +10,7 @@ DynamicsWorld::DynamicsWorld()
 {
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
-    m_dt = 0.05;
+    m_dt = 0.1;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
 
@@ -100,7 +100,6 @@ void DynamicsWorld::update()
 //            p->p += c->deltaP();
             c->project();
         }
-
 
         for( ConstraintPtr c : p->m_CollisionConstraints)
         {
@@ -200,8 +199,14 @@ void DynamicsWorld::checkSphereSphere(ParticlePtr p1, ParticlePtr p2)
 
 void DynamicsWorld::generateData()
 {
+
+//    auto pinCnstr = std::make_shared<PinConstraint>(m_Particles[0], QVector3D(1,1,0));
+
+//    m_Particles[0]->m_Constraints.push_back(pinCnstr);
+
+    /*
     qDebug()<<"genData";
-//    auto nSpring = std::make_shared<DistanceEqualityConstraint>(*m_Particles[0], *m_Particles[1]);
+
     auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
     nSpring->setRestLength(6.5);
     m_Particles[0]->m_Constraints.push_back(nSpring);
@@ -218,15 +223,7 @@ void DynamicsWorld::generateData()
     m_debugLines.push_back(&m_Particles[0]->x);
     m_debugLines.push_back(&m_Particles[2]->x);
 
-//    QVector3D** ptr = m_debugLines.data();
-//    QVector3D*  ptr2 = *ptr;
-//    QVector3D result = *ptr2;
-//    auto something  = ptr2[4];
-
-//    qDebug()<<m_Particles[0]->x<<m_Particles[1]->x<<m_Particles[2]->x;
-
-
-//    qDebug()<<"result-=-=-=-==-=: "<< result;
+    */
 
 
 }

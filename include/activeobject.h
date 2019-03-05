@@ -20,6 +20,10 @@ public:
     void notify(int _id);
     void notify(pSceneOb _sender);
     void notify(const Transform &_t);
+    void notify(MouseState _mouseState);
+    void onClicked();
+    void onPressed();
+    void onReleased();
     pSceneOb currentObject();
     bool isActive();
     void setTransform(const QVector3D _t, const QVector3D _r, const QVector3D _s);
@@ -31,6 +35,7 @@ signals:
 
 private:
     bool m_isActive;
+    bool m_pickedDynamic = false;
     pSceneOb activeSceneObject = nullptr;
     GLWidget *m_GLWidget;
 };

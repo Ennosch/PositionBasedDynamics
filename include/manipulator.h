@@ -46,6 +46,12 @@ enum State{
     ROTATE_VIEWPLANE
 };
 
+enum MouseState{
+    TRIGGERED,
+    PRESSED,
+    RELEASED
+};
+
 class Manipulator
 {
 public:

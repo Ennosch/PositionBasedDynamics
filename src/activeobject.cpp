@@ -22,7 +22,17 @@ void ActiveObject::notify(int _id)
 
 void ActiveObject::notify(pSceneOb _sender)
 {
-//    qDebug()<<"getting notified: "<<_sender.use_count();
+    if(_sender == nullptr)
+    {
+        m_isActive = false;
+        m_manipulator->setActive(false);
+        activeSceneObject = nullptr;
+        return;
+    }
+
+    // pick dynamicSceneObject Case:
+
+
     activeSceneObject = _sender;
 
     emit transformChanged(_sender->getMatrix(),
@@ -43,7 +53,54 @@ void ActiveObject::notify(const Transform &_t)
         activeSceneObject->setRotation(_t.rotation());
         activeSceneObject->setTranslation(_t.translation());
     }
+    //feed back Transform into dynamicObject
+
 }
+
+void ActiveObject::notify(MouseState _mouseState)
+{
+
+}
+
+void ActiveObject::onClicked()
+{
+    if(activeSceneObject)
+    {
+//        mlog<<"hello";
+        if(activeSceneObject->isDynamic())
+        {
+            activeSceneObject->isDynamic(false);
+            activeSceneObject->dynamicObject()->pinToPosition(activeSceneObject->getPos());
+            m_pickedDynamic = true;
+        }
+    }
+}
+
+void ActiveObject::onPressed()
+{
+    if(activeSceneObject)
+    {
+        {
+            activeSceneObject->dynamicObject()->endPinToPosition();
+            activeSceneObject->dynamicObject()->pinToPosition(activeSceneObject->getPos());
+            m_pickedDynamic = true;
+        }
+    }
+}
+
+void ActiveObject::onReleased()
+{
+    if(activeSceneObject)
+    {
+        if(m_pickedDynamic)
+        {
+            activeSceneObject->dynamicObject()->endPinToPosition();
+            activeSceneObject->isDynamic(true);
+        }
+    }
+}
+
+
 
 pSceneOb ActiveObject::currentObject()
 {

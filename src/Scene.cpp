@@ -54,6 +54,7 @@ void Scene::initialize()
   QtOpenGLinitialize();
 //  DynamicsInitialize();
   setupScene();
+  m_DynamicsWorld->generateData();
 }
 
 void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, int _size)

@@ -44,14 +44,16 @@ private:
     QVector3D n, p, dp, qc;
 };
 
-class PointConstraint : public AbstractConstraint
+class PinConstraint : public AbstractConstraint
 {
 public:
-    PointConstraint(const QVector3D &_p);
+    PinConstraint(const ParticlePtr _particle, const QVector3D &_pos );
+    void project();
     float constraintFunction();
     QVector3D deltaP();
 private:
-    QVector3D p;
+    QVector3D pinPosition;
+    ParticlePtr particle;
 };
 
 class DistanceEqualityConstraint : public AbstractConstraint
