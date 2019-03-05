@@ -43,7 +43,7 @@ PinConstraint::PinConstraint(const ParticlePtr _particle, const QVector3D &_pos)
     pinPosition(_pos) ,
     particle(_particle)
 {
-
+    m_Particles.push_back(_particle);
 }
 
 void PinConstraint::project()

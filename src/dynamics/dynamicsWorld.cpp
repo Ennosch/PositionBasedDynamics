@@ -10,7 +10,7 @@ DynamicsWorld::DynamicsWorld()
 {
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
-    m_dt = 0.1;
+    m_dt = 0.2;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
 
@@ -87,7 +87,6 @@ void DynamicsWorld::update()
             if(n != p)
                 checkSphereSphere(p,n);
         }
-
         checkSpherePlane(p, m_Planes[0]);
 
     }
@@ -102,10 +101,11 @@ void DynamicsWorld::update()
                 constraint->project();
         }
 
-        for( ConstraintWeakPtr c : p->m_CollisionConstraints)
+        for( ConstraintPtr c : p->m_CollisionConstraints)
         {
-            if(auto constraint = c.lock())
-                p->p += constraint->deltaP();
+//            if(auto constraint = c.lock())
+//                p->p += constraint->deltaP();
+            p->p += c->deltaP();
         }
         p->m_CollisionConstraints.clear();
     }
@@ -253,9 +253,39 @@ void DynamicsWorld::checkSpherePlane(ParticlePtr p1, const Plane &_plane)
 //    auto hsCstr = std::make_shared<ConstraintPtr>
 
     auto hsCstr = std::make_shared<HalfSpaceConstraint>(p1->p, qc, _plane.Normal);
-    ConstraintWeakPtr hsCstrWeak= hsCstr;
-    m_Constraints.push_back(hsCstr);
-    p1->m_CollisionConstraints.push_back(hsCstrWeak);
+//    ConstraintWeakPtr hsCstrWeak= hsCstr;
+//    m_Constraints.push_back(hsCstr);
+//    p1->m_CollisionConstraints.push_back(hsCstrWeak);
+    p1->m_CollisionConstraints.push_back(hsCstr);
+}
+
+void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
+{
+    for(auto p : _constraint->m_Particles)
+    {
+        if(auto particle = p.lock())
+        {
+            std::vector< ConstraintWeakPtr>::const_iterator it = particle->m_Constraints.begin();
+            std::vector< ConstraintWeakPtr>::const_iterator itEnd = particle->m_Constraints.end();
+            for(it; it != itEnd; ++it)
+            {
+                if(it->lock() == _constraint)
+                {
+                    particle->m_Constraints.erase(it);
+                    mlog<<"delete constraint";
+                }
+            }
+        }
+    }
+
+    m_Constraints.erase(
+                std::remove_if(
+                    m_Constraints.begin(),
+                    m_Constraints.end(),
+                    [&](const ConstraintPtr c){return c == _constraint;}),
+                m_Constraints.end()
+                );
+
 }
 
 

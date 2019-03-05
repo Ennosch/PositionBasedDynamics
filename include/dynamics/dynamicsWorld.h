@@ -41,6 +41,9 @@ class DynamicsWorld
         void checkSphereSphere(ParticlePtr p1, ParticlePtr p2);
         void checkSpherePlane(ParticlePtr p1, const Plane &_plane);
 
+        void deleteConstraint(const ConstraintPtr _constraint);
+        void deleteParticle();
+
         void generateData();
 
         QVector3D* debugDrawLineData();
