@@ -69,8 +69,6 @@ void ActiveObject::onClicked()
 {
 
     auto dw = m_GLWidget->scene()->dynamicsWorld();
-    mlog<<"on clicked";
-
     if(activeSceneObject)
     {
 //        mlog<<"hello";
@@ -83,7 +81,6 @@ void ActiveObject::onClicked()
             activeSceneObject->dynamicObject()->particle()->m_Constraints.push_back(m_pinConstraint);
 
             m_pickedDynamic = true;
-            mlog<<"created Constr";
         }
         else{
             mlog<<"--------Missing Cstr1";
@@ -93,7 +90,6 @@ void ActiveObject::onClicked()
 
 void ActiveObject::onPressed()
 {
-    mlog<<"on Pressed";
     if(activeSceneObject)
     {
         {
@@ -103,7 +99,6 @@ void ActiveObject::onPressed()
             {
                 m_pinConstraint->setPositon(activeSceneObject->getPos());
                 m_pickedDynamic = true;
-                mlog<<"m_pinConstraint update";
             }
         }
     }
@@ -115,12 +110,10 @@ void ActiveObject::onReleased()
     {
         if(m_pickedDynamic)
         {
-            mlog<<"attempt to delet";
             // (Improve) dont include scene and dynamicsWorld. Just ask constraint to delete itself ?
             auto dw = m_GLWidget->scene()->dynamicsWorld();
             dw->deleteConstraint(m_pinConstraint);
             m_pinConstraint.reset();
-            mlog<<"attempt to delet2";
             activeSceneObject->isDynamic(true);
         }
     }

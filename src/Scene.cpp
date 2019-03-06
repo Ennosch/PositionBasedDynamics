@@ -321,13 +321,15 @@ void Scene::updateLinesVBO()
 {
 
 // Get lines from dynamicsWorld
-//    m_LinesB.clear();
-//    for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
-//    {
-//        QVector3D vec = *_vec;
+    m_LinesB.clear();
+    for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
+    {
+        QVector3D vec = *_vec;
 //        m_LinesB.push_back(QVector3D(0,0,0));
 //        m_LinesB.push_back(QVector3D(2,2,2));
-//    }
+        m_LinesB.push_back(vec);
+    }
+
     m_lines_vao->bind();
     m_lines_vbo.create();
     m_lines_vbo.bind();
@@ -715,7 +717,7 @@ void Scene::paint()
                       m_SceneObjects[0]->draw();
                   }
 
-//         drawLines();
+         drawLines();
 
          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
@@ -824,9 +826,10 @@ void Scene::setupScene()
 
 
 //        auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
-//        auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,11.0,0), QQuaternion(1,0,0,0));
-//        auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(0,10,0), QQuaternion(1,0,0,0));
-        auto sceneObject4 = addSceneObjectFromModel("sphere", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
+
+        auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
+        auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1.0,0), QQuaternion(1,0,0,0));
+        auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,0), QQuaternion(1,0,0,0));
 
 //        sceneObject6->setScale(QVector3D(0.5,0.5,0.5));
 //       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));
@@ -842,11 +845,9 @@ void Scene::setupScene()
 //       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2.1,22,0), QQuaternion(1,0,0,0));
 
 
-//        makeDynamic(sceneObject1);
-//        makeDynamic(sceneObject2);
-//        makeDynamic(sceneObject3);
-//       makeDynamic(sceneObject2);
-//       makeDynamic(sceneObject3);
+        makeDynamic(sceneObject1);
+        makeDynamic(sceneObject2);
+        makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject4);

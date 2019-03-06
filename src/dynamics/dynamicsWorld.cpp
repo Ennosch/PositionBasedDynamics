@@ -97,6 +97,8 @@ void DynamicsWorld::update()
         for( ConstraintWeakPtr c : p->m_Constraints)
         {
 //            p->p += c->deltaP();
+//            auto test = c.lock();
+//            bool test2 = c.expired();
             if(auto constraint = c.lock())
                 constraint->project();
         }
@@ -205,8 +207,6 @@ void DynamicsWorld::generateData()
 //    auto pinCnstr = std::make_shared<PinConstraint>(m_Particles[0], QVector3D(1,1,0));
 
 //    m_Particles[0]->m_Constraints.push_back(pinCnstr);
-
-    /*
     qDebug()<<"genData";
 
     auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
@@ -214,20 +214,24 @@ void DynamicsWorld::generateData()
     m_Particles[0]->m_Constraints.push_back(nSpring);
     m_Particles[1]->m_Constraints.push_back(nSpring);
 
+    m_Constraints.push_back(nSpring);
+
+//    bool test1 = m_Particles[0]->m_Constraints[0].expired();
+//    auto test = m_Particles[0]->m_Constraints[0].lock();
+
     auto nSpring2 = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[2]);
     nSpring2->setRestLength(4.5);
     m_Particles[0]->m_Constraints.push_back(nSpring2);
     m_Particles[2]->m_Constraints.push_back(nSpring2);
+
+
+    m_Constraints.push_back(nSpring2);
 
 //    m_debugLines.push_back(&test1);
     m_debugLines.push_back(&m_Particles[0]->x);
     m_debugLines.push_back(&m_Particles[1]->x);
     m_debugLines.push_back(&m_Particles[0]->x);
     m_debugLines.push_back(&m_Particles[2]->x);
-
-    */
-
-
 }
 
 QVector3D* DynamicsWorld::debugDrawLineData()
@@ -272,7 +276,6 @@ void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
                 if(it->lock() == _constraint)
                 {
                     particle->m_Constraints.erase(it);
-                    mlog<<"delete constraint";
                 }
             }
         }

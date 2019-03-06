@@ -111,7 +111,7 @@ void DistanceEqualityConstraint::project()
 
     float c2 = constraintFunction();
 
-//    qDebug()<<"projecting";
+//    qDebug()<<"projecting DistanceEqualityConstraint";
 }
 
 void DistanceEqualityConstraint::setRestLength(float _d)
