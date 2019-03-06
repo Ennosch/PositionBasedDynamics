@@ -19,7 +19,7 @@ public:
     int ID = 0;
 
     QVector3D position();
-    unsigned radius();
+    float radius();
 
     float foo();
 
@@ -36,6 +36,6 @@ public:
 };
 
 inline QVector3D Particle::position(){ return x; };
-inline unsigned Particle::radius(){ return r; };
+inline float Particle::radius(){ return r; };
 
 #endif // PARTICLE_H

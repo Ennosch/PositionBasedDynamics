@@ -13,11 +13,12 @@ class CollisionDetection
 {
 public:
     CollisionDetection();
-    float checkPointPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o);
-    Vec3 checkRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o);
+    CollisionDetection(Scene *_scene);
+    double distanceFromPointToPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o);
+    Vec3 intersectRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o);
 
     bool checkRaySphere(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
-    float checkRaySphereF(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
+    float distancaneFromIntersectionRayToSphere(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
     bool solveQuadratic(const float &a, const float &b, const float &c, float &x0, float &x1);
 
     Vec3 intersectRayPlane(const Vec3 &_n, const Vec3 &_pO, const Ray &_ray);
@@ -26,6 +27,7 @@ public:
 
     Vec3 closetPointFromRayToRay(const Ray &_r1, const Ray &_r2);
 
+    bool checkSphereSphere(const Vec3 &_s1, const Vec3 &_s2, float &d, float _r1, float _r2);
 
     Scene *m_scene;
 };

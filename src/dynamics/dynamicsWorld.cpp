@@ -10,20 +10,24 @@ DynamicsWorld::DynamicsWorld()
 {
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
-    m_dt = 0.2;
+    m_dt = 0.1;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
 
 void DynamicsWorld::initialize()
 {
-    qDebug()<<"DynamicsWorld initialize";
-//    Eigen::Vector3d test(1,2,3);
+    qDebug()<<"DynamicsWorld initialize ";
+    Eigen::Vector3d test(1,2,3);
+
+    mlog<<"helloo"<<test.x()<<test.y();
 
     m_CollisionDetect = CollisionDetection();
     Plane groundPlane;
     groundPlane.Normal = QVector3D(0, 1, 0);
     groundPlane.Offset = QVector3D(0, 0, 0);
     addPlane(groundPlane);
+
+
 
 //    auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
 
@@ -85,10 +89,10 @@ void DynamicsWorld::update()
         for(ParticlePtr n : neighbourParticles)
         {
             if(n != p)
+                // check predicted postion for particle particle collisions
                 checkSphereSphere(p,n);
         }
         checkSpherePlane(p, m_Planes[0]);
-
     }
 
     // Solver Iteration (9)
@@ -107,11 +111,11 @@ void DynamicsWorld::update()
         {
 //            if(auto constraint = c.lock())
 //                p->p += constraint->deltaP();
-            p->p += c->deltaP();
+//            p->p += c->deltaP();
+            c->project();
         }
         p->m_CollisionConstraints.clear();
     }
-
 
     // Apply correction (13,14)
     for( ParticlePtr p : m_Particles)
@@ -121,7 +125,7 @@ void DynamicsWorld::update()
 //        p->x = p->x + QVector3D(0, -0.01, 0);
     }
 
-    // modify velocity (16)
+//     modify velocity (16)
 //    for( ParticlePtr p : m_Particles)
 //    {
 //        p->v = p->v + p->pp;
@@ -196,42 +200,36 @@ void DynamicsWorld::addPlane(const Plane &_plane)
     m_Planes.push_back(_plane);
 }
 
-void DynamicsWorld::checkSphereSphere(ParticlePtr p1, ParticlePtr p2)
+void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2)
 {
-
+    // Check predicted positon
+    float d;
+    if(m_CollisionDetect.checkSphereSphere(p1->p, p2->p, d,p1->radius(), p2->radius())){
+        addParticleParticleConstraint(p1, p2);
+    }
 }
 
 void DynamicsWorld::generateData()
 {
+//    auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
+//    nSpring->setRestLength(4.5);
+//    m_Particles[0]->m_Constraints.push_back(nSpring);
+//    m_Particles[1]->m_Constraints.push_back(nSpring);
 
-//    auto pinCnstr = std::make_shared<PinConstraint>(m_Particles[0], QVector3D(1,1,0));
+//    m_Constraints.push_back(nSpring);
 
-//    m_Particles[0]->m_Constraints.push_back(pinCnstr);
-    qDebug()<<"genData";
+//    auto nSpring2 = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[2]);
+//    nSpring2->setRestLength(4.5);
+//    m_Particles[0]->m_Constraints.push_back(nSpring2);
+//    m_Particles[2]->m_Constraints.push_back(nSpring2);
 
-    auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
-    nSpring->setRestLength(6.5);
-    m_Particles[0]->m_Constraints.push_back(nSpring);
-    m_Particles[1]->m_Constraints.push_back(nSpring);
-
-    m_Constraints.push_back(nSpring);
-
-//    bool test1 = m_Particles[0]->m_Constraints[0].expired();
-//    auto test = m_Particles[0]->m_Constraints[0].lock();
-
-    auto nSpring2 = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[2]);
-    nSpring2->setRestLength(4.5);
-    m_Particles[0]->m_Constraints.push_back(nSpring2);
-    m_Particles[2]->m_Constraints.push_back(nSpring2);
+//    m_Constraints.push_back(nSpring2);
 
 
-    m_Constraints.push_back(nSpring2);
-
-//    m_debugLines.push_back(&test1);
-    m_debugLines.push_back(&m_Particles[0]->x);
-    m_debugLines.push_back(&m_Particles[1]->x);
-    m_debugLines.push_back(&m_Particles[0]->x);
-    m_debugLines.push_back(&m_Particles[2]->x);
+//    m_debugLines.push_back(&m_Particles[0]->x);
+//    m_debugLines.push_back(&m_Particles[1]->x);
+//    m_debugLines.push_back(&m_Particles[0]->x);
+//    m_debugLines.push_back(&m_Particles[2]->x);
 }
 
 QVector3D* DynamicsWorld::debugDrawLineData()
@@ -242,25 +240,25 @@ QVector3D* DynamicsWorld::debugDrawLineData()
     return nullptr;
 }
 
-void DynamicsWorld::checkSpherePlane(ParticlePtr p1, const Plane &_plane)
+void DynamicsWorld::checkSpherePlane(const ParticlePtr p1, const Plane &_plane)
 {
-    float dist = m_CollisionDetect.checkPointPlane(p1->p, _plane.Normal, (_plane.Offset + (p1->r *_plane.Normal)));
+    float dist = m_CollisionDetect.distanceFromPointToPlane(p1->p, _plane.Normal, (_plane.Offset + (p1->r *_plane.Normal)));
     if(dist > 0)
         return;
-
-    QVector3D qc = m_CollisionDetect.checkRayPlane(p1->x, p1->p, _plane.Normal, (_plane.Offset + (p1->r *_plane.Normal)));
-
-//    float t, devisor;
-//    l = (p1->p - p1->x).normalized();
-//    devisor = QVector3D::dotProduct(l, _plane.Normal);
-//    t = (QVector3D::dotProduct((o-x), n)) / devisor;
-//    auto hsCstr = std::make_shared<ConstraintPtr>
-
-    auto hsCstr = std::make_shared<HalfSpaceConstraint>(p1->p, qc, _plane.Normal);
+    QVector3D qc = m_CollisionDetect.intersectRayPlane(p1->x, p1->p, _plane.Normal, (_plane.Offset + (p1->r *_plane.Normal)));
+    auto hsCstr = std::make_shared<HalfSpaceConstraint>(p1, qc, _plane.Normal);
 //    ConstraintWeakPtr hsCstrWeak= hsCstr;
 //    m_Constraints.push_back(hsCstr);
 //    p1->m_CollisionConstraints.push_back(hsCstrWeak);
     p1->m_CollisionConstraints.push_back(hsCstr);
+}
+
+void DynamicsWorld::addParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
+{
+    auto ppCstr = std::make_shared<ParticleParticleConstraint>(_p1, _p2);
+    _p1->m_CollisionConstraints.push_back(ppCstr);
+    _p2->m_CollisionConstraints.push_back(ppCstr);
+
 }
 
 void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)

@@ -150,7 +150,7 @@ void Scene::addLine(const QVector3D &_start, const QVector3D &_end)
 //    updateLinesVBO();
 }
 
-void Scene::makeDynamic(pSceneOb _sceneObject)
+void Scene::makeDynamicAsParticle(pSceneOb _sceneObject)
 {
     qDebug()<<"make Dynamic";
 //    m_DynamicsWorld.addDynamicObject(_sceneObject);
@@ -158,6 +158,11 @@ void Scene::makeDynamic(pSceneOb _sceneObject)
     auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsParticle(_sceneObject, newParticle);
     _sceneObject->makeDynamic(newDynamicObject);
     //    _sceneObject->
+}
+
+void Scene::makeDynamic(pSceneOb _sceneObject)
+{
+
 }
 
 void Scene::drawLines()
@@ -274,8 +279,7 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
 
     for(uint i = 1; i < m_SceneObjects.size(); i++)
     {
-
-        float t = m_CollisionDetect.checkRaySphereF(cameraRay.Origin,
+        float t = m_CollisionDetect.distancaneFromIntersectionRayToSphere(cameraRay.Origin,
                                                     cameraRay.Dir.normalized(),
                                                     m_SceneObjects[i]->getPos(),
                                                     0.5);
@@ -813,6 +817,8 @@ void Scene::setupScene()
        addModel(this, "grid", "../Grid100.obj");
        addModel(this, "sphere", "../Icosahedronf4.obj");
 
+
+       addModel(this, "grid1", "../Grid1.obj");
        addModel(this, "Vector", "../VectorShape.obj");
        addModel(this, "Circle", "../TorusShape.obj");
        addModel(this, "Plane", "../PlaneShape.obj");
@@ -825,38 +831,26 @@ void Scene::setupScene()
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
 
-//        auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(0,15.0,0), QQuaternion(1,0,0,0));
+       // Rope
+//        auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(0,6,-5), QQuaternion(1,0,0,0));
+//        auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(4.5,6,-5), QQuaternion(1,0,0,0));
+//        auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-4.5,6,-5), QQuaternion(1,0,0,0));
+//        makeDynamic(sceneObject1);
+//        makeDynamic(sceneObject2);
+//        makeDynamic(sceneObject3);
 
-        auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(0,1,0), QQuaternion(1,0,0,0));
-        auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1.0,0), QQuaternion(1,0,0,0));
-        auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,0), QQuaternion(1,0,0,0));
-
-//        sceneObject6->setScale(QVector3D(0.5,0.5,0.5));
-//       auto sceneObject4 = addSceneObjectFromModel("Teapot", 2, QVector3D(10,10,-2), QQuaternion(1,0,0,0));
-
-//       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(2,2,0), QQuaternion(1,0,0,0));
-//       auto sceneObject6 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(3,0,0), QQuaternion(1,0,0,0));
-       //       auto sceneObject3 = addSceneObjectFromModel("Icosahedron", 2, QVector3D(0.9,2,0.9), QQuaternion(1,0,0,0));
-
-//       // in neighbourhood
-//       auto sceneObject4 = addSceneObjectFromModel("Icosahedron", 1, QVector3D(1.9,4.9,1.9), QQuaternion(1,0,0,0));
-
-//       // outside
-//       auto sceneObject5 = addSceneObjectFromModel("Icosahedron", 0, QVector3D(2.1,22,0), QQuaternion(1,0,0,0));
+        //Spheres
+       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
+//       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));
+//       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,-5), QQuaternion(1,0,0,0));
+//       auto sceneObject4 = addSceneObjectFromModel("sphere", 1, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
 
 
-        makeDynamic(sceneObject1);
-        makeDynamic(sceneObject2);
-        makeDynamic(sceneObject3);
+//       makeDynamicAsParticle(sceneObject1);
+       makeDynamic(sceneObject1);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject4);
-//       makeDynamic(sceneObject5);
-//       makeDynamic(sceneObject6);
-
-//       auto myModel = m_ModelPool["grid1"];
-
-       addLine(QVector3D(0,0,0), QVector3D(0,5,0));
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(_vectorShape, m_manipulator_program);

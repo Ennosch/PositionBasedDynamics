@@ -6,7 +6,7 @@
 
 #include <QDebug>
 #include <QVector3D>
-//#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 #include "transform.h"
 #include "utils.h"
@@ -38,9 +38,10 @@ class DynamicsWorld
         ParticlePtr addParticle(float _x, float _y, float _z);
         void addPlane(const Plane &_plane);
 
-        void checkSphereSphere(ParticlePtr p1, ParticlePtr p2);
-        void checkSpherePlane(ParticlePtr p1, const Plane &_plane);
+        void checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2);
+        void checkSpherePlane(const ParticlePtr p1, const Plane &_plane);
 
+        void addParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void deleteConstraint(const ConstraintPtr _constraint);
         void deleteParticle();
 

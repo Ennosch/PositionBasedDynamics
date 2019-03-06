@@ -15,14 +15,14 @@ CollisionDetection::CollisionDetection(Scene *_scene)
     m_scene = _scene;
 }
 
-double CollisionDetection::checkPointPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o)
+double CollisionDetection::distanceFromPointToPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o)
 {
     Vec3 temp = (_p - _o);
     double fDist (Vec3::dotProduct(temp, _n));
     return fDist;
 }
 
-Vec3 CollisionDetection::checkRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o)
+Vec3 CollisionDetection::intersectRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o)
 {
     Vec3 ray, planehit;
     float devisor, t;
@@ -56,7 +56,7 @@ bool CollisionDetection::checkRaySphere(const Vec3 &_o, const Vec3 &_d, const Ve
     return true;
 }
 
-float CollisionDetection::checkRaySphereF(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r)
+float CollisionDetection::distancaneFromIntersectionRayToSphere(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r)
 {
     Vec3 L = _o - _p;
     float a = Vec3::dotProduct(_d, _d);
@@ -140,7 +140,7 @@ Vec3 CollisionDetection::intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, con
 {
     Vec3 AB = _B -_A;
     // this wont work anymore. Update PointPlane check to non abs() distance (goes < 0 now)
-    double d = (checkPointPlane(QVector3D(0,0,0), _n, _pO));
+    double d = (distanceFromPointToPlane(QVector3D(0,0,0), _n, _pO));
     double t = (d - Vec3::dotProduct(_n, _A)) / Vec3::dotProduct(_n, AB);
 
     QVector3D _d ;
@@ -188,6 +188,20 @@ Vec3 CollisionDetection::closetPointFromRayToRay(const Ray &_r1, const Ray &_r2)
 
 
     return result;
+}
+
+bool CollisionDetection::checkSphereSphere(const Vec3 &_s1, const Vec3 &_s2, float &d,float _r1, float _r2)
+{
+//    mlog<<"sphere check";
+    float dist = (_s2 - _s1).length();
+    float minDist = _r1 + _r2;
+    bool isColliding =  (dist < minDist);
+    if (isColliding)
+        d = minDist - dist;
+    float a = (_s2 - _s1).length();
+    float b = _r1 + _r2;
+
+    return isColliding;
 }
 
 

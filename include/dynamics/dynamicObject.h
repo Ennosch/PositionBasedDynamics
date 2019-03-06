@@ -26,11 +26,8 @@ private:
     bool m_IsParticle = false;
     Transform m_transform;
     ParticlePtr pParticle;
-
-
 //    std::vector<QVector3D> m_particles;
 //    std::vector<unsigned int> m_indices;
-
 };
 
 #endif // DYNAMICOBJECT_H

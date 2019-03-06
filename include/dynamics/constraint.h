@@ -30,8 +30,8 @@
 class HalfSpaceConstraint : public AbstractConstraint
 {
 public:
-    HalfSpaceConstraint(){}
     HalfSpaceConstraint(const QVector3D &_p, const QVector3D &_qc, const QVector3D &_n);
+    HalfSpaceConstraint(const ParticlePtr _p, const QVector3D &_qc, const QVector3D &_n);
 
     void project();
     float constraintFunction(){qDebug()<<" HalfSpace C"; return 2.0;}
@@ -40,7 +40,7 @@ public:
 
 private:
     float d;
-//    ParticlePtr p;
+    ParticlePtr pptr;
     QVector3D n, p, dp, qc;
 };
 
@@ -57,11 +57,24 @@ private:
     ParticlePtr particle;
 };
 
+class ParticleParticleConstraint : public AbstractConstraint
+{
+public:
+    ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
+    ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2, float _d);
+    void project();
+    float constraintFunction();
+    QVector3D deltaP();
+private:
+    int id;
+    float d;
+    ParticlePtr pptr1, pptr2;
+};
+
 class DistanceEqualityConstraint : public AbstractConstraint
 {
 public:
     DistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2 );
-    DistanceEqualityConstraint(const Particle &_p1, const Particle &_p2 );
 
     float constraintFunction();
     QVector3D deltaP();
@@ -74,7 +87,6 @@ private:
     float d;
     QVector3D Vp1, Vp2;
     ParticlePtr pptr1, pptr2;
-    Particle p1, p2;
 };
 
 class OtherConstraint : public AbstractConstraint

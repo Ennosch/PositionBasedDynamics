@@ -26,8 +26,8 @@ class ActiveObject;
 //};
 
 struct ManipulatorMode{
-    bool rotate = false;
-    bool translate = false;
+    bool rotate = true;
+    bool translate = true;
     bool viewPlane= true;
 };
 

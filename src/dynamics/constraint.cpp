@@ -16,14 +16,25 @@ HalfSpaceConstraint::HalfSpaceConstraint(
     p(_p),
     qc(_qc)
 {
-//            qDebug()<<"INit Halfspace Constraint";
+    //            qDebug()<<"INit Halfspace Constraint";
+}
+
+HalfSpaceConstraint::HalfSpaceConstraint(const ParticlePtr _p, const QVector3D &_qc, const QVector3D &_n) :
+        pptr(_p),
+        n(_n),
+        qc(_qc)
+{
+    p = pptr->p;
 }
 
 void HalfSpaceConstraint::project()
 {
 //    QVector3D::dotProduct((p-qc),  n);
-    dp = constraintFunction(p) * n;
+//    dp = constraintFunction(p) * n;
 //    p += dp;
+
+//    pptr->p += constraintFunction(p) * -n;
+    pptr->p += deltaP();
 }
 
 float HalfSpaceConstraint::constraintFunction(const QVector3D &_p)
@@ -66,19 +77,53 @@ QVector3D PinConstraint::deltaP()
     return pinPosition;
 }
 
-DistanceEqualityConstraint::DistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2) :
+ParticleParticleConstraint::ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2) :
     pptr1(_p1),
     pptr2(_p2)
 {
-
+    d = (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());
 }
 
-DistanceEqualityConstraint::DistanceEqualityConstraint(const Particle &_p1, const Particle &_p2):
-    p1(_p1),
-    p2(_p2)
+ParticleParticleConstraint::ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2, float _d) :
+    pptr1(_p1),
+    pptr2(_p2),
+    d(_d)
 {
 
 }
+
+void ParticleParticleConstraint::project()
+{
+    if(!m_dirty)
+        return;
+
+    QVector3D n = (pptr2->p - pptr1->p).normalized();
+
+    pptr1->p += (d/2) * n;
+    pptr2->p += (d/2) * -n;
+
+     m_dirty = false;
+}
+
+float ParticleParticleConstraint::constraintFunction()
+{
+    return 0.0;
+}
+
+QVector3D ParticleParticleConstraint::deltaP()
+{
+    return QVector3D(0,0,0);
+}
+
+DistanceEqualityConstraint::DistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
+    :
+    pptr1(_p1),
+    pptr2(_p2)
+{
+    m_Particles.push_back(_p1);
+    m_Particles.push_back(_p2);
+}
+
 
 float DistanceEqualityConstraint::constraintFunction()
 {
@@ -123,23 +168,5 @@ float DistanceEqualityConstraint::getRestLength()
 {
     return d;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
