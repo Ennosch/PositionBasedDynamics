@@ -1,5 +1,7 @@
+
 #include "dynamics/dynamicsWorld.h"
 
+#include "Scene.h"
 
 #include <Qdebug>
 
@@ -17,9 +19,9 @@ DynamicsWorld::DynamicsWorld()
 void DynamicsWorld::initialize()
 {
     qDebug()<<"DynamicsWorld initialize ";
-    Eigen::Vector3d test(1,2,3);
+//    Eigen::Vector3d test(1,2,3);
 
-    mlog<<"helloo"<<test.x()<<test.y();
+//    mlog<<"helloo"<<test.x()<<test.y();
 
     m_CollisionDetect = CollisionDetection();
     Plane groundPlane;
@@ -37,8 +39,16 @@ void DynamicsWorld::initialize()
     }
 }
 
+void DynamicsWorld::initialize(Scene *_scene)
+{
+    m_scene = _scene;
+    initialize();
+}
+
 void DynamicsWorld::update()
 {
+
+
     float dt = m_dt;
 
     if(!m_simulate)
@@ -46,6 +56,8 @@ void DynamicsWorld::update()
 
     // PBD Loop start
     // explicit Euler integration step (5)
+
+
     for( ParticlePtr p : m_Particles)
     {
         // e.G. gravity 0, 1, 0
@@ -172,17 +184,43 @@ for(auto& item: a) {
 
 void DynamicsWorld::addDynamicObject(pSceneOb _sceneObject)
 {
-    qDebug()<<"addDynamics Obecjt";
-    //    auto modelPtr = _sceneObject->pModel;
+
 }
 
-DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject, ParticlePtr _particle)
+DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject)
 {
-    qDebug()<<"addDynamicObjectAsParticle ";
     pCount++;
-    auto pDynamicObject = std::make_shared<DynamicObject>(_particle);
+    QVector3D pos = _sceneObject->getPos();
+
+    auto pDynamicObject = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), pCount);
+    m_Particles.push_back(pDynamicObject);
     m_DynamicObjects.push_back(pDynamicObject);
     return pDynamicObject;
+}
+
+DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObject)
+{
+    if(!_sceneObject->model())
+        return nullptr;
+
+    auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
+    ModelPtr model = _sceneObject->model();
+    for(unsigned int i = 0; i < model->getNumShapes(); i++)
+    {
+        ShapePtr shape = model->getShape(i);
+        mlog<<"has shape"<<i;
+        for(auto vert : shape->getVertices())
+        {
+            QVector3D pos = vert.Position;
+            mlog<<"pos:"<<pos;
+            auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
+            m_Particles.push_back(nParticle);
+            nRB->addParticle(nParticle);
+            m_scene->addSceneObjectFromParticle(nParticle);
+
+        }
+    }
+    return nullptr;
 }
 
 ParticlePtr DynamicsWorld::addParticle(float _x, float _y, float _z)
@@ -211,6 +249,7 @@ void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2
 
 void DynamicsWorld::generateData()
 {
+    mlog<<"Gen Data";
 //    auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
 //    nSpring->setRestLength(4.5);
 //    m_Particles[0]->m_Constraints.push_back(nSpring);

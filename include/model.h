@@ -29,10 +29,11 @@ public:
     void draw();
     void bind();
     int getNumShapes();
+
     ShapePtr getShape(unsigned int _index);
     ShapePtr processMesh(aiMesh *mesh, const aiScene *scene);
 
-    void inline foo(){qDebug()<<"hello model";};
+    void inline foo(){qDebug()<<"hello model";}
 
 private:
     std::string directory;

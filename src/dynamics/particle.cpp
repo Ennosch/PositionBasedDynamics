@@ -32,3 +32,30 @@ float Particle::foo()
 {
     return 2.0;
 }
+
+void Particle::setTransform(const QMatrix4x4 &_mat4)
+{
+    w = 0.0;
+}
+
+void Particle::pinToPosition(const QVector3D &_pos)
+{
+
+}
+
+void Particle::endPinToPosition()
+{
+    m_Constraints.clear();
+}
+
+const QMatrix4x4 &Particle::getTransfrom()
+{
+    Transform trans;
+    trans.setTranslation(x);
+    return trans.toMatrix();
+}
+
+const QVector3D Particle::getTranslation()
+{
+    return x;
+}

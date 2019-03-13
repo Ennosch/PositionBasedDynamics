@@ -34,6 +34,7 @@ SOURCES += \
     src/ui/DynamicsUiWidget.cpp \
     src/manipulator.cpp \
     src/Framebuffer.cpp \
+    src/dynamics/rigidBody.cpp
 
 
 OBJECTS_DIR = build/obj
@@ -73,7 +74,8 @@ HEADERS += \
     include/activeobject.h \
     include/ui/DynamicsUiWidget.h \
     include/manipulator.h \
-    include/Framebuffer.h
+    include/Framebuffer.h \
+    include/dynamics/rigidBody.h
 
 
 

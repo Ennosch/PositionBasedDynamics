@@ -37,6 +37,14 @@ SceneObject::SceneObject(Scene *_scene, ShapePtr _Shape,
     m_Transform.rotate(_rot);
 }
 
+SceneObject::SceneObject(Scene *_scene, ModelPtr _Model, const uint _materialID, const QVector3D &_pos) :
+    pScene(_scene),
+    pModel(_Model),
+    m_MaterialID(_materialID)
+{
+    m_Transform.setTranslation(_pos);
+}
+
 SceneObject::SceneObject(Scene *_scene,
                          ModelPtr _Model,
                          const uint _materialID,
@@ -84,8 +92,6 @@ void SceneObject::update()
     {
         m_ModelMatrix = pDynamicObject->getTransfrom();
         setTranslation(pDynamicObject->getTranslation());
-
-//        mlog<<"kept dynamic";
         if(m_IsActive)
             notify();
     }
@@ -155,6 +161,11 @@ DynamicObjectPtr SceneObject::dynamicObject()
 const QMatrix4x4 SceneObject::getMatrix()
 {
     return m_ModelMatrix;
+}
+
+ModelPtr SceneObject::model()
+{
+    return pModel;
 }
 
 uint SceneObject::getID()

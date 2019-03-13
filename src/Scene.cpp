@@ -43,14 +43,6 @@ void Scene::initialize()
       SCR_HEIGHT = widget()->height() * 2;
       qDebug()<<"widget"<<SCR_WIDTH<<SCR_HEIGHT;
   }
-  else
-  {
-      SCR_WIDTH = 720;
-      SCR_HEIGHT = 720;
-  }
-
-
-
   QtOpenGLinitialize();
 //  DynamicsInitialize();
   setupScene();
@@ -105,6 +97,26 @@ pSceneOb Scene::addSceneObjectFromModel(std::string _name, const uint _materialI
     return pSO;
 }
 
+pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle)
+{
+    auto pModel = getModelFromPool("sphere");
+    if(pModel == nullptr)
+    {
+        qDebug()<<"WARNING: COULD NOT ADD SceneObject as Particle";
+        return nullptr;
+    }
+    auto pSO = std::make_shared<SceneObject>(this, pModel, 1 , _particle->getTranslation());
+    m_SceneObjects.push_back(pSO);
+    pSO->makeDynamic(_particle);
+
+    pSO->setActiveObject(widget()->activeObject());
+    numCreation++;
+    pSO->setID(numCreation);
+
+    mlog<<"added PARTICLE AS OBEJCT";
+    return pSO;
+}
+
 LightPtr Scene::addPointLight(const QVector3D &_pos, const QVector3D &_color)
 {
     auto pLight = std::make_shared<Light>();
@@ -152,17 +164,20 @@ void Scene::addLine(const QVector3D &_start, const QVector3D &_end)
 
 void Scene::makeDynamicAsParticle(pSceneOb _sceneObject)
 {
-    qDebug()<<"make Dynamic";
+    auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsParticle(_sceneObject);
+    _sceneObject->makeDynamic(newDynamicObject);
+    return;
+
 //    m_DynamicsWorld.addDynamicObject(_sceneObject);
     ParticlePtr newParticle = m_DynamicsWorld->addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().y(), _sceneObject->getPos().z());
-    auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsParticle(_sceneObject, newParticle);
-    _sceneObject->makeDynamic(newDynamicObject);
+//    auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsParticle(_sceneObject, newParticle);
+//    _sceneObject->makeDynamic(newDynamicObject);
     //    _sceneObject->
 }
 
 void Scene::makeDynamic(pSceneOb _sceneObject)
 {
-
+    m_DynamicsWorld->addDynamicObjectAsRigidBody(_sceneObject);
 }
 
 void Scene::drawLines()
@@ -175,6 +190,11 @@ void Scene::drawLines()
       glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
       m_lines_vao->release();
     }
+}
+
+void Scene::drawPoints()
+{
+
 }
 
 void Scene::drawGeometryShader()
@@ -323,7 +343,6 @@ int3 Scene::readPixel(uint _x, uint _y)
 
 void Scene::updateLinesVBO()
 {
-
 // Get lines from dynamicsWorld
     m_LinesB.clear();
     for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
@@ -337,7 +356,6 @@ void Scene::updateLinesVBO()
     m_lines_vao->bind();
     m_lines_vbo.create();
     m_lines_vbo.bind();
-
 
 //    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
 //    QVector3D* ptr2 = *ptr;
@@ -353,6 +371,11 @@ void Scene::updateLinesVBO()
                           sizeof(QVector3D), //byte offset between consecutive generic vertex attributes
                           nullptr);
     m_lines_vao->release();
+}
+
+void Scene::updatePointsVBO()
+{
+    m_Points.clear();
 
 }
 
@@ -570,10 +593,11 @@ void Scene::QtOpenGLinitialize()
 
 void Scene::DynamicsInitialize()
 {
+
     if(!m_DynamicsWorld)
         m_DynamicsWorld = new DynamicsWorld();
 
-    m_DynamicsWorld->initialize();
+    m_DynamicsWorld->initialize(this);
 }
 
 void Scene::resize(int width, int height)
@@ -614,14 +638,12 @@ void Scene::resize(int width, int height)
 void Scene::paint()
 {
 
-
-
     QVector4D null = QVector4D(0,0,0,1);
     QMatrix4x4 model;
     model.setToIdentity();
 
     QVector4D ndcNull = m_projection_matrix * m_arcCamera.toMatrix() * model * null ;
-//    mlog<<ndcNull;
+
 
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -783,6 +805,7 @@ void Scene::setDynamicsWorld(DynamicsWorld *_world)
 
 void Scene::setupScene()
 {
+    mlog<<"setupScene";
 //        addPointLight(QVector3D(5,0,0), QVector3D(0, 0, 1));
 //        addPointLight(QVector3D(-5,0,0), QVector3D(0, 1, 0));
 //        addPointLight(QVector3D(0,5,0), QVector3D(1, 0, 0));

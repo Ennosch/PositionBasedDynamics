@@ -24,6 +24,7 @@ public:
     SceneObject(Scene *_scene, ShapePtr _Shape);
     SceneObject(Scene *_scene, ShapePtr _Shape, const QVector3D &_pos);
     SceneObject(Scene *_scene, ShapePtr _Shape, const QVector3D &_pos, const QQuaternion &_rot);
+    SceneObject(Scene *_scene, ModelPtr _Model, const uint _materialID, const QVector3D &_pos);
     SceneObject(Scene *_scene, ModelPtr _Model, const uint _materialID, const QVector3D &_pos, const QQuaternion &_rot);
     SceneObject(std::string _path);
 
@@ -53,6 +54,7 @@ public:
     const Transform getTransform();
     uint getMaterialID();
     ShapePtr shape();
+    ModelPtr model();
     uint getID();
 
     bool m_IsDirty = true;

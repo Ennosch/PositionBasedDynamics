@@ -54,6 +54,8 @@ public:
   void DynamicsInitialize();
   void setupScene();
   void updateLinesVBO();
+  void updatePointsVBO();
+  void initFramebuffer();
 
   void debug(const QVector3D &_pos);
 
@@ -62,6 +64,8 @@ public:
   ModelPtr addModel(Scene *_scene, std::string _name, std::string _path);
 
   pSceneOb addSceneObjectFromModel(std::string _name, const uint _materialID, const QVector3D &_pos, const QQuaternion &_rot);
+  pSceneOb addSceneObjectFromParticle( const ParticlePtr _particle);
+
   LightPtr addPointLight();
   LightPtr addPointLight(const QVector3D &_pos, const QVector3D &_color);
   MaterialPtr addMaterial(const QVector3D &_ambient, const QVector3D &_diffuse, const QVector3D &_specular, float _shininess);
@@ -70,6 +74,10 @@ public:
   void addLine(const QVector3D &_start, const QVector3D &_end);
   void makeDynamicAsParticle(pSceneOb _sceneObject);
   void makeDynamic(pSceneOb _sceneObject);
+
+  void drawLines();
+  void drawPoints();
+  void drawGeometryShader();
 
   // accessor
   uint width();
@@ -140,6 +148,7 @@ private:
   std::vector <pSceneOb> m_SceneObjects;
   std::vector <Line> m_Lines;
   std::vector <QVector3D> m_LinesB;
+  std::vector <QVector3D> m_Points;
 
   pSceneOb m_pickedObject;
 };

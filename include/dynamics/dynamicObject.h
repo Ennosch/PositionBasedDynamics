@@ -14,18 +14,21 @@ class DynamicObject
 {
 public:
     DynamicObject();
-    DynamicObject( ParticlePtr _particle);
-    void setTransform(const QMatrix4x4& _mat4);
-    void pinToPosition(const QVector3D &_pos);
-    void endPinToPosition();
-    ParticlePtr particle();
+//    DynamicObject( ParticlePtr _particle);
+    virtual void setTransform(const QMatrix4x4& _mat4);
+    virtual void pinToPosition(const QVector3D &_pos);
+    virtual void endPinToPosition();
+//    ParticlePtr particle();
 
-    const QMatrix4x4& getTransfrom();
-    const QVector3D getTranslation();
+    virtual const QMatrix4x4& getTransfrom();
+    virtual const QVector3D getTranslation();
+
 private:
-    bool m_IsParticle = false;
-    Transform m_transform;
-    ParticlePtr pParticle;
+//    bool m_IsParticle = false;
+
+//    Transform m_transform;
+//    ParticlePtr pParticle;
+
 //    std::vector<QVector3D> m_particles;
 //    std::vector<unsigned int> m_indices;
 };

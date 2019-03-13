@@ -74,11 +74,10 @@ void ActiveObject::onClicked()
 //        mlog<<"hello";
         if(activeSceneObject->isDynamic())
         {
-            activeSceneObject->isDynamic(false);
-//            activeSceneObject->dynamicObject()->pinToPosition(activeSceneObject->getPos());
-            m_pinConstraint = std::make_shared<PinConstraint>(activeSceneObject->dynamicObject()->particle(), activeSceneObject->getPos());
+            activeSceneObject->isDynamic(false);            
+//            m_pinConstraint = std::make_shared<PinConstraint>(activeSceneObject->dynamicObject()->particle(), activeSceneObject->getPos());
             // Pushing back shared_ptr. Expecting conversion to weak_ptr.
-            activeSceneObject->dynamicObject()->particle()->m_Constraints.push_back(m_pinConstraint);
+//            activeSceneObject->dynamicObject()->particle()->m_Constraints.push_back(m_pinConstraint);
 
             m_pickedDynamic = true;
         }

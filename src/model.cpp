@@ -135,6 +135,7 @@ void Model::bind()
         meshes[i]->bind();
 }
 
+
 ShapePtr Model::getShape(unsigned int _index)
 {
     if(!meshes[_index])

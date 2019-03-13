@@ -5,10 +5,13 @@
 #include <QDebug>
 
 #include "utils.h"
+#include "transform.h"
+#include "dynamics/dynamicObject.h"
+
 
 class AbstractConstraint;
 
-class Particle
+class Particle : public DynamicObject
 {
 public:
     Particle();
@@ -20,8 +23,15 @@ public:
 
     QVector3D position();
     float radius();
-
     float foo();
+
+    // virtuals
+    void setTransform(const QMatrix4x4& _mat4);
+    void pinToPosition(const QVector3D &_pos);
+    void endPinToPosition();
+
+    const QMatrix4x4& getTransfrom();
+    const QVector3D getTranslation();
 
 //private:
     unsigned age;

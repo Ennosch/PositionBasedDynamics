@@ -14,17 +14,21 @@
 #include "hashgrid.h"
 #include "dynamics/dynamicObject.h"
 #include "dynamics/particle.h"
+#include "dynamics/rigidBody.h"
 #include "dynamics/collisiondetection.h"
 #include "dynamics/constraint.h"
 #include "dynamicsWorldController.h"
 
 typedef QVector3D Vec3;
 
+class Scene;
+
 class DynamicsWorld
 {
     public:
         DynamicsWorld();
         void initialize();
+        void initialize(Scene *_scene);
         void update();
         void info();
         DynamicsWorldController* controller();
@@ -33,7 +37,8 @@ class DynamicsWorld
         void step();
 
         void addDynamicObject(pSceneOb _sceneObject);
-        DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject, ParticlePtr _particle);
+        DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
+        DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject);
 
         ParticlePtr addParticle(float _x, float _y, float _z);
         void addPlane(const Plane &_plane);
@@ -68,6 +73,8 @@ class DynamicsWorld
 
         HashGrid m_hashGrid;
         CollisionDetection m_CollisionDetect;
+
+        Scene *m_scene;
 
 };
 
