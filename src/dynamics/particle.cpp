@@ -2,13 +2,13 @@
 
 Particle::Particle()
 {
-        qDebug()<<"INit Particle 1 Constraint";
+        qDebug()<<"INit Particle 1 Ctor";
 }
 
 Particle::Particle(float _x, float _y, float _z, int _ID)
     :ID(_ID)
 {
-    qDebug()<<"INit Particle 2 Constraint";
+    qDebug()<<"INit Particle 2 Ctor";
     r = 0.5;
     m = 1.0;
     x = QVector3D(_x, _y, _z);

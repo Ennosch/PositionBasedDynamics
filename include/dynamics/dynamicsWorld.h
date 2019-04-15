@@ -6,7 +6,8 @@
 
 #include <QDebug>
 #include <QVector3D>
-#include <eigen3/Eigen/Dense>
+
+//#include <eigen3/Eigen/Dense>
 
 #include "transform.h"
 #include "utils.h"
@@ -53,8 +54,6 @@ class DynamicsWorld
         void generateData();
 
         QVector3D* debugDrawLineData();
-
-        void foo(){ qDebug("foo"); }
 
         int pCount = 0;
         int objectCount = 0;

@@ -27,6 +27,28 @@ void RigidBody::addParticle(const ParticleWeakPtr _particle)
     m_particles.push_back(_particle);
 }
 
+ConstraintPtr RigidBody::createConstraint()
+{
+//    return nullptr;
+//    auto smCstr = std::make_shared<ShapeMatchingConstraint>(m_particles);
+    auto smCstr = std::make_shared<ShapeMatchingConstraint>(this);
+    std::weak_ptr<ShapeMatchingConstraint> smCstrWeak = smCstr;
+    for(auto p : m_particles)
+    {
+        if(auto particle = p.lock())
+        {
+            particle->m_Constraints.push_back(smCstrWeak);
+        }
+    }
+    mlog<<"hello";
+    return smCstr;
+}
+
+void RigidBody::setTransform(const Transform _trans)
+{
+    m_transfrom = _trans;
+}
+
 void RigidBody::setTransform(const QMatrix4x4 &_mat4)
 {
 

@@ -200,10 +200,12 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
 
 DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObject)
 {
+
     if(!_sceneObject->model())
         return nullptr;
 
     auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
+    nRB->setTransform(_sceneObject->getTransform());
     ModelPtr model = _sceneObject->model();
     for(unsigned int i = 0; i < model->getNumShapes(); i++)
     {
@@ -212,15 +214,19 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
         for(auto vert : shape->getVertices())
         {
             QVector3D pos = vert.Position;
-            mlog<<"pos:"<<pos;
+            Transform tmpTrans = _sceneObject->getTransform();
+            pos = tmpTrans.toMatrix() * pos;
+
             auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
             m_Particles.push_back(nParticle);
             nRB->addParticle(nParticle);
             m_scene->addSceneObjectFromParticle(nParticle);
-
         }
     }
-    return nullptr;
+    auto smCstr = nRB->createConstraint();
+    m_Constraints.push_back(smCstr);
+
+    return nRB;
 }
 
 ParticlePtr DynamicsWorld::addParticle(float _x, float _y, float _z)

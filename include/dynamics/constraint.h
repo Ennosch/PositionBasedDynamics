@@ -3,6 +3,7 @@
 
 #include  <QDebug>
 #include <QVector3D>
+//#include <eigen3/Eigen/Dense>
 
 #include "dynamics/abstractconstraint.h"
 #include "dynamics/particle.h"
@@ -26,6 +27,8 @@
  *          project - calc delta and apply to particle
  *
  */
+
+//using namespace Eigen;
 
 class HalfSpaceConstraint : public AbstractConstraint
 {
@@ -89,13 +92,35 @@ private:
     ParticlePtr pptr1, pptr2;
 };
 
-class OtherConstraint : public AbstractConstraint
+class ShapeMatchingConstraint : public AbstractConstraint, public std::enable_shared_from_this<ShapeMatchingConstraint>
+//class ShapeMatchingConstraint : public AbstractConstraint
 {
 public:
-    OtherConstraint(){};
-    float constraintFunction(){qDebug()<<" OtherSpace C"; return 3.0;}
-//    float constraintFunction(const QVector3D &_p){return 5.5;}
+    ShapeMatchingConstraint();
+    ShapeMatchingConstraint(RigidBody *_rigidbody);
+    ShapeMatchingConstraint(const std::vector<ParticleWeakPtr> &_particles);
+    void project();
+    float constraintFunction();
+
+private:
+    struct LocalParticle{
+        ParticleWeakPtr particle;
+        QVector3D localX;
+    };
+    std::vector<LocalParticle> m_configuration;
+    RigidBody *m_rb;
+    std::vector<ParticleWeakPtr> m_particlePtrs;
+    QVector3D cm, cmOrigin;
+    QMatrix3x3 Ap, Aq;
 };
+
+/*WIP
+ *
+ * investigate memory leaking when adding particles from shapeMatching constraint / rigidbody
+ *
+ *  push sm constraint (this ) as smartPointer to the particles
+ *
+ */
 
 #endif // CONSTRAINT_H
 

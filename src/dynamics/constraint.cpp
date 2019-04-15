@@ -1,4 +1,5 @@
 #include "dynamics/constraint.h"
+#include "dynamics/rigidBody.h"
 
 
 
@@ -168,5 +169,100 @@ float DistanceEqualityConstraint::getRestLength()
 {
     return d;
 }
+
+
+
+ShapeMatchingConstraint::ShapeMatchingConstraint()
+{
+
+}
+
+ShapeMatchingConstraint::ShapeMatchingConstraint(RigidBody *_rigidbody)
+{
+    m_rb = _rigidbody;
+    mlog<<"init SM cstr ptr";
+
+
+    for(auto p : m_rb->m_particles)
+    {
+        if(auto particle = p.lock())
+        {
+            QMatrix4x4 tmpMat = m_rb->getTransfrom();
+            QVector3D pLocal = tmpMat.inverted() * particle->x;
+            cmOrigin += pLocal;
+//            mlog<<"Shape Matching: "<<pLocal;
+            LocalParticle dataPair;
+            dataPair.localX = pLocal;
+            dataPair.particle = p;
+            m_configuration.push_back(dataPair);
+        }
+    }
+    cmOrigin /= m_rb->m_particles.size();
+//    mlog<<"Shape Matching Div: "<<m_rb->m_particles.size()<<cmOrigin;
+
+
+}
+
+ShapeMatchingConstraint::ShapeMatchingConstraint(const std::vector<ParticleWeakPtr> &_particles)
+{
+    m_particlePtrs = _particles;
+    mlog<<"init SM cstr";
+}
+
+void ShapeMatchingConstraint::project()
+{
+//    if(!m_dirty)
+//        return;
+
+//     compute center of mass (T)
+    for(auto pair : m_configuration)
+    {
+        if(auto particle = pair.particle.lock())
+        {
+            cm += particle->p;
+        }
+    }
+    cm /= m_rb->m_particles.size();
+
+//    // compute A (Ax = b)
+    for(auto pair : m_configuration)
+    {
+        if(auto particle = pair.particle.lock())
+        {
+            QMatrix3x3 tmpP;
+            QVector3D pi, qi;
+            float m = particle->w;
+            pi = particle->p - cm;
+            qi = pair.localX - cmOrigin;
+//            tmpP = (m*pi)
+//            QMatrix3x3
+//            QMatrix3x3::
+        }
+    }
+//    m_dirty = false;
+}
+
+float ShapeMatchingConstraint::constraintFunction()
+{
+    return 0.0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

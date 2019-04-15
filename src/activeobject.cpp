@@ -82,7 +82,7 @@ void ActiveObject::onClicked()
             m_pickedDynamic = true;
         }
         else{
-            mlog<<"--------Missing Cstr1";
+            mlog<<"--------Missing Constraint for ative object";
         }
     }
 }

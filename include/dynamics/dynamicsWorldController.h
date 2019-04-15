@@ -24,7 +24,7 @@ protected slots:
 private:
     bool m_simulating;
     DynamicsWorld *m_dynamicsWorld;
-    Scene *m_scene;
+
 };
 
 #endif // DYNAMICSWORLDCONTROLLER_H

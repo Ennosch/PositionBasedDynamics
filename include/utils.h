@@ -42,6 +42,7 @@ class Particle;
 
 class AbstractConstraint;
 class DistanceEqualityConstraint;
+class RigidBody;
 
 struct Material {
     QVector3D ambient;

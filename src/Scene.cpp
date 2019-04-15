@@ -109,9 +109,7 @@ pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle)
     m_SceneObjects.push_back(pSO);
     pSO->makeDynamic(_particle);
 
-    pSO->setActiveObject(widget()->activeObject());
-    numCreation++;
-    pSO->setID(numCreation);
+
 
     mlog<<"added PARTICLE AS OBEJCT";
     return pSO;
@@ -863,7 +861,8 @@ void Scene::setupScene()
 //        makeDynamic(sceneObject3);
 
         //Spheres
-       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
+       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,-5), QQuaternion(0.8,0.3,0.3,0.1));
+
 //       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));
 //       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,-5), QQuaternion(1,0,0,0));
 //       auto sceneObject4 = addSceneObjectFromModel("sphere", 1, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
