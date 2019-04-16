@@ -851,7 +851,6 @@ void Scene::setupScene()
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
-
        // Rope
 //        auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(0,6,-5), QQuaternion(1,0,0,0));
 //        auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(4.5,6,-5), QQuaternion(1,0,0,0));
@@ -861,7 +860,9 @@ void Scene::setupScene()
 //        makeDynamic(sceneObject3);
 
         //Spheres
-       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,-5), QQuaternion(0.8,0.3,0.3,0.1));
+//       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
+       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
+        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), rot);
 
 //       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));
 //       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,-5), QQuaternion(1,0,0,0));

@@ -4,5 +4,10 @@
 
 AbstractConstraint::AbstractConstraint()
 {
-//    qDebug()<<"INit abstract Constraint";
+    //    qDebug()<<"INit abstract Constraint";
+}
+
+void AbstractConstraint::setDirty(bool _isDirty)
+{
+    m_dirty = _isDirty;
 }

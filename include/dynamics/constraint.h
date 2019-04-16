@@ -3,7 +3,7 @@
 
 #include  <QDebug>
 #include <QVector3D>
-//#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 #include "dynamics/abstractconstraint.h"
 #include "dynamics/particle.h"
@@ -107,11 +107,16 @@ private:
         ParticleWeakPtr particle;
         QVector3D localX;
     };
+
+    Transform m_transform;
+    QMatrix4x4 modelMatrix;
+
     std::vector<LocalParticle> m_configuration;
     RigidBody *m_rb;
     std::vector<ParticleWeakPtr> m_particlePtrs;
     QVector3D cm, cmOrigin;
-    QMatrix3x3 Ap, Aq;
+//    QMatrix3x3 Ap, Aq;
+    Eigen::Matrix3f Ap, Aq;
 };
 
 /*WIP

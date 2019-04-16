@@ -22,6 +22,7 @@ public:
 // members:
     std::vector<ParticleWeakPtr> m_Particles;
     bool m_dirty = true;
+    void setDirty(bool _isDirty);
 };
 
 

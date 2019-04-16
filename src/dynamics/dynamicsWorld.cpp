@@ -12,7 +12,7 @@ DynamicsWorld::DynamicsWorld()
 {
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
-    m_dt = 0.1;
+    m_dt = 0.01;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
 
@@ -28,8 +28,6 @@ void DynamicsWorld::initialize()
     groundPlane.Normal = QVector3D(0, 1, 0);
     groundPlane.Offset = QVector3D(0, 0, 0);
     addPlane(groundPlane);
-
-
 
 //    auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
 
@@ -47,8 +45,6 @@ void DynamicsWorld::initialize(Scene *_scene)
 
 void DynamicsWorld::update()
 {
-
-
     float dt = m_dt;
 
     if(!m_simulate)
@@ -61,7 +57,8 @@ void DynamicsWorld::update()
     for( ParticlePtr p : m_Particles)
     {
         // e.G. gravity 0, 1, 0
-        QVector3D forceExt = QVector3D(0, -1, 0);
+//        QVector3D forceExt = QVector3D(0, -1, 0);
+        QVector3D forceExt = QVector3D(0, 0, 0);
         p->v = p->v + dt * p->w*forceExt;
     }
 
@@ -100,11 +97,22 @@ void DynamicsWorld::update()
         std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
         for(ParticlePtr n : neighbourParticles)
         {
-            if(n != p)
-                // check predicted postion for particle particle collisions
-                checkSphereSphere(p,n);
+//            if(n != p)
+//                // check predicted postion for particle particle collisions
+//                checkSphereSphere(p,n);
         }
-        checkSpherePlane(p, m_Planes[0]);
+//        checkSpherePlane(p, m_Planes[0]);
+    }
+
+    // Constraint dirty to do something
+    for( ParticlePtr p : m_Particles)
+    {
+        for( ConstraintWeakPtr c : p->m_Constraints)
+        {
+            if(auto constraint = c.lock()){
+                constraint->setDirty(true);
+            }
+        }
     }
 
     // Solver Iteration (9)
@@ -115,8 +123,9 @@ void DynamicsWorld::update()
 //            p->p += c->deltaP();
 //            auto test = c.lock();
 //            bool test2 = c.expired();
-            if(auto constraint = c.lock())
+            if(auto constraint = c.lock()){
                 constraint->project();
+            }
         }
 
         for( ConstraintPtr c : p->m_CollisionConstraints)
@@ -213,11 +222,15 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
         mlog<<"has shape"<<i;
         for(auto vert : shape->getVertices())
         {
-            QVector3D pos = vert.Position;
+            QVector3D posf3 = vert.Position;
+            QVector4D pos = QVector4D(posf3.x(), posf3.y(), posf3.z(), 1);
             Transform tmpTrans = _sceneObject->getTransform();
             pos = tmpTrans.toMatrix() * pos;
 
             auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
+
+//            mlog<<"FROM SHAPE:"<<pos.x()<<pos.y()<< pos.z();
+
             m_Particles.push_back(nParticle);
             nRB->addParticle(nParticle);
             m_scene->addSceneObjectFromParticle(nParticle);
