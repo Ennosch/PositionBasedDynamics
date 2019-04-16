@@ -13,7 +13,7 @@ public:
     RigidBody(ModelPtr _model);
 
     void parseData(const ModelPtr _model);
-    void addParticle(const ParticleWeakPtr _particle);
+    void addParticle(const QVector3D &_localPos, const ParticleWeakPtr _particle);
     ConstraintPtr createConstraint();
 
     void setTransform(const Transform _trans);
@@ -27,14 +27,21 @@ public:
     const QVector3D getTranslation();
 
 private:
+    struct RestShape{
+        QVector3D localPos;
+        ParticleWeakPtr particle;
+    };
+
     friend ShapeMatchingConstraint;
     int id;
 
+    std::vector<RestShape> m_restShape;
     ModelPtr m_model;
     ShapePtr m_shape;
 
     Transform m_transfrom;
     std::vector<ParticleWeakPtr> m_particles;
+
 };
 
 #endif // RigidBody_H

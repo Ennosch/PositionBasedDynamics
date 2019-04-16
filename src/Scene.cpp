@@ -106,12 +106,14 @@ pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle)
         return nullptr;
     }
     auto pSO = std::make_shared<SceneObject>(this, pModel, 1 , _particle->getTranslation());
+    pSO->setActiveObject(widget()->activeObject());
+    numCreation++;
+    pSO->setID(numCreation);
     m_SceneObjects.push_back(pSO);
     pSO->makeDynamic(_particle);
 
 
-
-    mlog<<"added PARTICLE AS OBEJCT";
+//    mlog<<"added PARTICLE AS OBEJCT";
     return pSO;
 }
 
@@ -846,7 +848,9 @@ void Scene::setupScene()
        addModel(this, "Axis", "../AxisShape.obj");
        addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "../bunny.obj");
-       addModel(this, "teapot", "resources/objects/teapot.obj");
+       addModel(this, "teapot", "resources/objects/teaspot.obj");
+
+       addModel(this, "gridTransform", "../Grid1_transfrom.obj");
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
@@ -862,23 +866,25 @@ void Scene::setupScene()
         //Spheres
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
-        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), rot);
 
-//       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));
-//       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,-5), QQuaternion(1,0,0,0));
-//       auto sceneObject4 = addSceneObjectFromModel("sphere", 1, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
+        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3.5,0), rot);
+//        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,0,0), rot);
 
+       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));
+       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,-5), QQuaternion(1,0,0,0));
+       auto sceneObject4 = addSceneObjectFromModel("sphere", 1, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
 
 //       makeDynamicAsParticle(sceneObject1);
+       makeDynamicAsParticle(sceneObject2);
+       makeDynamicAsParticle(sceneObject3);
+//       makeDynamicAsParticle(sceneObject5);
        makeDynamic(sceneObject1);
 //       makeDynamic(sceneObject2);
 //       makeDynamic(sceneObject3);
 //       makeDynamic(sceneObject4);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
-       mainpulator = new Manipulator(_vectorShape, m_manipulator_program);
-       mainpulator->setScene(this);
-
+       mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
 //       sceneObject4->rotate(QQuaternion::fromEulerAngles(QVector3D(45,0,0)));
 //       mainpulator->setTransform(sceneObject4->getTransform());
 

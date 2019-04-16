@@ -41,7 +41,7 @@ public:
     int3 cell;
 //    std::vector<ConstraintWeakPtr> m_CollisionConstraints;
     std::vector<ConstraintPtr> m_CollisionConstraints;
-    std::vector<ConstraintWeakPtr> m_Constraints;
+//    std::vector<ConstraintWeakPtr> m_Constraints;
 
 };
 

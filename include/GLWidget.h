@@ -31,6 +31,7 @@ class GLWidget : public QOpenGLWidget
 public:
 //    GLWidget();
     GLWidget(QWindow *parent = nullptr);
+    ~GLWidget();
     void setScene(Scene *_scene);
 
      Scene* scene() const;

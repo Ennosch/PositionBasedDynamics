@@ -21,10 +21,19 @@ void RigidBody::parseData(const ModelPtr _model)
 //    }
 }
 
-void RigidBody::addParticle(const ParticleWeakPtr _particle)
+void RigidBody::addParticle(const QVector3D &_localPos, const ParticleWeakPtr _particle)
 {
-    mlog<<"passed particle";
+//    mlog<<"passed particle";
     m_particles.push_back(_particle);
+
+
+    RestShape shapeParticle;
+    shapeParticle.localPos = _localPos;
+    shapeParticle.particle = _particle;
+
+    m_restShape.push_back(shapeParticle);
+//    m_restShape.particle = _particle;
+//    m_restShape.localPos = _particle.lock()->x;
 }
 
 ConstraintPtr RigidBody::createConstraint()

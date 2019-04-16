@@ -12,7 +12,7 @@ DynamicsWorld::DynamicsWorld()
 {
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
-    m_dt = 0.01;
+    m_dt = 0.1;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
 
@@ -57,8 +57,7 @@ void DynamicsWorld::update()
     for( ParticlePtr p : m_Particles)
     {
         // e.G. gravity 0, 1, 0
-//        QVector3D forceExt = QVector3D(0, -1, 0);
-        QVector3D forceExt = QVector3D(0, 0, 0);
+        QVector3D forceExt = QVector3D(0, -1, 0);
         p->v = p->v + dt * p->w*forceExt;
     }
 
@@ -101,7 +100,7 @@ void DynamicsWorld::update()
 //                // check predicted postion for particle particle collisions
 //                checkSphereSphere(p,n);
         }
-//        checkSpherePlane(p, m_Planes[0]);
+        checkSpherePlane(p, m_Planes[0]);
     }
 
     // Constraint dirty to do something
@@ -124,7 +123,10 @@ void DynamicsWorld::update()
 //            auto test = c.lock();
 //            bool test2 = c.expired();
             if(auto constraint = c.lock()){
-                constraint->project();
+//                for(int i=0; i<=5; i++)
+                {
+                    constraint->project();
+                }
             }
         }
 
@@ -209,7 +211,6 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
 
 DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObject)
 {
-
     if(!_sceneObject->model())
         return nullptr;
 
@@ -219,7 +220,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     for(unsigned int i = 0; i < model->getNumShapes(); i++)
     {
         ShapePtr shape = model->getShape(i);
-        mlog<<"has shape"<<i;
+//        mlog<<"has shape"<<i;
         for(auto vert : shape->getVertices())
         {
             QVector3D posf3 = vert.Position;
@@ -232,7 +233,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
 //            mlog<<"FROM SHAPE:"<<pos.x()<<pos.y()<< pos.z();
 
             m_Particles.push_back(nParticle);
-            nRB->addParticle(nParticle);
+            nRB->addParticle(posf3, nParticle);
             m_scene->addSceneObjectFromParticle(nParticle);
         }
     }

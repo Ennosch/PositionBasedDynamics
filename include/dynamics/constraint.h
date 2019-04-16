@@ -9,6 +9,14 @@
 #include "dynamics/particle.h"
 #include "utils.h"
 
+typedef double Real;
+//using Matrix3r = Eigen::Matrix<Real, 3, 3>;
+//using Vector3r = Eigen::Matrix<Real, 3, 1>;
+//const Real eps = static_cast<Real>(1e-6);
+using Matrix3r = Eigen::Matrix3f;
+using Vector3r = Eigen::Matrix<float, 3, 1>;
+
+const double eps = 1e-6;
 
 //class AbstractConstraint
 //{
@@ -92,32 +100,44 @@ private:
     ParticlePtr pptr1, pptr2;
 };
 
-class ShapeMatchingConstraint : public AbstractConstraint, public std::enable_shared_from_this<ShapeMatchingConstraint>
-//class ShapeMatchingConstraint : public AbstractConstraint
+//class ShapeMatchingConstraint : public AbstractConstraint, public std::enable_shared_from_this<ShapeMatchingConstraint>
+class ShapeMatchingConstraint : public AbstractConstraint
 {
 public:
     ShapeMatchingConstraint();
     ShapeMatchingConstraint(RigidBody *_rigidbody);
-    ShapeMatchingConstraint(const std::vector<ParticleWeakPtr> &_particles);
+    void projectOld();
+    void project1D();
     void project();
     float constraintFunction();
 
 private:
-    struct LocalParticle{
-        ParticleWeakPtr particle;
-        QVector3D localX;
+    struct smParticle{
+        // Vec3 localP  (restPose)
+        // Vec3 target  (cached)
+        QVector3D localRest, target;
+        // Vec3 *p->    (to be updated)
+        QVector3D *p;
     };
+    std::vector< smParticle > m_ShapeParticles;
+    std::vector< ParticlePtr> m_particles;
+
+    QVector3D cm, cmTarget,cmOrigin;
 
     Transform m_transform;
     QMatrix4x4 modelMatrix;
 
-    std::vector<LocalParticle> m_configuration;
     RigidBody *m_rb;
-    std::vector<ParticleWeakPtr> m_particlePtrs;
-    QVector3D cm, cmOrigin;
-//    QMatrix3x3 Ap, Aq;
     Eigen::Matrix3f Ap, Aq;
 };
+
+
+void polarDecompositionStable(const Matrix3r &M, const double tolerance, Matrix3r &R);
+
+double oneNorm(const Matrix3r &A);
+
+double infNorm(const Matrix3r &A);
+
 
 /*WIP
  *

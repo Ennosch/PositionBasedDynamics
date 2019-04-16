@@ -88,12 +88,22 @@ void SceneObject::release()
 
 void SceneObject::update()
 {
+
+    if(m_IsActive && m_IsDynamic)
+    {
+
+    }
+
     if(isDynamic())
     {
+
         m_ModelMatrix = pDynamicObject->getTransfrom();
         setTranslation(pDynamicObject->getTranslation());
         if(m_IsActive)
+        {
             notify();
+        }
+
     }
     else if(m_IsDirty)
     {
@@ -101,7 +111,9 @@ void SceneObject::update()
         m_ModelMatrix =  m_Transform.toMatrix();
 
         if(m_IsActive)
+        {
             notify();
+        }
     }
 }
 
@@ -145,12 +157,7 @@ void SceneObject::setID(uint _id)
 void SceneObject::notify()
 {
     pSceneOb pSO = pScene->getPointerFromSceneObject(this);
-//    qDebug()<<"instances: "<<pSO.use_count();
-
-
     activeObject->notify(pSO);
-
-    //    qDebug()<<"instances2: "<<pSO.use_count();
 }
 
 DynamicObjectPtr SceneObject::dynamicObject()

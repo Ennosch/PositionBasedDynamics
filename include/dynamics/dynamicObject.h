@@ -22,7 +22,7 @@ public:
 
     virtual const QMatrix4x4& getTransfrom();
     virtual const QVector3D getTranslation();
-
+    std::vector<ConstraintWeakPtr> m_Constraints;
 private:
 //    bool m_IsParticle = false;
 

@@ -9,6 +9,9 @@
 
 //}
 
+
+
+
 HalfSpaceConstraint::HalfSpaceConstraint(
         const QVector3D &_p,
         const QVector3D &_qc,
@@ -170,8 +173,6 @@ float DistanceEqualityConstraint::getRestLength()
     return d;
 }
 
-
-
 ShapeMatchingConstraint::ShapeMatchingConstraint()
 {
 
@@ -182,124 +183,242 @@ ShapeMatchingConstraint::ShapeMatchingConstraint(RigidBody *_rigidbody)
     m_rb = _rigidbody;
     mlog<<"init SM cstr ptr";
 
-
-    for(auto p : m_rb->m_particles)
+    // init data
+    for(auto restShape : m_rb->m_restShape)
     {
-        if(auto particle = p.lock())
+        if(auto particle = restShape.particle.lock())
         {
-            QMatrix4x4 tmpMat = m_rb->getTransfrom();
-            QVector3D pLocal = tmpMat.inverted() * particle->x;
-            cmOrigin += pLocal;
-//            mlog<<"Shape Matching: "<<pLocal;
-            LocalParticle dataPair;
-            dataPair.localX = pLocal;
-            dataPair.particle = p;
-            m_configuration.push_back(dataPair);
+            smParticle p;
+            p.p = &particle->p;
+//            mlog<<"inititlaize          :"<<particle->x;
+            p.localRest = restShape.localPos;
+            p.target = particle->p;
+            cmOrigin += p.localRest;
+            m_ShapeParticles.push_back(p);
+            m_particles.push_back(particle);
         }
     }
-    cmOrigin /= m_rb->m_particles.size();
-//    mlog<<"Shape Matching Div: "<<m_rb->m_particles.size()<<cmOrigin;
+    cmOrigin /= m_ShapeParticles.size();
+
+    std::cout<<"compute Aqq \n"<<std::endl;
+
+    Aq.setIdentity();
+    for(auto particle : m_ShapeParticles)
+    {
+        QVector3D _qi = particle.localRest;
+        mlog<<_qi;
+        QVector3D qiQt = _qi- cmOrigin;
+//        Eigen::Vector3f qi(qiQt.x(), qiQt.y(), qiQt.z());
+
+        Eigen::Vector3f qi(particle.localRest.x() - cmOrigin.x() ,
+                           particle.localRest.y() - cmOrigin.y() ,
+                           particle.localRest.z() - cmOrigin.z() );
+
+        std::cout<<qi<<std::endl;
+        std::cout<<"------"<<std::endl;
+
+        Aq += qi * qi.transpose();
+    }
+//    mlog<<"-\n end init-0-------\n\n";
 
 
+    std::cout<<"this is Aq"<<std::endl;
+    std::cout<<Aq<<std::endl;
+//    mlog<<"++==++++=+===================";
 }
 
-ShapeMatchingConstraint::ShapeMatchingConstraint(const std::vector<ParticleWeakPtr> &_particles)
-{
-    m_particlePtrs = _particles;
-    mlog<<"init SM cstr";
-}
-
-void ShapeMatchingConstraint::project()
+void ShapeMatchingConstraint::projectOld()
 {
     if(!m_dirty)
         return;
 
+    // prepare data
+    // cache target position
+    for(auto sParticle : m_ShapeParticles)
+    {
+        sParticle.target = *sParticle.p;
+        cmTarget += sParticle.target;
+    }
+    cmTarget /= m_ShapeParticles.size();
+
+
     for(int j=0; j<1;j ++)
     {
-
-    //     compute center of mass (T)
-        int count = 0;
-        cm = QVector3D(0,0,0);
-        for(auto pair : m_configuration)
+        // CM
+        for(auto sParticle : m_ShapeParticles)
         {
-            if(auto particle = pair.particle.lock())
-            {
-                cm += particle->p;
-    //            mlog<<particle->x<<count;
-                count++;
-            }
+            cm += *sParticle.p;
         }
-        cm /= m_configuration.size();
-    //    mlog<<(cm );
+        cm /= m_ShapeParticles.size();
 
-    //    // compute A (Ax = b)
-        Ap.setIdentity();
         Aq.setIdentity();
-
-        for(auto pair : m_configuration)
+        Ap.setIdentity();
+        for(auto sParticle : m_ShapeParticles)
         {
-            if(auto particle = pair.particle.lock())
-            {
-                QMatrix3x3 tmpP;
-                QVector3D _pi, _qi;
-                float m = particle->w;
-                _pi = particle->p - cm;
-                _qi = pair.localX - cmOrigin;
+            Eigen::Vector3f _qi(sParticle.p->x(), sParticle.p->y(), sParticle.p->z());
+            Eigen::Vector3f qi = _qi - Eigen::Vector3f(cm.x() , cm.y() ,cm.z());
+            Aq += qi * qi.transpose();
 
-                Eigen::Vector3f pi(_pi.x(), _pi.y(), _pi.z());
-                Eigen::Vector3f qi(_qi.x(), _qi.y(), _qi.z());
-
-                Eigen::Matrix3f _tmpAp = pi * qi.transpose();
-                Eigen::Matrix3f _tmpAq = qi * qi.transpose();
-                Ap += _tmpAp;
-                Aq += _tmpAq;
-            }
+            float test = sParticle.target.x();
+            Eigen::Vector3f _pi(sParticle.target.x(), sParticle.target.y(), sParticle.target.z());
+            Eigen::Vector3f pi = _pi - Eigen::Vector3f(cmTarget.x() , cmTarget.y() ,cmTarget.z());
+            Ap += pi * qi.transpose();
         }
-        Eigen::MatrixXf A = Ap * Aq.inverse();
-    //    Eigen::MatrixXf A = Aq.inverse() * Ap ;
+
+        Eigen::Matrix3f A = Ap * Aq.inverse();
         Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+
         Eigen::MatrixXf UV = svd.matrixU() * svd.matrixV().transpose();
-    //    Eigen::MatrixXf UV = svd.matrixV() * svd.matrixU();
         QMatrix3x3 R;
 
-        std::cout<<A<<std::endl;
-        std::cout<<"------"<<std::endl;
-
-        for(int i = 0 ;i<9; i++)
-        {
+        for(int i = 0 ;i<9; i++){
             R.data()[i] = UV.data()[i];
         }
 
-        QQuaternion rot =QQuaternion::fromRotationMatrix(R);
-        modelMatrix.setToIdentity();
-        modelMatrix.rotate(rot);
+        QMatrix4x4 transform;
+        transform.setToIdentity();
+        QQuaternion rot = QQuaternion::fromRotationMatrix(R);
+        transform.translate(cmTarget - cm);
+//        transform.rotate(rot);
 
-    //    mlog<<rot;
-    //    modelMatrix.translate((cm - cmOrigin));
-    //    modelMatrix.rotate(rot);
+        QVector3D eulerAngles = rot.toEulerAngles();
+        mlog<<R;
 
-        count = 0;
-        for(auto pair : m_configuration)
+        for(auto sParticle : m_ShapeParticles)
         {
-            if(auto particle = pair.particle.lock())
-            {
-                particle->p = modelMatrix * pair.localX;
-    //            QVector4D point = QVector4D(pair.localX.x(), pair.localX.y(), pair.localX.z(), 1);
-
-    //            QVector4D test = modelMatrix * point;
-    //            mlog<<count<<test<<"  "<< particle->p <<"  "<< particle->x<<"  "<< (cm );
-                count++;
-            }
+            QVector3D p = *sParticle.p;
+//            QVector3D corret = QVector3D(1,0,0);
+//            *sParticle.p = corret;
         }
+    }
+    mlog<<"update";
+    m_dirty = false;
+}
+
+void ShapeMatchingConstraint::project1D()
+{
+    if(!m_dirty)
+        return;
+
+    cm = QVector3D(0,0,0);
+    for(auto particle : m_particles)
+    {
+        cm += particle->p;
+    }
+    cm /= m_particles.size();
+
+    Ap.setIdentity();
+    for(auto particle : m_ShapeParticles)
+    {
+        QVector3D _qi = particle.localRest;
+        QVector3D qiQt = _qi- cmOrigin;
+        Eigen::Vector3f qi(qiQt.x(), qiQt.y(), qiQt.z());
+
+        QVector3D _pi = *particle.p;
+        QVector3D piQt = _pi- cm;
+        Eigen::Vector3f pi(piQt.x(), piQt.y(), piQt.z());
+
+//        std::cout<<pi<<std::endl;
+//        std::cout<<"---------"<<std::endl;
+
+        Ap += pi * qi.transpose();
+    }
+
+//    std::cout<<Ap<<std::endl;
+
+    Eigen::Matrix3f A = Ap * Aq.inverse();
+    Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+
+    Matrix3r Apolar = A;
+    Matrix3r Rpolar = A;
+
+    polarDecompositionStable(Apolar, eps, Rpolar);
+
+//    std::cout<<"Rpolar: -----------------"<<std::endl;
+//    std::cout<<Rpolar<<std::endl;
+
+    Eigen::MatrixXf UV = svd.matrixU() * svd.matrixV().transpose();
+    QMatrix3x3 R;
+
+//    std::cout<<"SVD: -----------------"<<std::endl;
+//    std::cout<<UV<<std::endl;
+
+    // copy Eigen3x3 rotation matrix into QMatrix3x3
+    for(int i = 0 ;i<9; i++){
+        R.data()[i] = UV.data()[i];
+    }
+
+    QMatrix4x4 transform;
+    transform.setToIdentity();
+    QQuaternion rot = QQuaternion::fromRotationMatrix(R);
+    QVector3D eulerAngles = rot.toEulerAngles();
+    transform.translate(cm - cmOrigin);
+    transform.rotate(rot);
+
+    for(auto particle : m_particles)
+    {
+//        particle->p = transform
+//        mlog<<"x: "<<particle->x;
+    }
+
+//    mlog<<transform;
+    for(auto shapeParticle : m_ShapeParticles)
+    {
+        QVector3D p = *shapeParticle.p;
+        QVector3D dp = transform * shapeParticle.localRest;
+        *shapeParticle.p = dp;
+
+//        QVector3D goal = cm + (R * (shapeParticle.localRest -cmOrigin));
+
+        Eigen::Vector3f x0(shapeParticle.localRest.x(), shapeParticle.localRest.y(), shapeParticle.localRest.z());
+        Eigen::Vector3f restCm(cmOrigin.x(), cmOrigin.y(), cmOrigin.z());
+        Eigen::Vector3f x(p.x(), p.y(), p.z());
+        Eigen::Vector3f cme(cm.x(), cm.y(), cm.z());
+
+        Eigen::Vector3f goal = cme + UV * (x0 - restCm);
+        Eigen::Vector3f corr = (goal - x);
+
+        Eigen::Vector3f eigenResult = x + corr;
+
+//        mlog<<"p:   "<<p<<"dp: "<<dp;
+
+
+//        mlog<<"eigenResult:     "<<eigenResult.x()<<"   "<<eigenResult.y()<<"   "<<eigenResult.z()<<"           QResult: "<<dp.x()<<"       "<<dp.y()<<"       "<<dp.z()   ;
 
     }
-//    mlog<<R;
 
-//    std::cout<<UV<<std::endl;
-//    mlog<<R;
-//    std::cout<<"---------"<<std::endl;
+//    for (int i = 0; i < numPoints; i++) {
+//		Vector3r goal = cm + R * (x0[i] - restCm);
+//		corr[i] = (goal - x[i]) * stiffness;
+//	}
+
+//    mlog<<"euler Angles"<<eulerAngles;
+//    mlog<<"step";
 
     m_dirty = false;
+}
+
+void ShapeMatchingConstraint::project()
+{
+    project1D();
+//    if(!m_dirty)
+//        return;
+
+//    int numIterations = 1;
+//    for(int j=0; j<numIterations;j ++)
+//    {
+
+//        // compute cm
+//        // compute Ap
+//        // A (Ap Aq) and rot
+
+//        //
+//        // Particle->p = transform * localP;
+
+
+//    }
+
+//    m_dirty = false;
 }
 
 float ShapeMatchingConstraint::constraintFunction()
@@ -307,15 +426,112 @@ float ShapeMatchingConstraint::constraintFunction()
     return 0.0;
 }
 
+void polarDecompositionStable(const Matrix3r &M, const double tolerance, Matrix3r &R)
+{
+    Matrix3r Mt = M.transpose();
+    double Mone = oneNorm(M);
+    double Minf = infNorm(M);
+    double Eone;
+    Matrix3r MadjTt, Et;
+    do
+    {
+        MadjTt.row(0) = Mt.row(1).cross(Mt.row(2));
+        MadjTt.row(1) = Mt.row(2).cross(Mt.row(0));
+        MadjTt.row(2) = Mt.row(0).cross(Mt.row(1));
+
+        double det = Mt(0,0) * MadjTt(0,0) + Mt(0,1) * MadjTt(0,1) + Mt(0,2) * MadjTt(0,2);
+
+        if (fabs(det) < 1.0e-12)
+        {
+            Vector3r len;
+            unsigned int index = 0xffffffff;
+            for (unsigned int i = 0; i < 3; i++)
+            {
+                len[i] = MadjTt.row(i).squaredNorm();
+                if (len[i] > 1.0e-12)
+                {
+                    // index of valid cross product
+                    // => is also the index of the vector in Mt that must be exchanged
+                    index = i;
+                    break;
+                }
+            }
+            if (index == 0xffffffff)
+            {
+                R.setIdentity();
+                return;
+            }
+            else
+            {
+                Mt.row(index) = Mt.row((index + 1) % 3).cross(Mt.row((index + 2) % 3));
+                MadjTt.row((index + 1) % 3) = Mt.row((index + 2) % 3).cross(Mt.row(index));
+                MadjTt.row((index + 2) % 3) = Mt.row(index).cross(Mt.row((index + 1) % 3));
+                Matrix3r M2 = Mt.transpose();
+                Mone = oneNorm(M2);
+                Minf = infNorm(M2);
+                det = Mt(0,0) * MadjTt(0,0) + Mt(0,1) * MadjTt(0,1) + Mt(0,2) * MadjTt(0,2);
+            }
+        }
+
+        const double MadjTone = oneNorm(MadjTt);
+        const double MadjTinf = infNorm(MadjTt);
+
+        const double gamma = sqrt(sqrt((MadjTone*MadjTinf) / (Mone*Minf)) / fabs(det));
+
+//        const double g1 = gamma* static_cast<Real>(0.5);
+        const double g1 = 0.5;
+//        const double g2 = static_cast<Real>(0.5) / (gamma*det);
+        const double g2 = (0.5) / (gamma*det);
+
+        for (unsigned char i = 0; i < 3; i++)
+        {
+            for (unsigned char j = 0; j < 3; j++)
+            {
+                Et(i,j) = Mt(i,j);
+                Mt(i,j) = g1*Mt(i,j) + g2*MadjTt(i,j);
+                Et(i,j) -= Mt(i,j);
+            }
+        }
+
+        Eone = oneNorm(Et);
+
+        Mone = oneNorm(Mt);
+        Minf = infNorm(Mt);
+    } while (Eone > Mone * tolerance);
+
+    // Q = Mt^T
+    R = Mt.transpose();
+}
 
 
 
 
+double oneNorm(const Matrix3r &A)
+{
+    const double sum1 = fabs(A(0,0)) + fabs(A(1,0)) + fabs(A(2,0));
+    const double sum2 = fabs(A(0,1)) + fabs(A(1,1)) + fabs(A(2,1));
+    const double sum3 = fabs(A(0,2)) + fabs(A(1,2)) + fabs(A(2,2));
+    double maxSum = sum1;
+    if (sum2 > maxSum)
+        maxSum = sum2;
+    if (sum3 > maxSum)
+        maxSum = sum3;
+    return maxSum;
+}
 
 
-
-
-
+double infNorm(const Matrix3r &A)
+{
+    const double sum1 = fabs(A(0, 0)) + fabs(A(0, 1)) + fabs(A(0, 2));
+    const double sum2 = fabs(A(1, 0)) + fabs(A(1, 1)) + fabs(A(1, 2));
+    const double sum3 = fabs(A(2, 0)) + fabs(A(2, 1)) + fabs(A(2, 2));
+    double maxSum = sum1;
+    if (sum2 > maxSum)
+        maxSum = sum2;
+    if (sum3 > maxSum)
+        maxSum = sum3;
+    return maxSum;
+}
 
 
 

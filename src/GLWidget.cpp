@@ -40,6 +40,11 @@ GLWidget::GLWidget(QWindow *parent) : QOpenGLWidget()
     m_activeObject = new ActiveObject(this);
 }
 
+GLWidget::~GLWidget()
+{
+    delete m_activeObject;
+}
+
 void GLWidget::setScene(Scene *_scene)
 {
     m_scene = _scene;
@@ -165,24 +170,28 @@ Tool GLWidget::tool()
 
 void GLWidget::processInput()
 {
+
     // update() registers keys, add/remove from inputManager containers
     m_tool = MANIPULATOR_TR;
     switch (m_tool) {
         case MANIPULATOR_TR:
             if(scene()->mainpulator)
+            {
                 scene()->mainpulator->update();
+            }
             break;
     }
+
     // convert Mouse window coordinates to have origin (0,0) at center of image
     QPoint _localMousePos = this->mapFromGlobal(QCursor::pos());
     _localMousePos.setX(_localMousePos.x() - (this->width()/2));
     _localMousePos.setY((_localMousePos.y() - (this->height()/2)) * -1);
 
+
     // handle key press events
     if(inputManager::buttonTriggered(Qt::LeftButton) )
     {
         QPointF toPick = getMouseNDCCoords();
-
         if(scene()->mainpulator->currentState == NONE)
         {
             auto picked = scene()->pickObject(toPick.x(), toPick.y());
@@ -192,18 +201,15 @@ void GLWidget::processInput()
                 scene()->mainpulator->currentState = TRANSLATE_VIEWPLANE;
             }
         }
-
-    //if(inputManager::keyPressed(Qt::Key_Alt ) && inputManager::buttonPressed(Qt::LeftButton))
-    // Handle Mouse button states
-    // LeftButton
-    if(inputManager::buttonTriggered(Qt::LeftButton))
-    {
         m_inputManger.setMouseTriggeredPosition();
         scene()->m_arcCamera.arcBallStart();
 //        scene()->mainpulator->setState(TRANSLATE_VIEWPLANE);
 
 //        if notDragging:
+
         scene()->mainpulator->startDrag();
+
+
     }
     if(inputManager::buttonPressed(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt ))
     {
