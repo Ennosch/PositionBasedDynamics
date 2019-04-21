@@ -37,11 +37,13 @@ void ActiveObject::notify(pSceneOb _sender)
 
     if(_sender != activeSceneObject)
     {
-        m_pickedDynamic = _sender->isDynamic();
+        qDebug()<<"sender: "<<_sender.get()<<"      activeObject:   "<<activeSceneObject.get();
+//        m_pickedDynamic = _sender->isDynamic();
     }
     // pick dynamicSceneObject Case:
     // WIP check rigidBody particle initialization, something is wrong there.
     activeSceneObject = _sender;
+
     m_isActive = true;
 
     m_manipulator->setActive(true);
@@ -78,6 +80,7 @@ void ActiveObject::onClicked()
     {
         if(activeSceneObject->isDynamic())
         {
+            m_pickedDynamic = true;
             activeSceneObject->isDynamic(false);
             Particle *ptr = nullptr;
             auto particleSmartPointer = activeSceneObject->dynamicObject()->pointer(ptr);
@@ -85,7 +88,6 @@ void ActiveObject::onClicked()
             // Pushing back shared_ptr. Expecting conversion to weak_ptr.
             activeSceneObject->dynamicObject()->m_Constraints.push_back(m_pinConstraint);
 
-            m_pickedDynamic = true;
         }
         else{
             mlog<<"--------Missing Constraint for active object";
@@ -115,7 +117,7 @@ void ActiveObject::onReleased()
     {
         if(m_pickedDynamic)
         {
-//            mlog<<" onReleased 1"<<m_pickedDynamic<<"           "<<activeSceneObject.get();
+            mlog<<" onReleased 1"<<m_pickedDynamic<<"           "<<activeSceneObject.get();
             // (Improve) dont include scene and dynamicsWorld. Just ask constraint to delete itself ?
             auto dw = m_GLWidget->scene()->dynamicsWorld();
             dw->deleteConstraint(m_pinConstraint);
@@ -127,8 +129,7 @@ void ActiveObject::onReleased()
         m_pickedDynamic = false;
         mlog<<" onReleased 3";
     }
-    activeSceneObject = nullptr;
-    mlog<<" onReleased 4";
+
 }
 
 pSceneOb ActiveObject::currentObject()
