@@ -848,7 +848,7 @@ void Scene::setupScene()
        addModel(this, "Axis", "../AxisShape.obj");
        addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "../bunny.obj");
-       addModel(this, "teapot", "resources/objects/teaspot.obj");
+       addModel(this, "teapot", "../MegaTeapot.obj");
 
        addModel(this, "gridTransform", "../Grid1_transfrom.obj");
 
@@ -867,7 +867,7 @@ void Scene::setupScene()
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
 
-        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3.5,0), rot);
+        auto sceneObject1 = addSceneObjectFromModel("teapot", 0, QVector3D(0, 50,0), rot);
 //        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,0,0), rot);
 
        auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));

@@ -180,245 +180,60 @@ ShapeMatchingConstraint::ShapeMatchingConstraint()
 
 ShapeMatchingConstraint::ShapeMatchingConstraint(RigidBody *_rigidbody)
 {
-    m_rb = _rigidbody;
-    mlog<<"init SM cstr ptr";
-
-    // init data
-    for(auto restShape : m_rb->m_restShape)
+    cmOrigin = Eigen::Vector3f(0,0,0);
+    cm = Eigen::Vector3f(0,0,0);
+    for(int i=0; i < _rigidbody->m_particles.size(); i++)
     {
-        if(auto particle = restShape.particle.lock())
+        auto p = _rigidbody->m_particles[i];
+        if(auto particle = p.lock())
         {
-            smParticle p;
-            p.p = &particle->p;
-//            mlog<<"inititlaize          :"<<particle->x;
-            p.localRest = restShape.localPos;
-            p.target = particle->p;
-            cmOrigin += p.localRest;
-            m_ShapeParticles.push_back(p);
             m_particles.push_back(particle);
+//            Eigen::Vector3f x0 = Eigen::Vector3f(particle->x.x(), particle->x.y(), particle->x.z());
+            Eigen::Vector3f x0 = Eigen::Vector3f(_rigidbody->m_restShape[i].x(), _rigidbody->m_restShape[i].y(), _rigidbody->m_restShape[i].z());
+            m_restPositions.push_back(x0);
+            cmOrigin += x0;
         }
     }
-    cmOrigin /= m_ShapeParticles.size();
+    cmOrigin /= m_particles.size();
 
-    std::cout<<"compute Aqq \n"<<std::endl;
-
-    Aq.setIdentity();
-    for(auto particle : m_ShapeParticles)
+    Aqq.setZero();
+    for(auto p :  m_particles)
     {
-        QVector3D _qi = particle.localRest;
-        mlog<<_qi;
-        QVector3D qiQt = _qi- cmOrigin;
-//        Eigen::Vector3f qi(qiQt.x(), qiQt.y(), qiQt.z());
-
-        Eigen::Vector3f qi(particle.localRest.x() - cmOrigin.x() ,
-                           particle.localRest.y() - cmOrigin.y() ,
-                           particle.localRest.z() - cmOrigin.z() );
-
-        std::cout<<qi<<std::endl;
-        std::cout<<"------"<<std::endl;
-
-        Aq += qi * qi.transpose();
+        Eigen::Vector3f qi = Eigen::Vector3f(p->x.x(), p->x.y(), p->x.z()) - cmOrigin;
+        Aqq += qi * qi.transpose();
     }
-//    mlog<<"-\n end init-0-------\n\n";
-
-
-    std::cout<<"this is Aq"<<std::endl;
-    std::cout<<Aq<<std::endl;
-//    mlog<<"++==++++=+===================";
-}
-
-void ShapeMatchingConstraint::projectOld()
-{
-    if(!m_dirty)
-        return;
-
-    // prepare data
-    // cache target position
-    for(auto sParticle : m_ShapeParticles)
-    {
-        sParticle.target = *sParticle.p;
-        cmTarget += sParticle.target;
-    }
-    cmTarget /= m_ShapeParticles.size();
-
-
-    for(int j=0; j<1;j ++)
-    {
-        // CM
-        for(auto sParticle : m_ShapeParticles)
-        {
-            cm += *sParticle.p;
-        }
-        cm /= m_ShapeParticles.size();
-
-        Aq.setIdentity();
-        Ap.setIdentity();
-        for(auto sParticle : m_ShapeParticles)
-        {
-            Eigen::Vector3f _qi(sParticle.p->x(), sParticle.p->y(), sParticle.p->z());
-            Eigen::Vector3f qi = _qi - Eigen::Vector3f(cm.x() , cm.y() ,cm.z());
-            Aq += qi * qi.transpose();
-
-            float test = sParticle.target.x();
-            Eigen::Vector3f _pi(sParticle.target.x(), sParticle.target.y(), sParticle.target.z());
-            Eigen::Vector3f pi = _pi - Eigen::Vector3f(cmTarget.x() , cmTarget.y() ,cmTarget.z());
-            Ap += pi * qi.transpose();
-        }
-
-        Eigen::Matrix3f A = Ap * Aq.inverse();
-        Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
-
-        Eigen::MatrixXf UV = svd.matrixU() * svd.matrixV().transpose();
-        QMatrix3x3 R;
-
-        for(int i = 0 ;i<9; i++){
-            R.data()[i] = UV.data()[i];
-        }
-
-        QMatrix4x4 transform;
-        transform.setToIdentity();
-        QQuaternion rot = QQuaternion::fromRotationMatrix(R);
-        transform.translate(cmTarget - cm);
-//        transform.rotate(rot);
-
-        QVector3D eulerAngles = rot.toEulerAngles();
-        mlog<<R;
-
-        for(auto sParticle : m_ShapeParticles)
-        {
-            QVector3D p = *sParticle.p;
-//            QVector3D corret = QVector3D(1,0,0);
-//            *sParticle.p = corret;
-        }
-    }
-    mlog<<"update";
-    m_dirty = false;
-}
-
-void ShapeMatchingConstraint::project1D()
-{
-    if(!m_dirty)
-        return;
-
-    cm = QVector3D(0,0,0);
-    for(auto particle : m_particles)
-    {
-        cm += particle->p;
-    }
-    cm /= m_particles.size();
-
-    Ap.setIdentity();
-    for(auto particle : m_ShapeParticles)
-    {
-        QVector3D _qi = particle.localRest;
-        QVector3D qiQt = _qi- cmOrigin;
-        Eigen::Vector3f qi(qiQt.x(), qiQt.y(), qiQt.z());
-
-        QVector3D _pi = *particle.p;
-        QVector3D piQt = _pi- cm;
-        Eigen::Vector3f pi(piQt.x(), piQt.y(), piQt.z());
-
-//        std::cout<<pi<<std::endl;
-//        std::cout<<"---------"<<std::endl;
-
-        Ap += pi * qi.transpose();
-    }
-
-//    std::cout<<Ap<<std::endl;
-
-    Eigen::Matrix3f A = Ap * Aq.inverse();
-    Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
-
-    Matrix3r Apolar = A;
-    Matrix3r Rpolar = A;
-
-    polarDecompositionStable(Apolar, eps, Rpolar);
-
-//    std::cout<<"Rpolar: -----------------"<<std::endl;
-//    std::cout<<Rpolar<<std::endl;
-
-    Eigen::MatrixXf UV = svd.matrixU() * svd.matrixV().transpose();
-    QMatrix3x3 R;
-
-//    std::cout<<"SVD: -----------------"<<std::endl;
-//    std::cout<<UV<<std::endl;
-
-    // copy Eigen3x3 rotation matrix into QMatrix3x3
-    for(int i = 0 ;i<9; i++){
-        R.data()[i] = UV.data()[i];
-    }
-
-    QMatrix4x4 transform;
-    transform.setToIdentity();
-    QQuaternion rot = QQuaternion::fromRotationMatrix(R);
-    QVector3D eulerAngles = rot.toEulerAngles();
-    transform.translate(cm - cmOrigin);
-    transform.rotate(rot);
-
-    for(auto particle : m_particles)
-    {
-//        particle->p = transform
-//        mlog<<"x: "<<particle->x;
-    }
-
-//    mlog<<transform;
-    for(auto shapeParticle : m_ShapeParticles)
-    {
-        QVector3D p = *shapeParticle.p;
-        QVector3D dp = transform * shapeParticle.localRest;
-        *shapeParticle.p = dp;
-
-//        QVector3D goal = cm + (R * (shapeParticle.localRest -cmOrigin));
-
-        Eigen::Vector3f x0(shapeParticle.localRest.x(), shapeParticle.localRest.y(), shapeParticle.localRest.z());
-        Eigen::Vector3f restCm(cmOrigin.x(), cmOrigin.y(), cmOrigin.z());
-        Eigen::Vector3f x(p.x(), p.y(), p.z());
-        Eigen::Vector3f cme(cm.x(), cm.y(), cm.z());
-
-        Eigen::Vector3f goal = cme + UV * (x0 - restCm);
-        Eigen::Vector3f corr = (goal - x);
-
-        Eigen::Vector3f eigenResult = x + corr;
-
-//        mlog<<"p:   "<<p<<"dp: "<<dp;
-
-
-//        mlog<<"eigenResult:     "<<eigenResult.x()<<"   "<<eigenResult.y()<<"   "<<eigenResult.z()<<"           QResult: "<<dp.x()<<"       "<<dp.y()<<"       "<<dp.z()   ;
-
-    }
-
-//    for (int i = 0; i < numPoints; i++) {
-//		Vector3r goal = cm + R * (x0[i] - restCm);
-//		corr[i] = (goal - x[i]) * stiffness;
-//	}
-
-//    mlog<<"euler Angles"<<eulerAngles;
-//    mlog<<"step";
-
-    m_dirty = false;
 }
 
 void ShapeMatchingConstraint::project()
 {
-    project1D();
-//    if(!m_dirty)
-//        return;
+    return;
+    cm.setZero();
+    for(auto p : m_particles)
+    {
+        cm += Eigen::Vector3f(p->p.x(), p->p.y(), p->p.z());
+    }
+    cm /= m_particles.size();
 
-//    int numIterations = 1;
-//    for(int j=0; j<numIterations;j ++)
-//    {
-
-//        // compute cm
-//        // compute Ap
-//        // A (Ap Aq) and rot
-
-//        //
-//        // Particle->p = transform * localP;
+    Apq.setZero();
+    for(int i=0; i < m_particles.size(); i++)
+    {
+        Eigen::Vector3f pi = Eigen::Vector3f(m_particles[i]->p.x(), m_particles[i]->p.y(), m_particles[i]->p.z()) - cm;
+        Eigen::Vector3f qi = m_restPositions[i] - cmOrigin;
+        Apq += pi * qi.transpose();
+    }
 
 
-//    }
+    Eigen::Matrix3f A = Apq * Aqq.inverse();
+    Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
 
-//    m_dirty = false;
+    Eigen::Matrix3f R = svd.matrixU() * svd.matrixV().transpose();
+
+    for(int i=0; i < m_particles.size(); i++)
+    {
+        Eigen::Vector3f qi =  m_restPositions[i] - cmOrigin;
+        Eigen::Vector3f gi = (R * qi) + (cm - cmOrigin);
+        m_particles[i]->p = QVector3D(gi.x(), gi.y(), gi.z());
+    }
 }
 
 float ShapeMatchingConstraint::constraintFunction()

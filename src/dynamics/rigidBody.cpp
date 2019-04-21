@@ -25,13 +25,8 @@ void RigidBody::addParticle(const QVector3D &_localPos, const ParticleWeakPtr _p
 {
 //    mlog<<"passed particle";
     m_particles.push_back(_particle);
+    m_restShape.push_back(_localPos);
 
-
-    RestShape shapeParticle;
-    shapeParticle.localPos = _localPos;
-    shapeParticle.particle = _particle;
-
-    m_restShape.push_back(shapeParticle);
 //    m_restShape.particle = _particle;
 //    m_restShape.localPos = _particle.lock()->x;
 }

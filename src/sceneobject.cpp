@@ -99,7 +99,6 @@ void SceneObject::update()
         if(m_IsActive)
         {
             notify();
-
         }
     }
     else if(m_IsDirty)

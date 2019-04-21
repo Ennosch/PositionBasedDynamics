@@ -191,6 +191,7 @@ void GLWidget::processInput()
     // handle key press events
     if(inputManager::buttonTriggered(Qt::LeftButton) )
     {
+        mlog<<"button triggered ";
         QPointF toPick = getMouseNDCCoords();
         if(scene()->mainpulator->currentState == NONE)
         {
@@ -224,8 +225,14 @@ void GLWidget::processInput()
     }
     if(inputManager::buttonReleased(Qt::LeftButton) && m_tool == MANIPULATOR_TR )
     {
+        mlog<<"button released          &&  m_tool == MANIPULATOR_TR ";
         scene()->mainpulator->endDrag();
     }
+    if(inputManager::buttonReleased(Qt::LeftButton)  )
+    {
+        mlog<<"button released";
+    }
+
     if(inputManager::buttonTriggered(Qt::RightButton) )
     {
         scene()->m_arcCamera.trackStart(m_inputManger.mousePosition());

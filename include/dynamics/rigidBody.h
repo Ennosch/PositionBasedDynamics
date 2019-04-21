@@ -28,15 +28,10 @@ public:
 
 
 private:
-    struct RestShape{
-        QVector3D localPos;
-        ParticleWeakPtr particle;
-    };
-
     friend ShapeMatchingConstraint;
     int id;
 
-    std::vector<RestShape> m_restShape;
+    std::vector<QVector3D> m_restShape;
     ModelPtr m_model;
     ShapePtr m_shape;
 

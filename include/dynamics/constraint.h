@@ -106,29 +106,17 @@ class ShapeMatchingConstraint : public AbstractConstraint
 public:
     ShapeMatchingConstraint();
     ShapeMatchingConstraint(RigidBody *_rigidbody);
-    void projectOld();
-    void project1D();
     void project();
     float constraintFunction();
 
 private:
-    struct smParticle{
-        // Vec3 localP  (restPose)
-        // Vec3 target  (cached)
-        QVector3D localRest, target;
-        // Vec3 *p->    (to be updated)
-        QVector3D *p;
-    };
-    std::vector< smParticle > m_ShapeParticles;
-    std::vector< ParticlePtr> m_particles;
+    std::vector< ParticlePtr>       m_particles;
+    std::vector< Eigen::Vector3f>   m_restPositions;
 
-    QVector3D cm, cmTarget,cmOrigin;
-
-    Transform m_transform;
-    QMatrix4x4 modelMatrix;
+    Eigen::Vector3f cm, cmOrigin;
 
     RigidBody *m_rb;
-    Eigen::Matrix3f Ap, Aq;
+    Eigen::Matrix3f Apq, Aqq;
 };
 
 

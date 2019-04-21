@@ -36,8 +36,9 @@ void ActiveObject::notify(pSceneOb _sender)
     }
 
     if(_sender != activeSceneObject)
+    {
         m_pickedDynamic = _sender->isDynamic();
-
+    }
     // pick dynamicSceneObject Case:
     // WIP check rigidBody particle initialization, something is wrong there.
     activeSceneObject = _sender;
@@ -78,25 +79,9 @@ void ActiveObject::onClicked()
         if(activeSceneObject->isDynamic())
         {
             activeSceneObject->isDynamic(false);
-
-//            auto test = activeSceneObject->dynamicObject()->pointer();
-
-            Particle *ptr;
-            auto test = activeSceneObject->dynamicObject()->pointer(ptr);
-
-            mlog<<typeid(test).name();
-            mlog<<activeSceneObject->dynamicObject().get();
-//            ParticlePtr dw;
-//            particle1.reset(new Particle);
-//            particle1.reset(ptr2);
-//            particle.reset(ptr);
-
-//            qDebug()<<ptr->foo();
-
-
-//            mlog<<"TYPE:    "<<typeid(ptr).name()<<ptr;
-
-            m_pinConstraint = std::make_shared<PinConstraint>(test, activeSceneObject->getPos());
+            Particle *ptr = nullptr;
+            auto particleSmartPointer = activeSceneObject->dynamicObject()->pointer(ptr);
+            m_pinConstraint = std::make_shared<PinConstraint>(particleSmartPointer, activeSceneObject->getPos());
             // Pushing back shared_ptr. Expecting conversion to weak_ptr.
             activeSceneObject->dynamicObject()->m_Constraints.push_back(m_pinConstraint);
 
@@ -130,13 +115,20 @@ void ActiveObject::onReleased()
     {
         if(m_pickedDynamic)
         {
+//            mlog<<" onReleased 1"<<m_pickedDynamic<<"           "<<activeSceneObject.get();
             // (Improve) dont include scene and dynamicsWorld. Just ask constraint to delete itself ?
             auto dw = m_GLWidget->scene()->dynamicsWorld();
             dw->deleteConstraint(m_pinConstraint);
-            m_pinConstraint.reset();
             activeSceneObject->isDynamic(true);
+
+            m_pinConstraint.reset();
+            mlog<<" onReleased 2";
         }
+        m_pickedDynamic = false;
+        mlog<<" onReleased 3";
     }
+    activeSceneObject = nullptr;
+    mlog<<" onReleased 4";
 }
 
 pSceneOb ActiveObject::currentObject()
