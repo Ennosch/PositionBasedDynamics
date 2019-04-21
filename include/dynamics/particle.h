@@ -11,7 +11,7 @@
 
 class AbstractConstraint;
 
-class Particle : public DynamicObject
+class Particle : public DynamicObject, public std::enable_shared_from_this<Particle>
 {
 public:
     Particle();
@@ -25,13 +25,18 @@ public:
     float radius();
     float foo();
 
+    ParticlePtr pointer(Particle *ptr);
+
     // virtuals
     void setTransform(const QMatrix4x4& _mat4);
     void pinToPosition(const QVector3D &_pos);
     void endPinToPosition();
 
+    void pointer(Particle** _ptr);
     const QMatrix4x4& getTransfrom();
     const QVector3D getTranslation();
+
+
 
 //private:
     unsigned age;

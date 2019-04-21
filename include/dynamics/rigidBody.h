@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "dynamics/constraint.h"
 
-class RigidBody : public DynamicObject
+class RigidBody : public DynamicObject,  public std::enable_shared_from_this<RigidBody>
 {
 public:
     RigidBody();
@@ -25,6 +25,7 @@ public:
 
     const QMatrix4x4 &getTransfrom();
     const QVector3D getTranslation();
+
 
 private:
     struct RestShape{

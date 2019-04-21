@@ -49,7 +49,6 @@ ConstraintPtr RigidBody::createConstraint()
             particle->m_Constraints.push_back(smCstrWeak);
         }
     }
-    mlog<<"hello";
     return smCstr;
 }
 
@@ -82,3 +81,8 @@ const QVector3D RigidBody::getTranslation()
 {
 
 }
+
+//std::shared_ptr<RigidBody> RigidBody::getPointer()
+//{
+//    return shared_from_this();
+//}

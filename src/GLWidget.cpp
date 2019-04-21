@@ -208,9 +208,8 @@ void GLWidget::processInput()
 //        if notDragging:
 
         scene()->mainpulator->startDrag();
-
-
     }
+
     if(inputManager::buttonPressed(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt ))
     {
         int _radius = std::min(this->width(), this->height()) / 2;

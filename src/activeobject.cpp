@@ -4,6 +4,7 @@
 
 #include "Scene.h"
 #include "dynamics/dynamicsWorld.h"
+#include "dynamics/particle.h"
 
 
 ActiveObject::ActiveObject()
@@ -33,11 +34,15 @@ void ActiveObject::notify(pSceneOb _sender)
         activeSceneObject = nullptr;
         return;
     }
+
+    if(_sender != activeSceneObject)
+        m_pickedDynamic = _sender->isDynamic();
+
     // pick dynamicSceneObject Case:
     // WIP check rigidBody particle initialization, something is wrong there.
     activeSceneObject = _sender;
-
     m_isActive = true;
+
     m_manipulator->setActive(true);
 
     emit transformChanged(_sender->getMatrix(),
@@ -58,7 +63,6 @@ void ActiveObject::notify(const Transform &_t)
         activeSceneObject->setTranslation(_t.translation());
     }
     //feed back Transform into dynamicObject
-
 }
 
 void ActiveObject::notify(MouseState _mouseState)
@@ -68,16 +72,33 @@ void ActiveObject::notify(MouseState _mouseState)
 
 void ActiveObject::onClicked()
 {
-
     auto dw = m_GLWidget->scene()->dynamicsWorld();
     if(activeSceneObject)
     {
         if(activeSceneObject->isDynamic())
         {
-            activeSceneObject->isDynamic(false);            
-            m_pinConstraint = std::make_shared<PinConstraint>(activeSceneObject->dynamicObject(), activeSceneObject->getPos());
+            activeSceneObject->isDynamic(false);
+
+//            auto test = activeSceneObject->dynamicObject()->pointer();
+
+            Particle *ptr;
+            auto test = activeSceneObject->dynamicObject()->pointer(ptr);
+
+            mlog<<typeid(test).name();
+            mlog<<activeSceneObject->dynamicObject().get();
+//            ParticlePtr dw;
+//            particle1.reset(new Particle);
+//            particle1.reset(ptr2);
+//            particle.reset(ptr);
+
+//            qDebug()<<ptr->foo();
+
+
+//            mlog<<"TYPE:    "<<typeid(ptr).name()<<ptr;
+
+            m_pinConstraint = std::make_shared<PinConstraint>(test, activeSceneObject->getPos());
             // Pushing back shared_ptr. Expecting conversion to weak_ptr.
-//            activeSceneObject->dynamicObject()->m_Constraints.push_back(m_pinConstraint);
+            activeSceneObject->dynamicObject()->m_Constraints.push_back(m_pinConstraint);
 
             m_pickedDynamic = true;
         }
@@ -96,8 +117,8 @@ void ActiveObject::onPressed()
 //            activeSceneObject->dynamicObject()->pinToPosition(activeSceneObject->getPos());
             if(m_pinConstraint)
             {
-//                m_pinConstraint->setPositon(activeSceneObject->getPos());
-                m_pickedDynamic = true;
+                m_pinConstraint->setPositon(activeSceneObject->getPos());
+//                m_pickedDynamic = true;
             }
         }
     }
@@ -110,15 +131,13 @@ void ActiveObject::onReleased()
         if(m_pickedDynamic)
         {
             // (Improve) dont include scene and dynamicsWorld. Just ask constraint to delete itself ?
-//            auto dw = m_GLWidget->scene()->dynamicsWorld();
-//            dw->deleteConstraint(m_pinConstraint);
-//            m_pinConstraint.reset();
+            auto dw = m_GLWidget->scene()->dynamicsWorld();
+            dw->deleteConstraint(m_pinConstraint);
+            m_pinConstraint.reset();
             activeSceneObject->isDynamic(true);
         }
     }
 }
-
-
 
 pSceneOb ActiveObject::currentObject()
 {

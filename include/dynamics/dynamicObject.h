@@ -8,6 +8,8 @@
 #include <transform.h>
 #include <model.h>
 
+#include <utils.h>
+
 
 
 class DynamicObject
@@ -18,7 +20,12 @@ public:
     virtual void setTransform(const QMatrix4x4& _mat4);
     virtual void pinToPosition(const QVector3D &_pos);
     virtual void endPinToPosition();
-//    ParticlePtr particle();
+
+//    virtual DynamicObject* pointer();
+
+    virtual ParticlePtr pointer(Particle *ptr){};
+
+//    virtual void pointer(Particle** _ptr);
 
     virtual const QMatrix4x4& getTransfrom();
     virtual const QVector3D getTranslation();

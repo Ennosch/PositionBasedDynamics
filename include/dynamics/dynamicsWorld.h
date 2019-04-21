@@ -41,6 +41,8 @@ class DynamicsWorld
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject);
 
+
+        ParticlePtr getParticlePtrFromRawPtr (Particle *_ptr);
         ParticlePtr addParticle(float _x, float _y, float _z);
         void addPlane(const Plane &_plane);
 
