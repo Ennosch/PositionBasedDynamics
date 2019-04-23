@@ -100,7 +100,7 @@ public:
 
 private:
   int mtest = 0;
-    int widthT, heightT, nrComponents;
+    int widthT, heightT;
 
   friend class Window;
   friend class GLWidget;

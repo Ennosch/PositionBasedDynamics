@@ -35,11 +35,6 @@ void ActiveObject::notify(pSceneOb _sender)
         return;
     }
 
-    if(_sender != activeSceneObject)
-    {
-        qDebug()<<"sender: "<<_sender.get()<<"      activeObject:   "<<activeSceneObject.get();
-//        m_pickedDynamic = _sender->isDynamic();
-    }
     // pick dynamicSceneObject Case:
     // WIP check rigidBody particle initialization, something is wrong there.
     activeSceneObject = _sender;
@@ -117,17 +112,13 @@ void ActiveObject::onReleased()
     {
         if(m_pickedDynamic)
         {
-            mlog<<" onReleased 1"<<m_pickedDynamic<<"           "<<activeSceneObject.get();
             // (Improve) dont include scene and dynamicsWorld. Just ask constraint to delete itself ?
             auto dw = m_GLWidget->scene()->dynamicsWorld();
             dw->deleteConstraint(m_pinConstraint);
             activeSceneObject->isDynamic(true);
-
             m_pinConstraint.reset();
-            mlog<<" onReleased 2";
         }
         m_pickedDynamic = false;
-        mlog<<" onReleased 3";
     }
 
 }

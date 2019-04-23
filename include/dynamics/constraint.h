@@ -116,7 +116,9 @@ private:
     Eigen::Vector3f cm, cmOrigin;
 
     RigidBody *m_rb;
-    Eigen::Matrix3f Apq, Aqq;
+    Eigen::Matrix3f Apq, Aqq, R;
+
+    Eigen::Quaternionf q, qPrev;
 };
 
 

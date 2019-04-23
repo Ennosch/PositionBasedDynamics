@@ -38,6 +38,7 @@ void HalfSpaceConstraint::project()
 //    p += dp;
 
 //    pptr->p += constraintFunction(p) * -n;
+    return;
     pptr->p += deltaP();
 }
 
@@ -142,10 +143,13 @@ QVector3D DistanceEqualityConstraint::deltaP()
 
 void DistanceEqualityConstraint::project()
 {
-
+    if(!m_dirty)
+        return;
 //    p1.p = QVector3D(0,0.1,0);
     float w1, w2;
     QVector3D dp1, dp2, p1, p2;
+
+    float c1 = constraintFunction();
 
     p1 = pptr1->p;
     p2 = pptr2->p;
@@ -155,11 +159,12 @@ void DistanceEqualityConstraint::project()
     dp1 =  -w1/(w1 + w2) * constraintFunction() * ((p1 - p2) / (p1-p2).length());
     dp2 =  +w2/(w1 + w2) * constraintFunction() * ((p1 - p2) / (p1-p2).length());
 
-    pptr1->p += (dp1 / 2);
-    pptr2->p += (dp2 / 2);
+    pptr1->p += (dp1);
+    pptr2->p += (dp2);
 
     float c2 = constraintFunction();
 
+    m_dirty = false;
 //    qDebug()<<"projecting DistanceEqualityConstraint";
 }
 
@@ -180,6 +185,9 @@ ShapeMatchingConstraint::ShapeMatchingConstraint()
 
 ShapeMatchingConstraint::ShapeMatchingConstraint(RigidBody *_rigidbody)
 {
+    q = Eigen::Quaternionf(Eigen::AngleAxisf(0, Eigen::Vector3f(0, 0, 0)));
+    qPrev = q;
+
     cmOrigin = Eigen::Vector3f(0,0,0);
     cm = Eigen::Vector3f(0,0,0);
     for(int i=0; i < _rigidbody->m_particles.size(); i++)
@@ -196,17 +204,37 @@ ShapeMatchingConstraint::ShapeMatchingConstraint(RigidBody *_rigidbody)
     }
     cmOrigin /= m_particles.size();
 
-    Aqq.setZero();
-    for(auto p :  m_particles)
+//    Aqq.setZero();
+    Aqq.setIdentity();
+    for(int i=0; i < _rigidbody->m_particles.size(); i++)
     {
-        Eigen::Vector3f qi = Eigen::Vector3f(p->x.x(), p->x.y(), p->x.z()) - cmOrigin;
-        Aqq += qi * qi.transpose();
+        Eigen::Vector3f x0 = Eigen::Vector3f(_rigidbody->m_restShape[i].x(), _rigidbody->m_restShape[i].y(), _rigidbody->m_restShape[i].z());
+        Eigen::Vector3f qi = x0 - cmOrigin;
+        Eigen::Matrix3f _dot = qi * qi.transpose();
+        Aqq += _dot;
     }
+
+//    Eigen::Matrix3f _Aqq;
+//    _Aqq.setZero();
+//    for(int i=0; i < _rigidbody->m_particles.size(); i++)
+//    {
+//        Eigen::Vector3f x0 = Eigen::Vector3f(_rigidbody->m_restShape[i].x(), _rigidbody->m_restShape[i].y(), _rigidbody->m_restShape[i].z());
+//        Eigen::Vector3f qi = x0 - cmOrigin;
+//        _Aqq += qi * qi.transpose();
+//    }
+
+    std::cout<<"Aqq inerse: \n"<<Aqq<<std::endl;
+    std::cout<<"Aqq: \n"<<Aqq.inverse()<<std::endl;
+
+//    std::cout<<"_Aqq inerse: \n"<<_Aqq.inverse()<<std::endl;
+//    std::cout<<"_Aqq: \n"<<_Aqq.inverse()<<std::endl;
 }
 
 void ShapeMatchingConstraint::project()
 {
-    return;
+    if(!m_dirty)
+        return;
+
     cm.setZero();
     for(auto p : m_particles)
     {
@@ -222,18 +250,31 @@ void ShapeMatchingConstraint::project()
         Apq += pi * qi.transpose();
     }
 
-
     Eigen::Matrix3f A = Apq * Aqq.inverse();
     Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
 
-    Eigen::Matrix3f R = svd.matrixU() * svd.matrixV().transpose();
+    R = svd.matrixU() * svd.matrixV().transpose();
+
+    qPrev = q;
+    q = R;
+
+//    mlog<<m_particles.size();
+//    std::cout<<R<<std::endl;
+
+//    q = q.normalized();
+//    mlog<<"q: "<<q.x()<< q.y()<< q.z()<< q.w()<< "  qPrev"<<qPrev.x()<<qPrev.y()<<qPrev.z()<<qPrev.w();
+
+//    Eigen::Quaternion<float, Eigen::AutoAlign> quat(Eigen::MatrixX3f R);
 
     for(int i=0; i < m_particles.size(); i++)
     {
         Eigen::Vector3f qi =  m_restPositions[i] - cmOrigin;
-        Eigen::Vector3f gi = (R * qi) + (cm - cmOrigin);
+//        Eigen::Vector3f gi = (R * qi) + (cm - cmOrigin);
+        Eigen::Vector3f gi = (R * qi) + (cm);
         m_particles[i]->p = QVector3D(gi.x(), gi.y(), gi.z());
     }
+
+    m_dirty = false;
 }
 
 float ShapeMatchingConstraint::constraintFunction()

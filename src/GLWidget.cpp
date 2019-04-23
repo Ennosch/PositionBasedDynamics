@@ -120,7 +120,7 @@ void GLWidget::renderText()
     painter.setPen(QColor(0,0,0));
 
     QString fps = QString::number(fpsRate) + " fps";
-    QString a = QString::number(second);
+    QString a = QString::number(scene()->dynamicsWorld()->frameCount());
     QString b = QString::number(render);
     painter.drawText(QRect(5, 5, 100, 50), fps);
     painter.drawText(QRect(5, 19, 100, 50), a);
@@ -191,7 +191,6 @@ void GLWidget::processInput()
     // handle key press events
     if(inputManager::buttonTriggered(Qt::LeftButton) )
     {
-        mlog<<"button triggered ";
         QPointF toPick = getMouseNDCCoords();
         if(scene()->mainpulator->currentState == NONE)
         {
@@ -225,12 +224,11 @@ void GLWidget::processInput()
     }
     if(inputManager::buttonReleased(Qt::LeftButton) && m_tool == MANIPULATOR_TR )
     {
-        mlog<<"button released          &&  m_tool == MANIPULATOR_TR ";
         scene()->mainpulator->endDrag();
     }
     if(inputManager::buttonReleased(Qt::LeftButton)  )
     {
-        mlog<<"button released";
+
     }
 
     if(inputManager::buttonTriggered(Qt::RightButton) )

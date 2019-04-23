@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+#include <iostream>
+
 #define myqDebug() qDebug() << fixed << qSetRealNumberPrecision(3)
 Model::Model()
 {
@@ -45,7 +47,12 @@ void Model::loadModel(std::string _path)
         return;
     }
 //    directory = _path.substr(0, _path.find_last_of('/'));
+
+    std::cout<<_path<<std::endl;
+
     processNode(scene->mRootNode, scene);
+
+
 }
 
 
@@ -97,9 +104,9 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
         vertex.Barycentric = QVector3D(0,0,0);
 
         vertices.push_back(vertex);
-
     }
 
+    int maxIndex = -1;
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
@@ -111,8 +118,16 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
           int _mod = j % 3;
           _barycentric[_mod] = 1;
           vertices[face.mIndices[j]].Barycentric = _barycentric;
+
+//          if(face.mIndices[j] > maxIndex)
+//              mlog<<face.mIndices[j];
+//              maxIndex = face.mIndices[j];
         }
     }
+
+//    mlog<<"logging MAXINDEX "<<maxIndex;
+
+//    for(unsigned int i=0; i< mesh->)
 
 //    Shape *ptrNewShape = new Shape(vertices, indices, pScene, pShader);
 //    return ptrNewShape;

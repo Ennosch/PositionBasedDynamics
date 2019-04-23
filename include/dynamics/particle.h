@@ -36,17 +36,15 @@ public:
     const QMatrix4x4& getTransfrom();
     const QVector3D getTranslation();
 
-
-
 //private:
     unsigned age;
     float w, r, m;
     size_t hash;
     QVector3D p, pp, v, vt, x, xt, qc;
     int3 cell;
-//    std::vector<ConstraintWeakPtr> m_CollisionConstraints;
+
     std::vector<ConstraintPtr> m_CollisionConstraints;
-//    std::vector<ConstraintWeakPtr> m_Constraints;
+    std::list<ParticleWeakPtr> m_NonCollisionParticles;
 
 };
 

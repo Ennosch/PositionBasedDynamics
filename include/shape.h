@@ -79,6 +79,7 @@ private:
 
     // WIP model loading
     std::vector<Vertex> m_vertices;
+    std::vector<QVector3D> m_points;
     std::vector<unsigned int> m_indices;
 
     Scene *pScene;

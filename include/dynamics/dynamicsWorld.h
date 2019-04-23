@@ -49,11 +49,13 @@ class DynamicsWorld
         void checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2);
         void checkSpherePlane(const ParticlePtr p1, const Plane &_plane);
 
+        ConstraintPtr addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void addParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void deleteConstraint(const ConstraintPtr _constraint);
         void deleteParticle();
 
         void generateData();
+        int frameCount();
 
         QVector3D* debugDrawLineData();
 
@@ -63,6 +65,7 @@ class DynamicsWorld
 //    private:
         bool m_simulate;
         int m_ID = 0;
+        int m_frameCount;
         float m_dt;
         DynamicsWorldController         *m_DynamicsWorldController;
         std::vector <DynamicObjectPtr>  m_DynamicObjects;

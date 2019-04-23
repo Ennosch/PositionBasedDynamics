@@ -834,23 +834,29 @@ void Scene::setupScene()
                         15.0 );
 
     //    MAKE MODEL TO RENDER
-       addModel(this, "grid1", "../Grid1.obj");
-       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
-       addModel(this, "bunny", "../bunny.obj");
+//        addModel(this, "grid1", "../Grid1_16_points.obj");
+//       addModel(this, "grid1", "../Grid1_bend.obj");
+        addModel(this, "grid1", "../Grid2_small.obj");
+//        addModel(this, "grid1", "../banana.obj");
+//        addModel(this, "grid1", "../Grid1.obj");
+//       addModel(this, "grid1", "../triangle.obj");
+//        addModel(this, "grid1", "../Icosahedron.obj");
+
+
        addModel(this, "grid", "../Grid100.obj");
        addModel(this, "sphere", "../Icosahedronf4.obj");
 
 
-       addModel(this, "grid1", "../Grid1.obj");
+
        addModel(this, "Vector", "../VectorShape.obj");
        addModel(this, "Circle", "../TorusShape.obj");
        addModel(this, "Plane", "../PlaneShape.obj");
-       addModel(this, "Axis", "../AxisShape.obj");
-       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
-       addModel(this, "bunny", "../bunny.obj");
-       addModel(this, "teapot", "../MegaTeapot.obj");
+//       addModel(this, "Axis", "../AxisShape.obj");
+//       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
+//       addModel(this, "bunny", "../bunny.obj");
+//       addModel(this, "teapot", "../MegaTeapot.obj");
 
-       addModel(this, "gridTransform", "../Grid1_transfrom.obj");
+//       addModel(this, "gridTransform", "../Grid1_transfrom.obj");
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
@@ -865,18 +871,18 @@ void Scene::setupScene()
 
         //Spheres
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
-       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
+       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
 
-        auto sceneObject1 = addSceneObjectFromModel("teapot", 0, QVector3D(0, 50,0), rot);
+        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 0, 0), rot);
 //        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,0,0), rot);
 
-       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));
-       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,-5), QQuaternion(1,0,0,0));
-       auto sceneObject4 = addSceneObjectFromModel("sphere", 1, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
+//       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));
+//       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,-5), QQuaternion(1,0,0,0));
+//       auto sceneObject4 = addSceneObjectFromModel("sphere", 1, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
 
 //       makeDynamicAsParticle(sceneObject1);
-       makeDynamicAsParticle(sceneObject2);
-       makeDynamicAsParticle(sceneObject3);
+//       makeDynamicAsParticle(sceneObject2);
+//       makeDynamicAsParticle(sceneObject3);
 //       makeDynamicAsParticle(sceneObject5);
        makeDynamic(sceneObject1);
 //       makeDynamic(sceneObject2);
