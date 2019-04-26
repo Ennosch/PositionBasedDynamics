@@ -75,7 +75,8 @@ HEADERS += \
     include/ui/DynamicsUiWidget.h \
     include/manipulator.h \
     include/Framebuffer.h \
-    include/dynamics/rigidBody.h
+    include/dynamics/rigidBody.h \
+    include/dynamics/dynamicUtils.h
 
 
 

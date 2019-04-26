@@ -178,6 +178,9 @@ void Scene::makeDynamicAsParticle(pSceneOb _sceneObject)
 void Scene::makeDynamic(pSceneOb _sceneObject)
 {
     m_DynamicsWorld->addDynamicObjectAsRigidBody(_sceneObject);
+
+    // return rigid body
+    // make rigid body update the sceneObject..
 }
 
 void Scene::drawLines()
@@ -836,9 +839,10 @@ void Scene::setupScene()
     //    MAKE MODEL TO RENDER
 //        addModel(this, "grid1", "../Grid1_16_points.obj");
 //       addModel(this, "grid1", "../Grid1_bend.obj");
-        addModel(this, "grid1", "../Grid2_small.obj");
+//        addModel(this, "grid1", "../Grid2_small.obj");
 //        addModel(this, "grid1", "../banana.obj");
 //        addModel(this, "grid1", "../Grid1.obj");
+        addModel(this, "grid1", "../Grid1_12.obj");
 //       addModel(this, "grid1", "../triangle.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 

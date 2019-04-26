@@ -230,30 +230,23 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     nRB->setTransform(_sceneObject->getTransform());
     ModelPtr model = _sceneObject->model();
 
-
     auto shapeNum =  model->getNumShapes();
 
-    auto testShape = model->getShape(0);
-    auto verts = testShape->getVertices();
+//    auto testShape = model->getShape(0);
+//    auto verts = testShape->getVertices();
 
 
     for(unsigned int i = 0; i < model->getNumShapes(); i++)
     {
         ShapePtr shape = model->getShape(i);
 //        mlog<<"has shape"<<i;
-        for(auto vert : shape->getVertices())
+
+        for(auto point : shape->getPoints())
         {
-            QVector3D posf3 = vert.Position;
-            QVector4D pos = QVector4D(posf3.x(), posf3.y(), posf3.z(), 1);
-            Transform tmpTrans = _sceneObject->getTransform();
-            pos = tmpTrans.toMatrix() * pos;
-
+            QVector3D pos = _sceneObject->getMatrix() * point;
             auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
-
-//            mlog<<"FROM SHAPE:"<<pos.x()<<pos.y()<< pos.z();
-
             m_Particles.push_back(nParticle);
-            nRB->addParticle(posf3, nParticle);
+            nRB->addParticle(point, nParticle);
             m_scene->addSceneObjectFromParticle(nParticle);
         }
     }
@@ -302,9 +295,6 @@ int DynamicsWorld::frameCount()
 
 QVector3D* DynamicsWorld::debugDrawLineData()
 {
-//    auto pp9 =  m_debugLines.data();
-//    QVector3D* ptr = *pp9;
-//    qDebug()<<"DEBUG: ---------------"<<typeid(pp9).name();
     return nullptr;
 }
 

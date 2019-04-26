@@ -1,10 +1,7 @@
-#include "model.h"
-
-#include <QDebug>
-
 #include <iostream>
 
-#define myqDebug() qDebug() << fixed << qSetRealNumberPrecision(3)
+#include "model.h"
+
 Model::Model()
 {
 
@@ -55,8 +52,6 @@ void Model::loadModel(std::string _path)
 
 }
 
-
-
 void Model::processNode(aiNode *node, const aiScene *scene)
 {
     for(unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -85,8 +80,12 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
     // data to fill
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    std::vector<QVector3D> points;
 
-    // Walk through each of the mesh's vertices
+    std::map<int, std::list<int>> pointsToVerts;
+
+
+    // cache vertex attributes
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
@@ -102,10 +101,23 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
         // Barycentric depends ebo.
         vertex.Barycentric = QVector3D(0,0,0);
-
         vertices.push_back(vertex);
+
+        // cache position
+        auto itr = std::find(points.begin(), points.end(), vertex.Position);
+        if(itr != points.end())
+        {
+            int idx = itr - points.begin();
+            pointsToVerts[idx].push_back(i);
+        }
+        else
+        {
+            points.push_back(vertex.Position);
+            pointsToVerts[points.size() -1].push_back(i);
+        }
     }
 
+    // cache vert indices
     int maxIndex = -1;
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
@@ -118,10 +130,6 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
           int _mod = j % 3;
           _barycentric[_mod] = 1;
           vertices[face.mIndices[j]].Barycentric = _barycentric;
-
-//          if(face.mIndices[j] > maxIndex)
-//              mlog<<face.mIndices[j];
-//              maxIndex = face.mIndices[j];
         }
     }
 
@@ -132,7 +140,7 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
 //    Shape *ptrNewShape = new Shape(vertices, indices, pScene, pShader);
 //    return ptrNewShape;
 //    ShapePtr ptrNewShape = std::make_shared<Shape>(vertices, indices, pScene, pShader);
-     ShapePtr ptrNewShape = std::make_shared<Shape>(vertices, indices);
+     ShapePtr ptrNewShape = std::make_shared<Shape>(vertices, indices, points, pointsToVerts);
     return ptrNewShape;
 }
 
@@ -160,4 +168,3 @@ ShapePtr Model::getShape(unsigned int _index)
     }
     return meshes[_index];
 }
-

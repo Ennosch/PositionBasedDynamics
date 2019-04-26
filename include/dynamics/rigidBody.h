@@ -3,7 +3,7 @@
 
 #include "transform.h"
 #include "dynamicObject.h"
-#include "utils.h"
+#include "dynamics/dynamicUtils.h"
 #include "dynamics/constraint.h"
 
 class RigidBody : public DynamicObject,  public std::enable_shared_from_this<RigidBody>

@@ -1,5 +1,5 @@
 #include <boost/functional/hash.hpp>
-#include <boost/math/distributions.hpp>.
+#include <boost/math/distributions.hpp>
 #include <math.h>
 
 #include "hashgrid.h"
@@ -56,6 +56,15 @@ size_t HashGrid::hashFunction(int3 _cell)
         boost::hash_combine(hash, _cell.j);
         boost::hash_combine(hash, _cell.k);
         return hash;
+}
+
+size_t HashGrid::hashFunciton(float _i, float _j, float _k)
+{
+    size_t hash = 85523717;
+    boost::hash_combine(hash, _i);
+    boost::hash_combine(hash, _j);
+    boost::hash_combine(hash, _k);
+    return hash;
 }
 
 int3 HashGrid::pointToCell(float _x, float _y, float _z)

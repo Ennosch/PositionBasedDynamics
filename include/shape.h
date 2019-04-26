@@ -28,6 +28,8 @@ public:
     Shape();
     Shape(int _id): m_Id(_id){ qDebug()<<"Ctor 2 Shape";}
     Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices);
+    Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices,
+          std::vector<QVector3D> &_points, std::map<int, std::list<int>> &_pointsToVertsMap);
     Shape(std::vector<Vertex> &_vertices,
           std::vector<unsigned int> &_indices,
           Scene *_scene,
@@ -59,6 +61,7 @@ public:
     unsigned int getNumVertices();
 
     std::vector<Vertex>  getVertices();
+    std::vector<QVector3D> &getPoints();
     std::vector<unsigned int> getIndices();
     Vertex getVertexAtIndex(unsigned int idx);
 
@@ -81,6 +84,7 @@ private:
     std::vector<Vertex> m_vertices;
     std::vector<QVector3D> m_points;
     std::vector<unsigned int> m_indices;
+    std::map<int, std::list<int>> m_pointsToVerts;
 
     Scene *pScene;
     QOpenGLShaderProgram *pShader;

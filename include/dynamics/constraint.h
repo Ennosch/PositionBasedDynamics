@@ -7,7 +7,8 @@
 
 #include "dynamics/abstractconstraint.h"
 #include "dynamics/particle.h"
-#include "utils.h"
+#include "dynamics/dynamicUtils.h"
+
 
 typedef double Real;
 //using Matrix3r = Eigen::Matrix<Real, 3, 3>;

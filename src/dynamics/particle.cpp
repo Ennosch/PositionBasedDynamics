@@ -60,9 +60,12 @@ void Particle::pointer(Particle **_ptr)
 
 const QMatrix4x4 &Particle::getTransfrom()
 {
-    Transform trans;
-    trans.setTranslation(x);
-    return trans.toMatrix();
+    QMatrix4x4 mat;
+    mat.setToIdentity();
+    mat(0,3) = x.x();
+    mat(1,3) = x.y();
+    mat(2,3) = x.z();
+    return mat;
 }
 
 const QVector3D Particle::getTranslation()

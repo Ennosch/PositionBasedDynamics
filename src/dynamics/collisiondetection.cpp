@@ -9,12 +9,6 @@ CollisionDetection::CollisionDetection()
     qDebug()<<"CollisionDetection  Ctor";
 }
 
-CollisionDetection::CollisionDetection(Scene *_scene)
-{
-    qDebug()<<"CollisionDetection  Ctor With scene";
-    m_scene = _scene;
-}
-
 double CollisionDetection::distanceFromPointToPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o)
 {
     Vec3 temp = (_p - _o);
@@ -153,7 +147,6 @@ Vec3 CollisionDetection::intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, con
     else
     {
         _d = _A;
-        m_scene->debug(_d);
         mlog<<"ray fail t: "<<t;
         return _A;
     }

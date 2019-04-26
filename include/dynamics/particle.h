@@ -4,10 +4,8 @@
 #include <QVector3D>
 #include <QDebug>
 
-#include "utils.h"
-#include "transform.h"
+#include "dynamics/dynamicUtils.h"
 #include "dynamics/dynamicObject.h"
-
 
 class AbstractConstraint;
 

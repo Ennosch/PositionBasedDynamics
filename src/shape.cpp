@@ -13,14 +13,16 @@ Shape::Shape(std::vector<Vertex> &_vertices,
              std::vector<unsigned int> &_indices)
         :  m_indices(_indices), m_vertices(_vertices)
 {
-    // No parent, no automatic deletion ?!
-    // The parent of an object may be viewed as the object's owner
-//    m_pVao = new QOpenGLVertexArrayObject();
-
-
     qDebug()<<"ctor 2 shape. indecies vertices ";
     setupMesh();
-    int v = 4;
+}
+
+Shape::Shape(std::vector<Vertex> &_vertices,
+             std::vector<unsigned int> &_indices, std::vector<QVector3D> &_points, std::map<int, std::list<int> > &_pointsToVertsMap)
+        :  m_indices(_indices), m_vertices(_vertices), m_points(_points) ,m_pointsToVerts(_pointsToVertsMap)
+{
+    qDebug()<<"ctor 3 shape. indecies vertices ";
+    setupMesh();
 }
 
 Shape::Shape(std::vector<Vertex> &_vertices,
@@ -29,8 +31,6 @@ Shape::Shape(std::vector<Vertex> &_vertices,
              QOpenGLShaderProgram *_shaderProgram)
         :  m_indices(_indices), m_vertices(_vertices)
 {
-    // No parent, no automatic deletion ?!
-    // The parent of an object may be viewed as the object's owner
     qDebug()<<"construct Shape with Scene and Shader";
 
     setupMesh();
@@ -140,6 +140,11 @@ void Shape::drawOld()
 std::vector<Vertex> Shape::getVertices()
 {
     return m_vertices;
+}
+
+std::vector<QVector3D> &Shape::getPoints()
+{
+    return m_points;
 }
 
 std::vector<unsigned int> Shape::getIndices()

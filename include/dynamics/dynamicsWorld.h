@@ -11,6 +11,7 @@
 
 #include "transform.h"
 #include "utils.h"
+#include "dynamics/dynamicUtils.h"
 #include "sceneobject.h"
 #include "hashgrid.h"
 #include "dynamics/dynamicObject.h"
@@ -40,7 +41,6 @@ class DynamicsWorld
         void addDynamicObject(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject);
-
 
         ParticlePtr getParticlePtrFromRawPtr (Particle *_ptr);
         ParticlePtr addParticle(float _x, float _y, float _z);
