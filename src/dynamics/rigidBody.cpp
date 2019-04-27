@@ -102,7 +102,7 @@ ModelPtr RigidBody::getModel()
     return  m_model;
 }
 
-const QMatrix4x4 &RigidBody::getTransfrom()
+const QMatrix4x4 RigidBody::getTransfrom()
 {
     updateModelBuffers();
 //    return m_transfrom.toMatrix();

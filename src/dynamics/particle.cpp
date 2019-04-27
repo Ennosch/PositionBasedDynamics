@@ -58,7 +58,7 @@ void Particle::pointer(Particle **_ptr)
     *_ptr = this;
 }
 
-const QMatrix4x4 &Particle::getTransfrom()
+const QMatrix4x4 Particle::getTransfrom()
 {
     QMatrix4x4 mat;
     mat.setToIdentity();

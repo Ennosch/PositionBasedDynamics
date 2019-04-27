@@ -79,10 +79,10 @@ void ActiveObject::onClicked()
             activeSceneObject->isDynamic(false);
             Particle *ptr = nullptr;
             auto particleSmartPointer = activeSceneObject->dynamicObject()->pointer(ptr);
+            //(FIX)  activeSceneObject->dynamicObject()->pointer(ptr); picking case for RigidBody and SoftBody
             m_pinConstraint = std::make_shared<PinConstraint>(particleSmartPointer, activeSceneObject->getPos());
             // Pushing back shared_ptr. Expecting conversion to weak_ptr.
             activeSceneObject->dynamicObject()->m_Constraints.push_back(m_pinConstraint);
-
         }
         else{
             mlog<<"--------Missing Constraint for active object";

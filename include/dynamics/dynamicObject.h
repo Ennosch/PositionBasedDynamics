@@ -23,11 +23,13 @@ public:
 
 //    virtual DynamicObject* pointer();
 
-    virtual ParticlePtr pointer(Particle *ptr){};
+    virtual ParticlePtr pointer(Particle *ptr){
+        return nullptr;
+    };
 
 //    virtual void pointer(Particle** _ptr);
 
-    virtual const QMatrix4x4& getTransfrom();
+    virtual const QMatrix4x4 getTransfrom();
     virtual const QVector3D getTranslation();
 
     std::vector<ConstraintWeakPtr> m_Constraints;

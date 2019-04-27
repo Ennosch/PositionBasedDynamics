@@ -31,7 +31,7 @@ public:
     void endPinToPosition();
 
     void pointer(Particle** _ptr);
-    const QMatrix4x4& getTransfrom();
+    const QMatrix4x4 getTransfrom();
     const QVector3D getTranslation();
 
 //private:

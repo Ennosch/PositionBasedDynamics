@@ -39,7 +39,7 @@ void DynamicObject::endPinToPosition()
 //    return nullptr;
 //}
 
-const QMatrix4x4 &DynamicObject::getTransfrom()
+const QMatrix4x4 DynamicObject::getTransfrom()
 {
 //    if(m_IsParticle)
 //    {
