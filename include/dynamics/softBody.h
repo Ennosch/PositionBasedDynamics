@@ -1,16 +1,26 @@
 #ifndef SOFTBODY_H
 #define SOFTBODY_H
 
-//#include <transform.h>
-#include "utils.h"
+#include "dynamicObject.h"
 #include "dynamics/dynamicUtils.h"
-#include "model.h"
+#include "dynamics/constraint.h"
 
-class softBody
+class SoftBody : public DynamicObject
 {
 public:
-    softBody();
-    softBody(ModelPtr _model);
+    SoftBody();
+    SoftBody(ModelPtr _model);
+
+    void addParticle(const QVector3D &_localPos, const ParticleWeakPtr _particle);
+
+    std::vector<std::set<int> > createConstraintNetwork();
+
+    void updateModelBuffers();
+
+    ModelPtr getModel();
+    const QMatrix4x4 getTransfrom();
+
+    std::vector<ParticleWeakPtr>& getParticlels();
 
 private:
     ModelPtr m_model;

@@ -16,17 +16,14 @@ class DynamicObject
 {
 public:
     DynamicObject();
-//    DynamicObject( ParticlePtr _particle);
-    virtual void setTransform(const QMatrix4x4& _mat4);
+
     virtual void pinToPosition(const QVector3D &_pos);
     virtual void endPinToPosition();
 
 //    virtual DynamicObject* pointer();
-
     virtual ParticlePtr pointer(Particle *ptr){
         return nullptr;
-    };
-
+    }
 //    virtual void pointer(Particle** _ptr);
 
     virtual const QMatrix4x4 getTransfrom();

@@ -1,7 +1,6 @@
 #ifndef RigidBody_H
 #define RigidBody_H
 
-#include "transform.h"
 #include "dynamicObject.h"
 #include "dynamics/dynamicUtils.h"
 #include "dynamics/constraint.h"
@@ -12,14 +11,10 @@ public:
     RigidBody();
     RigidBody(ModelPtr _model);
 
-    void parseData(const ModelPtr _model);
     void addParticle(const QVector3D &_localPos, const ParticleWeakPtr _particle);
     ConstraintPtr createConstraint();
 
-    void setTransform(const Transform _trans);
-
     // virtuals
-    void setTransform(const QMatrix4x4& _mat4);
     void pinToPosition(const QVector3D &_pos);
     void endPinToPosition();
     void updateModelBuffers();
@@ -37,7 +32,6 @@ private:
     ModelPtr m_model;
     ShapePtr m_shape;
 
-    Transform m_transfrom;
     std::vector<ParticleWeakPtr> m_particles;
 
 };

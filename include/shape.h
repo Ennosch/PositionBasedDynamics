@@ -69,7 +69,7 @@ public:
     std::vector<Vertex>&  getVertices();
     std::vector<QVector3D> &getPoints();
     std::map<int, std::list<int>> &getVertsMap();
-    std::vector<unsigned int>& getIndices();
+    std:: vector<unsigned int>& getIndices();
     Vertex getVertexAtIndex(unsigned int idx);
 
     void setVertexPositionAtIndex(unsigned int idx, const QVector3D _value);

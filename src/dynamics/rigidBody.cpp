@@ -14,17 +14,6 @@ RigidBody::RigidBody(ModelPtr _model)
     m_model->clone(_model);
 }
 
-void RigidBody::parseData(const ModelPtr _model)
-{
-//    for(unsigned int i = 0; i < _model->getNumShapes(); i++)
-//    {
-//        ShapePtr shape = _model->getShape(i);
-//        for(auto vert : shape->getVertices())
-//        {
-//        }
-//    }
-}
-
 void RigidBody::addParticle(const QVector3D &_localPos, const ParticleWeakPtr _particle)
 {
 //    mlog<<"passed particle";
@@ -56,15 +45,6 @@ ConstraintPtr RigidBody::createConstraint()
     return smCstr;
 }
 
-void RigidBody::setTransform(const Transform _trans)
-{
-    m_transfrom = _trans;
-}
-
-void RigidBody::setTransform(const QMatrix4x4 &_mat4)
-{
-
-}
 
 void RigidBody::pinToPosition(const QVector3D &_pos)
 {

@@ -185,7 +185,6 @@ Vec3 CollisionDetection::closetPointFromRayToRay(const Ray &_r1, const Ray &_r2)
 
 bool CollisionDetection::checkSphereSphere(const Vec3 &_s1, const Vec3 &_s2, float &d,float _r1, float _r2)
 {
-//    mlog<<"sphere check";
     float dist = (_s2 - _s1).length();
     float minDist = _r1 + _r2;
     bool isColliding =  (dist < minDist);

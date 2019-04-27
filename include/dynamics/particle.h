@@ -26,7 +26,6 @@ public:
     ParticlePtr pointer(Particle *ptr);
 
     // virtuals
-    void setTransform(const QMatrix4x4& _mat4);
     void pinToPosition(const QVector3D &_pos);
     void endPinToPosition();
 

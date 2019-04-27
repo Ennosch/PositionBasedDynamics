@@ -17,6 +17,7 @@
 #include "dynamics/dynamicObject.h"
 #include "dynamics/particle.h"
 #include "dynamics/rigidBody.h"
+#include "dynamics/softBody.h"
 #include "dynamics/collisiondetection.h"
 #include "dynamics/constraint.h"
 #include "dynamicsWorldController.h"
@@ -50,7 +51,7 @@ class DynamicsWorld
         void checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2);
         void checkSpherePlane(const ParticlePtr p1, const Plane &_plane);
 
-        ConstraintPtr addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
+        std::shared_ptr<DistanceEqualityConstraint> addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void addParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void deleteConstraint(const ConstraintPtr _constraint);
         void deleteParticle();

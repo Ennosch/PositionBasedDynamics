@@ -5,15 +5,6 @@ DynamicObject::DynamicObject()
 
 }
 
-
-void DynamicObject::setTransform(const QMatrix4x4 &_mat4)
-{
-//    if(m_IsParticle)
-//    {
-//        pParticle->w = 0;
-//    }
-}
-
 void DynamicObject::pinToPosition(const QVector3D &_pos)
 {
 

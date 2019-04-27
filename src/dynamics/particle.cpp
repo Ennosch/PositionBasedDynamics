@@ -38,11 +38,6 @@ ParticlePtr Particle::pointer(Particle *ptr)
     return  shared_from_this();
 }
 
-void Particle::setTransform(const QMatrix4x4 &_mat4)
-{
-    w = 0.0;
-}
-
 void Particle::pinToPosition(const QVector3D &_pos)
 {
 

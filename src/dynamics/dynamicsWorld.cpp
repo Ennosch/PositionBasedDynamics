@@ -228,7 +228,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
         return nullptr;
 
     auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
-    nRB->setTransform(_sceneObject->getTransform());
+
 //    ModelPtr model = _sceneObject->model();
     ModelPtr model = nRB->getModel();
     _sceneObject->setModel(nRB->getModel());
@@ -263,6 +263,49 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
     if(!_sceneObject->model())
         return nullptr;
 
+     auto nSB = std::make_shared<SoftBody>(_sceneObject->model());
+     ModelPtr model = nSB->getModel();
+      _sceneObject->setModel(nSB->getModel());
+     auto shapeNum =  model->getNumShapes();
+     for(unsigned int i = 0; i < model->getNumShapes(); i++)
+     {
+         ShapePtr shape = model->getShape(i);
+         for(auto point : shape->getPoints())
+         {
+             QVector3D pos = _sceneObject->getMatrix() * point;
+             auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
+             m_Particles.push_back(nParticle);
+             nSB->addParticle(point, nParticle);
+             m_scene->addSceneObjectFromParticle(nParticle);
+         }
+     }
+
+     std::vector< std::set<int> > constraintIdxs  = nSB->createConstraintNetwork();
+
+     for(auto set : constraintIdxs)
+     {
+         std::set<int>::iterator itA, itB;
+         itA = set.begin();
+         itB = set.begin();
+         std::advance(itB, 1);
+
+         int A = *itA;
+         int B = *itB;
+
+         ParticlePtr p1 = nSB->getParticlels()[A].lock();
+         ParticlePtr p2 = nSB->getParticlels()[B].lock();
+         float restLength = ((p1->x)-(p2->x)).length();
+//         auto nCstrPtr = addDistanceEqualityConstraint(p1, p2);
+         std::shared_ptr<DistanceEqualityConstraint> nCstrPtr = addDistanceEqualityConstraint(p1, p2);
+         nCstrPtr->setRestLength(restLength);
+//         nCstrPtr->
+//         m_Constraints.push_back(nCstrPtr);
+
+     }
+
+     nSB->updateModelBuffers();
+     _sceneObject->makeDynamic(nSB);
+     return nSB;
 //    auto nRB = std::make_shared<SoftBody>(_sceneObject->model());
 }
 
@@ -284,7 +327,6 @@ void DynamicsWorld::addPlane(const Plane &_plane)
 void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2)
 {
     // Check predicted positon
-    mlog<<"sphere collison";
     float d;
     if(m_CollisionDetect.checkSphereSphere(p1->p, p2->p, d,p1->radius(), p2->radius())){
         addParticleParticleConstraint(p1, p2);
@@ -319,7 +361,7 @@ void DynamicsWorld::checkSpherePlane(const ParticlePtr p1, const Plane &_plane)
     p1->m_CollisionConstraints.push_back(hsCstr);
 }
 
-ConstraintPtr DynamicsWorld::addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
+std::shared_ptr<DistanceEqualityConstraint> DynamicsWorld::addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
 {
     auto nSpring = std::make_shared<DistanceEqualityConstraint>(_p1, _p2);
     nSpring->setRestLength(2.0);

@@ -843,8 +843,7 @@ void Scene::setupScene()
 //        addModel(this, "grid1", "../banana.obj");
 //        addModel(this, "grid1", "../Grid1.obj");
 //        addModel(this, "grid1", "../Grid1_12.obj");
-        addModel(this, "grid1", "../Cube10.obj");
-        addModel(this, "grid2", "../Cube10.obj");
+        addModel(this, "grid1", "../Grid_4x4.obj");
 //       addModel(this, "grid1", "../triangle.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
@@ -874,13 +873,14 @@ void Scene::setupScene()
 
         //Spheres
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
-       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
+       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(88,0,0));
 
-        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 5, 0), rot);
-        auto sceneObject3 = addSceneObjectFromModel("grid1", 0, QVector3D(15, 5, 0), rot);
+        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 8, 0), rot);
+
 
 //       makeDynamicRigidBody(sceneObject1);
-       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
