@@ -28,8 +28,11 @@ public:
     Shape();
     Shape(int _id): m_Id(_id){ qDebug()<<"Ctor 2 Shape";}
     Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices);
-    Shape(std::vector<Vertex> &_vertices, std::vector<unsigned int> &_indices,
-          std::vector<QVector3D> &_points, std::map<int, std::list<int>> &_pointsToVertsMap);
+    Shape(std::vector<Vertex> &_vertices,
+          std::vector<unsigned int> &_indices,
+          std::vector<QVector3D> &_points,
+          std::map<int, std::list<int>> &_pointsToVertsMap);
+
     Shape(std::vector<Vertex> &_vertices,
           std::vector<unsigned int> &_indices,
           Scene *_scene,
@@ -63,10 +66,10 @@ public:
     Vertex* data();
 
     unsigned int getNumVertices();
-    std::vector<Vertex>  getVertices();
+    std::vector<Vertex>&  getVertices();
     std::vector<QVector3D> &getPoints();
     std::map<int, std::list<int>> &getVertsMap();
-    std::vector<unsigned int> getIndices();
+    std::vector<unsigned int>& getIndices();
     Vertex getVertexAtIndex(unsigned int idx);
 
     void setVertexPositionAtIndex(unsigned int idx, const QVector3D _value);

@@ -24,6 +24,7 @@ public:
     void endPinToPosition();
     void updateModelBuffers();
 
+    ModelPtr getModel();
     const QMatrix4x4 &getTransfrom();
     const QVector3D getTranslation();
 

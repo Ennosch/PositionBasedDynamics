@@ -23,13 +23,16 @@ class Model
 {
 public:
     Model();
+    Model(std::vector<ShapePtr> _meshes);
     Model(Scene *_scene, QOpenGLShaderProgram *_shaderProgram);
     void loadModel(std::string _path);
     void processNode(aiNode *node, const aiScene *scene);
     void draw();
     void drawPoints();
     void bind();
+    void clone(const ModelPtr &_model);
     int getNumShapes();
+    std::vector<ShapePtr> getMeshes();
 
     ShapePtr getShape(unsigned int _index);
     ShapePtr processMesh(aiMesh *mesh, const aiScene *scene);

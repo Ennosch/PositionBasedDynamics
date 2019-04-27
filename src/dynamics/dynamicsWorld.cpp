@@ -218,6 +218,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
     auto pDynamicObject = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), pCount);
     m_Particles.push_back(pDynamicObject);
     m_DynamicObjects.push_back(pDynamicObject);
+    _sceneObject->makeDynamic(pDynamicObject);
     return pDynamicObject;
 }
 
@@ -228,7 +229,9 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
 
     auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
     nRB->setTransform(_sceneObject->getTransform());
-    ModelPtr model = _sceneObject->model();
+//    ModelPtr model = _sceneObject->model();
+    ModelPtr model = nRB->getModel();
+    _sceneObject->setModel(nRB->getModel());
 
     auto shapeNum =  model->getNumShapes();
 
@@ -250,8 +253,17 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     m_Constraints.push_back(smCstr);
 
     nRB->updateModelBuffers();
+    _sceneObject->makeDynamic(nRB);
 
     return nRB;
+}
+
+DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject)
+{
+    if(!_sceneObject->model())
+        return nullptr;
+
+//    auto nRB = std::make_shared<SoftBody>(_sceneObject->model());
 }
 
 ParticlePtr DynamicsWorld::addParticle(float _x, float _y, float _z)

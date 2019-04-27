@@ -7,6 +7,12 @@ Model::Model()
 
 }
 
+Model::Model(std::vector<ShapePtr> _meshes)
+{
+    mlog<<"Model meshes: "<<&_meshes[0]<<" &: ";
+    meshes = _meshes;
+}
+
 Model::Model(Scene *_scene, QOpenGLShaderProgram *_shaderProgram)
             : pScene(_scene), pShader(_shaderProgram)
 {
@@ -164,6 +170,23 @@ void Model::bind()
 {
     for(unsigned int i = 0; i < meshes.size(); i++)
         meshes[i]->bind();
+}
+
+void Model::clone(const ModelPtr &_model)
+{
+    for(auto mesh : _model->getMeshes())
+    {
+        ShapePtr shape = std::make_shared<Shape>(mesh->getVertices(),
+                                                 mesh->getIndices(),
+                                                 mesh->getPoints(),
+                                                 mesh->getVertsMap());
+        meshes.push_back(shape);
+    }
+}
+
+std::vector<ShapePtr> Model::getMeshes()
+{
+    return meshes;
 }
 
 

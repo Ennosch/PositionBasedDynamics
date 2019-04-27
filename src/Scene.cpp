@@ -112,8 +112,7 @@ pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle)
     m_SceneObjects.push_back(pSO);
     pSO->makeDynamic(_particle);
 
-
-//    mlog<<"added PARTICLE AS OBEJCT";
+//    mlog<<"added PARTICLE AS OBEJCT"<<_particle->getTranslation();
     return pSO;
 }
 
@@ -160,21 +159,6 @@ void Scene::addLine(const QVector3D &_start, const QVector3D &_end)
     line.End = _end;
     m_Lines.push_back(line);
 //    updateLinesVBO();
-}
-
-void Scene::makeDynamicAsParticle(pSceneOb _sceneObject)
-{
-    auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsParticle(_sceneObject);
-    _sceneObject->makeDynamic(newDynamicObject);
-    return;
-
-}
-
-void Scene::makeDynamic(pSceneOb _sceneObject)
-{
-    auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsRigidBody(_sceneObject);
-    _sceneObject->makeDynamic(newDynamicObject);
-    return;
 }
 
 void Scene::drawLines()
@@ -701,10 +685,9 @@ void Scene::paint()
                             continue;
                         }
 //                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
-                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
-                        {
-                            continue;
-                        }
+//                        {
+//                            continue;
+//                        }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
                         m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
@@ -865,11 +848,8 @@ void Scene::setupScene()
 //       addModel(this, "grid1", "../triangle.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
-
        addModel(this, "grid", "../Grid100.obj");
        addModel(this, "sphere", "../Icosahedronf4.obj");
-
-
 
        addModel(this, "Vector", "../VectorShape.obj");
        addModel(this, "Circle", "../TorusShape.obj");
@@ -897,20 +877,13 @@ void Scene::setupScene()
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
 
         auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 5, 0), rot);
-        auto sceneObject2 = addSceneObjectFromModel("sphere", 1, QVector3D(1, 0, 0), rot);
+        auto sceneObject3 = addSceneObjectFromModel("grid1", 0, QVector3D(15, 5, 0), rot);
 
-        auto sceneObject3 = addSceneObjectFromModel("grid2", 0, QVector3D(15, 5, 0), rot);
-
-       makeDynamic(sceneObject1);
-
+//       makeDynamicRigidBody(sceneObject1);
+       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
-//       sceneObject4->rotate(QQuaternion::fromEulerAngles(QVector3D(45,0,0)));
-//       mainpulator->setTransform(sceneObject4->getTransform());
-
-
-       mlog<<"num SO: "<<m_SceneObjects.size();
 }
 
 

@@ -7,7 +7,11 @@ RigidBody::RigidBody()
 
 RigidBody::RigidBody(ModelPtr _model)
 {
-    m_model = _model;
+//    m_model = _model;
+
+    // deep copy model instead of
+    m_model = std::make_shared<Model>();
+    m_model->clone(_model);
 }
 
 void RigidBody::parseData(const ModelPtr _model)
@@ -74,6 +78,7 @@ void RigidBody::endPinToPosition()
 
 void RigidBody::updateModelBuffers()
 {
+
     for(unsigned int i = 0; i < m_model->getNumShapes(); i++)
     {
         ShapePtr shape = m_model->getShape(i);
@@ -84,11 +89,17 @@ void RigidBody::updateModelBuffers()
             for(auto vertIdx : shape->getVertsMap()[i])
             {
                 shape->setVertexPositionAtIndex(vertIdx, position);
+//                mlog<<"vertIdx: "<<vertIdx<<" position: "<<position;
             }
 //            mlog<<" pointIdx: "<<pointIdx<<"    list: "<<pair.second;
         }
         shape->updateVertexBuffer();
     }
+}
+
+ModelPtr RigidBody::getModel()
+{
+    return  m_model;
 }
 
 const QMatrix4x4 &RigidBody::getTransfrom()

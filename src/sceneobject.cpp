@@ -157,6 +157,11 @@ void SceneObject::setActiveObject(ActiveObject *_activeObject)
     activeObject = _activeObject;
 }
 
+void SceneObject::setModel(ModelPtr _model)
+{
+    pModel =  _model;
+}
+
 void SceneObject::setID(uint _id)
 {
     m_ID = _id;

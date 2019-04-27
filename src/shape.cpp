@@ -125,6 +125,9 @@ void Shape::recomputeNormals()
             QVector3D vertB = m_vertices[m_indices[i-1]].Position;
             QVector3D vertC = m_vertices[m_indices[i  ]].Position;
 
+
+//            mlog<<"i: "<<i<<" indices: "<<vertA<<vertB<<vertC;
+
             QVector3D AB, AC, CB, normal;
             AB  = vertB -vertA;
             AC  = vertC -vertA;
@@ -203,7 +206,7 @@ void Shape::drawOld()
     m_pVao->release();
 }
 
-std::vector<Vertex> Shape::getVertices()
+std::vector<Vertex>& Shape::getVertices()
 {
     return m_vertices;
 }
@@ -218,7 +221,7 @@ std::map<int, std::list<int> > &Shape::getVertsMap()
     return m_pointsToVerts;
 }
 
-std::vector<unsigned int> Shape::getIndices()
+std::vector<unsigned int>& Shape::getIndices()
 {
     return m_indices;
 }

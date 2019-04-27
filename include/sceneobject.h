@@ -46,6 +46,7 @@ public:
     bool isDynamic();
     void isDynamic(bool _isDynamic);
     void setActiveObject(ActiveObject *_activeObject);
+    void setModel(ModelPtr _model);
     void setID(uint _id);
     void notify();
 

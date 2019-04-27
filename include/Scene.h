@@ -72,8 +72,6 @@ public:
   void addLine(const Line &_line);
   void addLine(const Ray &_ray, float t);
   void addLine(const QVector3D &_start, const QVector3D &_end);
-  void makeDynamicAsParticle(pSceneOb _sceneObject);
-  void makeDynamic(pSceneOb _sceneObject);
 
   void drawLines();
   void drawPoints();

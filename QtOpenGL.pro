@@ -8,6 +8,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 CONFIG -= app_bundle
 
+CONFIG += dynamic
+
 SOURCES += \
     src/main.cpp \
     src/AbstractScene.cpp \
@@ -34,7 +36,8 @@ SOURCES += \
     src/ui/DynamicsUiWidget.cpp \
     src/manipulator.cpp \
     src/Framebuffer.cpp \
-    src/dynamics/rigidBody.cpp
+    src/dynamics/rigidBody.cpp \
+    src/dynamics/softBody.cpp
 
 
 OBJECTS_DIR = build/obj
@@ -76,7 +79,8 @@ HEADERS += \
     include/manipulator.h \
     include/Framebuffer.h \
     include/dynamics/rigidBody.h \
-    include/dynamics/dynamicUtils.h
+    include/dynamics/dynamicUtils.h \
+    include/dynamics/softBody.h
 
 
 
