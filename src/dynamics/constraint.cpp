@@ -2,8 +2,6 @@
 #include "dynamics/rigidBody.h"
 
 
-
-
 //AbstractConstraint::AbstractConstraint()
 //{
 
@@ -33,25 +31,20 @@ HalfSpaceConstraint::HalfSpaceConstraint(const ParticlePtr _p, const QVector3D &
 
 void HalfSpaceConstraint::project()
 {
-//    QVector3D::dotProduct((p-qc),  n);
-//    dp = constraintFunction(p) * n;
-//    p += dp;
-
-//    pptr->p += constraintFunction(p) * -n;
-    return;
+    if(constraintFunction(pptr->p) > 0)
+        return;
     pptr->p += deltaP();
 }
 
 float HalfSpaceConstraint::constraintFunction(const QVector3D &_p)
 {
-    float C = QVector3D::dotProduct((p-qc),  n);;
+    float C = QVector3D::dotProduct((_p-qc),  n);
     return C;
 }
 
 QVector3D HalfSpaceConstraint::deltaP()
 {
-//    return constraintFunction() * n;
-    return constraintFunction(p) * -n;
+    return constraintFunction(pptr->p) * -n;
 }
 
 

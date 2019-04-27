@@ -30,6 +30,7 @@ public:
 
     void bind();
     void draw();
+    void drawPoints();
     void drawOld();
     void release();
     void update();

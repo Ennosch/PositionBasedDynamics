@@ -24,6 +24,7 @@ SceneObject::SceneObject(Scene *_scene, ShapePtr _Shape,
     pShape(_Shape)
 {
     m_Transform.setTranslation(_pos);
+    m_ModelMatrix = m_Transform.toMatrix();
 }
 
 SceneObject::SceneObject(Scene *_scene, ShapePtr _Shape,
@@ -35,6 +36,7 @@ SceneObject::SceneObject(Scene *_scene, ShapePtr _Shape,
 
     m_Transform.setTranslation(_pos);
     m_Transform.rotate(_rot);
+    m_ModelMatrix = m_Transform.toMatrix();
 }
 
 SceneObject::SceneObject(Scene *_scene, ModelPtr _Model, const uint _materialID, const QVector3D &_pos) :
@@ -43,6 +45,7 @@ SceneObject::SceneObject(Scene *_scene, ModelPtr _Model, const uint _materialID,
     m_MaterialID(_materialID)
 {
     m_Transform.setTranslation(_pos);
+    m_ModelMatrix = m_Transform.toMatrix();
 }
 
 SceneObject::SceneObject(Scene *_scene,
@@ -56,6 +59,7 @@ SceneObject::SceneObject(Scene *_scene,
 {
     m_Transform.setTranslation(_pos);
     m_Transform.rotate(_rot);
+    m_ModelMatrix = m_Transform.toMatrix();
 }
 
 SceneObject::SceneObject(std::string _path)
@@ -78,6 +82,14 @@ void SceneObject::draw()
     else
     {
         pShape->drawOld();
+    }
+}
+
+void SceneObject::drawPoints()
+{
+    if(pModel != nullptr)
+    {
+        pModel->drawPoints();
     }
 }
 

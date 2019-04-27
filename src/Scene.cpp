@@ -556,11 +556,12 @@ void Scene::QtOpenGLinitialize()
     m_quad_vao->release();
 
 //    initFramebufferOld();
-
     initFramebuffer();
 
-
     somePoints.push_back(QVector3D(0,2,0));
+    somePoints.push_back(QVector3D(0,4,0));
+    somePoints.push_back(QVector3D(1,0,0));
+    somePoints.push_back(QVector3D(0,0,1));
 
     pointsVAO = new QOpenGLVertexArrayObject();
     pointsVAO->create();
@@ -569,15 +570,28 @@ void Scene::QtOpenGLinitialize()
     pointsVAO->bind();
     pointsVBO.bind();
     pointsVBO.allocate(somePoints.data(), somePoints.size() * sizeof (QVector3D));
+
+    m_geometry_program->enableAttributeArray("Position");
     m_geometry_program->setAttributeBuffer("Position",
                                            GL_FLOAT,                    // type
                                            0,                           // offset = start
                                            3,                           // tuplesize num of components per vert
-                                           3 * sizeof(GLfloat));        //stride num of bytes between verts. 0 = densly packed
-    m_geometry_program->enableAttributeArray("Position");
+//                                           3 * sizeof(GLfloat));        //stride num of bytes between verts. 0 = densly packed
+                                           sizeof(Vertex));
+    m_geometry_program->enableAttributeArray("Normal");
+    m_geometry_program->setAttributeBuffer("Normal",
+                                           GL_FLOAT,                    // type
+                                           offsetof(Vertex, Normal),                           // offset = start
+                                           3,                           // tuplesize num of components per vert
+                                           sizeof(Vertex));        //stride num of bytes between verts. 0 = densly packed
+
+    auto offset = (void*)offsetof(Vertex, Normal);
+
+    mlog<<"----------------------typeID offset"<<sizeof (float);
+
+
     pointsVBO.release();
     pointsVAO->release();
-
 
 
     m_lines_vao = new QOpenGLVertexArrayObject();
@@ -590,7 +604,6 @@ void Scene::QtOpenGLinitialize()
 
 void Scene::DynamicsInitialize()
 {
-
     if(!m_DynamicsWorld)
         m_DynamicsWorld = new DynamicsWorld();
 
@@ -641,8 +654,6 @@ void Scene::paint()
 
     QVector4D ndcNull = m_projection_matrix * m_arcCamera.toMatrix() * model * null ;
 
-
-
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glViewport ( 0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -689,6 +700,11 @@ void Scene::paint()
                         {
                             continue;
                         }
+//                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
+                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
+                        {
+                            continue;
+                        }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
                         m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
@@ -728,24 +744,31 @@ void Scene::paint()
                 m_activeProgram->setUniformValue("overlayColor", QVector4D(0,0,0,0) );
             }
 
-            //-------------------------Draw Wireframe---------------------------------------------------------------------------
-                  m_flat_program->bind();
-                  m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-                  m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-                  m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
-                  if(m_SceneObjects[0])
-                  {
-                      glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-                      m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
-                      m_SceneObjects[0]->draw();
-                  }
+            //-------------------------Draw Wireframe-----------------------------------------------------------
+              m_flat_program->bind();
+              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
+              if(m_SceneObjects[0])
+              {
+                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
+                  m_SceneObjects[0]->draw();
+              }
 
          drawLines();
+
+         // -------------------------Geometry Shader-----------------------------------------------------------
+         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+          m_geometry_program->bind();
+          m_geometry_program->setUniformValue("projection", m_projection_matrix);
+          m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
+          m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
+          m_SceneObjects[1]->drawPoints();
 
          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
          glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -807,9 +830,9 @@ void Scene::setupScene()
 //        addPointLight(QVector3D(-5,0,0), QVector3D(0, 1, 0));
 //        addPointLight(QVector3D(0,5,0), QVector3D(1, 0, 0));
 
-         addPointLight(QVector3D(0,5,0), QVector3D(1.0, 1.0, 1.0));
-         addPointLight(QVector3D(2,5,0), QVector3D(0.6, 0.6, 1.0));
-         addPointLight(QVector3D(0,3,2), QVector3D(0.8, 0.8, 0.8));
+         addPointLight(QVector3D(0,25,0), QVector3D(1.0, 1.0, 1.0));
+         addPointLight(QVector3D(10,25,0), QVector3D(0.6, 0.6, 1.0));
+         addPointLight(QVector3D(0,15,10), QVector3D(0.8, 0.8, 0.8));
 
 
          // blue tone
@@ -836,7 +859,9 @@ void Scene::setupScene()
 //        addModel(this, "grid1", "../Grid2_small.obj");
 //        addModel(this, "grid1", "../banana.obj");
 //        addModel(this, "grid1", "../Grid1.obj");
-        addModel(this, "grid1", "../Grid1_12.obj");
+//        addModel(this, "grid1", "../Grid1_12.obj");
+        addModel(this, "grid1", "../Cube10.obj");
+        addModel(this, "grid2", "../Cube10.obj");
 //       addModel(this, "grid1", "../triangle.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
@@ -851,7 +876,7 @@ void Scene::setupScene()
        addModel(this, "Plane", "../PlaneShape.obj");
 //       addModel(this, "Axis", "../AxisShape.obj");
 //       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
-//       addModel(this, "bunny", "../bunny.obj");
+       addModel(this, "bunny", "../bunny.obj");
 //       addModel(this, "teapot", "../MegaTeapot.obj");
 
 //       addModel(this, "gridTransform", "../Grid1_transfrom.obj");
@@ -871,27 +896,21 @@ void Scene::setupScene()
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
 
-        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 0, 0), rot);
-//        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,0,0), rot);
+        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 5, 0), rot);
+        auto sceneObject2 = addSceneObjectFromModel("sphere", 1, QVector3D(1, 0, 0), rot);
 
-//       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(2,1,-5), QQuaternion(1,0,0,0));
-//       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-2,1,-5), QQuaternion(1,0,0,0));
-//       auto sceneObject4 = addSceneObjectFromModel("sphere", 1, QVector3D(0,3,-5), QQuaternion(1,0,0,0));
+        auto sceneObject3 = addSceneObjectFromModel("grid2", 0, QVector3D(15, 5, 0), rot);
 
-//       makeDynamicAsParticle(sceneObject1);
-//       makeDynamicAsParticle(sceneObject2);
-//       makeDynamicAsParticle(sceneObject3);
-//       makeDynamicAsParticle(sceneObject5);
        makeDynamic(sceneObject1);
-//       makeDynamic(sceneObject2);
-//       makeDynamic(sceneObject3);
-//       makeDynamic(sceneObject4);
+
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
 //       sceneObject4->rotate(QQuaternion::fromEulerAngles(QVector3D(45,0,0)));
 //       mainpulator->setTransform(sceneObject4->getTransform());
 
+
+       mlog<<"num SO: "<<m_SceneObjects.size();
 }
 
 

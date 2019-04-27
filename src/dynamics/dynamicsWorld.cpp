@@ -302,10 +302,8 @@ void DynamicsWorld::checkSpherePlane(const ParticlePtr p1, const Plane &_plane)
     if(dist > 0)
         return;
     QVector3D qc = m_CollisionDetect.intersectRayPlane(p1->x, p1->p, _plane.Normal, (_plane.Offset + (p1->r *_plane.Normal)));
+//    qc -= (p1->r *_plane.Normal);
     auto hsCstr = std::make_shared<HalfSpaceConstraint>(p1, qc, _plane.Normal);
-//    ConstraintWeakPtr hsCstrWeak= hsCstr;
-//    m_Constraints.push_back(hsCstr);
-//    p1->m_CollisionConstraints.push_back(hsCstrWeak);
     p1->m_CollisionConstraints.push_back(hsCstr);
 }
 

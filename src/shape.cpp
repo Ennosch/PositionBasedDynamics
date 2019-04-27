@@ -93,12 +93,12 @@ void Shape::setupMesh()
     m_ebo.allocate(m_indices.data(), m_indices.size()*4);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(Vertex),
-                          nullptr);
+    glVertexAttribPointer(0,                // vert attr index
+                          3,                // num componets
+                          GL_FLOAT,         // type
+                          GL_FALSE,         // normalized
+                          sizeof(Vertex),   // stride
+                          nullptr);         // pointer to first components. (offset)
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1,
                           3,
@@ -115,8 +115,32 @@ void Shape::setupMesh()
                           (void*)offsetof(Vertex, Barycentric));
 }
 
+void Shape::recomputeNormals()
+{
+    for(int i=0; i < m_indices.size(); i++)
+    {
+        if(!((i+1) % 3))
+        {
+            QVector3D vertA = m_vertices[m_indices[i-2]].Position;
+            QVector3D vertB = m_vertices[m_indices[i-1]].Position;
+            QVector3D vertC = m_vertices[m_indices[i  ]].Position;
+
+            QVector3D AB, AC, CB, normal;
+            AB  = vertB -vertA;
+            AC  = vertC -vertA;
+            normal = QVector3D::crossProduct(AB, AC).normalized();
+
+            m_vertices[m_indices[i-2]].Normal = normal;
+            m_vertices[m_indices[i-1]].Normal = normal;
+            m_vertices[m_indices[i  ]].Normal = normal;
+        }
+    }
+}
+
 void Shape::updateVertexBuffer()
 {
+    recomputeNormals();
+
     m_pVao->bind();
     m_vvbo.create();
     m_vvbo.bind();
@@ -150,11 +174,20 @@ void Shape::updateVertexBuffer()
 
 void Shape::draw()
 {
-       m_pVao->bind();
-       unsigned int count = m_indices.size();
-       glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+    m_pVao->bind();
+    unsigned int count = m_indices.size();
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 //       glDrawArrays(GL_TRIANGLES, 0, count);
-       m_pVao->release();
+    m_pVao->release();
+}
+
+void Shape::drawPoints()
+{
+    m_pVao->bind();
+    unsigned int count = m_indices.size();
+    glDrawElements(GL_POINTS, count, GL_UNSIGNED_INT, nullptr);
+//       glDrawArrays(GL_TRIANGLES, 0, count);
+    m_pVao->release();
 }
 
 void Shape::drawWireframe()

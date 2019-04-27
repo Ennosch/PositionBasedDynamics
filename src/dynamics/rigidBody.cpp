@@ -94,12 +94,15 @@ void RigidBody::updateModelBuffers()
 const QMatrix4x4 &RigidBody::getTransfrom()
 {
     updateModelBuffers();
-    return m_transfrom.toMatrix();
+//    return m_transfrom.toMatrix();
+    QMatrix4x4 identity;
+    identity.setToIdentity();
+    return  identity;
 }
 
 const QVector3D RigidBody::getTranslation()
 {
-
+    return QVector3D(0,0,0);
 }
 
 //std::shared_ptr<RigidBody> RigidBody::getPointer()

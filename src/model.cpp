@@ -23,8 +23,8 @@ void Model::loadModel(std::string _path)
 //                                             aiProcess_JoinIdenticalVertices |
                                              aiProcess_FlipUVs |
                                              aiProcess_CalcTangentSpace |                                             
-//                                             aiProcess_GenNormals |
-                                             aiProcess_GenSmoothNormals |
+                                             aiProcess_GenNormals |
+//                                             aiProcess_GenSmoothNormals |
                                              aiProcess_FixInfacingNormals);
 
 ////------------------- exporter test
@@ -149,6 +149,14 @@ void Model::draw()
     for(unsigned int i = 0; i < meshes.size(); i++)
     {
         meshes[i]->draw();
+    }
+}
+
+void Model::drawPoints()
+{
+    for(unsigned int i = 0; i < meshes.size(); i++)
+    {
+        meshes[i]->drawPoints();
     }
 }
 

@@ -27,13 +27,13 @@ public:
     void loadModel(std::string _path);
     void processNode(aiNode *node, const aiScene *scene);
     void draw();
+    void drawPoints();
     void bind();
     int getNumShapes();
 
     ShapePtr getShape(unsigned int _index);
     ShapePtr processMesh(aiMesh *mesh, const aiScene *scene);
 
-    void inline foo(){qDebug()<<"hello model";}
 
 private:
     std::string directory;

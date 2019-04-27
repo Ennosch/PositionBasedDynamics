@@ -54,8 +54,10 @@ public:
     void release();
     void bind();
     void setupMesh();
+    void recomputeNormals();
     void updateVertexBuffer();
     void draw();
+    void drawPoints();
     void drawWireframe();
     void drawOld();
     Vertex* data();
