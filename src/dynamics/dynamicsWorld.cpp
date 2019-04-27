@@ -232,10 +232,6 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
 
     auto shapeNum =  model->getNumShapes();
 
-//    auto testShape = model->getShape(0);
-//    auto verts = testShape->getVertices();
-
-
     for(unsigned int i = 0; i < model->getNumShapes(); i++)
     {
         ShapePtr shape = model->getShape(i);
@@ -252,6 +248,8 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     }
     auto smCstr = nRB->createConstraint();
     m_Constraints.push_back(smCstr);
+
+    nRB->updateModelBuffers();
 
     return nRB;
 }

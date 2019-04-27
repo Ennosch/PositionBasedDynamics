@@ -115,6 +115,39 @@ void Shape::setupMesh()
                           (void*)offsetof(Vertex, Barycentric));
 }
 
+void Shape::updateVertexBuffer()
+{
+    m_pVao->bind();
+    m_vvbo.create();
+    m_vvbo.bind();
+    m_vvbo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    m_vvbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(Vertex));
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(Vertex),
+                          nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(Vertex),
+                          (void*)offsetof(Vertex, Normal));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(Vertex),
+                          (void*)offsetof(Vertex, Barycentric));
+
+    m_pVao->release();
+}
+
 void Shape::draw()
 {
        m_pVao->bind();
@@ -147,6 +180,11 @@ std::vector<QVector3D> &Shape::getPoints()
     return m_points;
 }
 
+std::map<int, std::list<int> > &Shape::getVertsMap()
+{
+    return m_pointsToVerts;
+}
+
 std::vector<unsigned int> Shape::getIndices()
 {
     return m_indices;
@@ -155,6 +193,11 @@ std::vector<unsigned int> Shape::getIndices()
 Vertex Shape::getVertexAtIndex(unsigned int idx)
 {
     return m_vertices[idx];
+}
+
+void Shape::setVertexPositionAtIndex(unsigned int idx, const QVector3D _value)
+{
+    m_vertices[idx].Position = _value;
 }
 
 

@@ -22,6 +22,7 @@ public:
     void setTransform(const QMatrix4x4& _mat4);
     void pinToPosition(const QVector3D &_pos);
     void endPinToPosition();
+    void updateModelBuffers();
 
     const QMatrix4x4 &getTransfrom();
     const QVector3D getTranslation();

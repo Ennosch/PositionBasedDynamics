@@ -168,19 +168,13 @@ void Scene::makeDynamicAsParticle(pSceneOb _sceneObject)
     _sceneObject->makeDynamic(newDynamicObject);
     return;
 
-//    m_DynamicsWorld.addDynamicObject(_sceneObject);
-    ParticlePtr newParticle = m_DynamicsWorld->addParticle(_sceneObject->getPos().x(), _sceneObject->getPos().y(), _sceneObject->getPos().z());
-//    auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsParticle(_sceneObject, newParticle);
-//    _sceneObject->makeDynamic(newDynamicObject);
-    //    _sceneObject->
 }
 
 void Scene::makeDynamic(pSceneOb _sceneObject)
 {
-    m_DynamicsWorld->addDynamicObjectAsRigidBody(_sceneObject);
-
-    // return rigid body
-    // make rigid body update the sceneObject..
+    auto newDynamicObject = m_DynamicsWorld->addDynamicObjectAsRigidBody(_sceneObject);
+    _sceneObject->makeDynamic(newDynamicObject);
+    return;
 }
 
 void Scene::drawLines()

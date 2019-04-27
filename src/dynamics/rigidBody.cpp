@@ -72,8 +72,28 @@ void RigidBody::endPinToPosition()
 
 }
 
+void RigidBody::updateModelBuffers()
+{
+    for(unsigned int i = 0; i < m_model->getNumShapes(); i++)
+    {
+        ShapePtr shape = m_model->getShape(i);
+//        for(auto pair : shape->getVertsMap())
+        for(int i=0; i < shape->getVertsMap().size();  i++)
+        {
+            QVector3D position = m_particles[i].lock()->getTranslation();
+            for(auto vertIdx : shape->getVertsMap()[i])
+            {
+                shape->setVertexPositionAtIndex(vertIdx, position);
+            }
+//            mlog<<" pointIdx: "<<pointIdx<<"    list: "<<pair.second;
+        }
+        shape->updateVertexBuffer();
+    }
+}
+
 const QMatrix4x4 &RigidBody::getTransfrom()
 {
+    updateModelBuffers();
     return m_transfrom.toMatrix();
 }
 

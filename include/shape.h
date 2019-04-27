@@ -54,16 +54,20 @@ public:
     void release();
     void bind();
     void setupMesh();
+    void updateVertexBuffer();
     void draw();
     void drawWireframe();
     void drawOld();
     Vertex* data();
-    unsigned int getNumVertices();
 
+    unsigned int getNumVertices();
     std::vector<Vertex>  getVertices();
     std::vector<QVector3D> &getPoints();
+    std::map<int, std::list<int>> &getVertsMap();
     std::vector<unsigned int> getIndices();
     Vertex getVertexAtIndex(unsigned int idx);
+
+    void setVertexPositionAtIndex(unsigned int idx, const QVector3D _value);
 
 //    inline int getVertsSize(){return m_verticesSize;}
 //    inline const QVector3D* getData(){return m_vertices; }
@@ -77,7 +81,6 @@ private:
     QOpenGLVertexArrayObject m_vao;
     QOpenGLVertexArrayObject* m_pVao;
     std::string m_name, directory;
-//    const QVector3D *m_vertices;
     int m_verticesSize;
 
     // WIP model loading
