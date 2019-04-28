@@ -187,13 +187,13 @@ void GLWidget::processInput()
     _localMousePos.setX(_localMousePos.x() - (this->width()/2));
     _localMousePos.setY((_localMousePos.y() - (this->height()/2)) * -1);
 
-
     // handle key press events
     if(inputManager::buttonTriggered(Qt::LeftButton) )
     {
         QPointF toPick = getMouseNDCCoords();
         if(scene()->mainpulator->currentState == NONE)
         {
+
             auto picked = scene()->pickObject(toPick.x(), toPick.y());
             if(picked)
             {

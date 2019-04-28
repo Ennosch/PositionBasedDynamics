@@ -12,7 +12,6 @@ public:
     SoftBody(ModelPtr _model);
 
     void addParticle(const QVector3D &_localPos, const ParticleWeakPtr _particle);
-
     std::vector<std::set<int> > createConstraintNetwork();
     void turnOffSelfCollision();
 

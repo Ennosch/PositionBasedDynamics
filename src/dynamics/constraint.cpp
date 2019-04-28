@@ -138,6 +138,7 @@ void DistanceEqualityConstraint::project()
 {
     if(!m_dirty)
         return;
+
 //    p1.p = QVector3D(0,0.1,0);
     float w1, w2;
     QVector3D dp1, dp2, p1, p2;
@@ -157,7 +158,7 @@ void DistanceEqualityConstraint::project()
 
     float c2 = constraintFunction();
 
-    m_dirty = false;
+//    m_dirty = false;
 //    qDebug()<<"projecting DistanceEqualityConstraint";
 }
 

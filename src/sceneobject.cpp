@@ -135,6 +135,13 @@ bool SceneObject::isActive()
     return m_IsActive;
 }
 
+void SceneObject::setRadius(float _r)
+{
+//    mlog<<"setRadius"<<_r;
+    setScale(QVector3D(2 * _r, 2 * _r, 2 * _r));
+    m_radius = _r;
+}
+
 void SceneObject::makeDynamic(DynamicObjectPtr _dynamicObject)
 {
     pDynamicObject = _dynamicObject;
@@ -171,6 +178,11 @@ void SceneObject::notify()
 {
     pSceneOb pSO = pScene->getPointerFromSceneObject(this);
     activeObject->notify(pSO);
+}
+
+float SceneObject::getRadius()
+{
+    return m_radius;
 }
 
 DynamicObjectPtr SceneObject::dynamicObject()

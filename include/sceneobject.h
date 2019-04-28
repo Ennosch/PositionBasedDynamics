@@ -37,6 +37,7 @@ public:
 
     void isActive(bool _isActive);
     bool isActive();
+    void setRadius(float _r);
     void setTranslation(const QVector3D &_dt);
     void setRotation(const QVector3D &_rt);
     void translate(const QVector3D &_dt);
@@ -50,6 +51,7 @@ public:
     void setID(uint _id);
     void notify();
 
+    float getRadius();
     DynamicObjectPtr dynamicObject();
     const QMatrix4x4 getMatrix();
     const QVector3D getPos();
@@ -61,18 +63,18 @@ public:
 
     bool m_IsDirty = true;
 
-
 private:
+
+    float m_radius = 0.5;
 
     bool m_IsActive = false;
     bool m_IsDirty = true;
     bool m_IsDynamic = false;
 
-
     QMatrix4x4 m_ModelMatrix;
 
     uint m_ID;
-    uint m_MaterialID;    
+    uint m_MaterialID;
     ShapePtr pShape;
     ModelPtr pModel;
     MaterialPtr pMaterial;
@@ -82,6 +84,8 @@ private:
     ActiveObject *activeObject;
 
 };
+
+
 
 inline uint SceneObject::getMaterialID(){ return m_MaterialID;};
 inline const QVector3D SceneObject::getPos(){ return m_Transform.translation(); };

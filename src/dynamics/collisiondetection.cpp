@@ -52,6 +52,7 @@ bool CollisionDetection::checkRaySphere(const Vec3 &_o, const Vec3 &_d, const Ve
 
 float CollisionDetection::distancaneFromIntersectionRayToSphere(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r)
 {
+    // from: https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
     Vec3 L = _o - _p;
     float a = Vec3::dotProduct(_d, _d);
     float b = 2 * Vec3::dotProduct(_d,L);
@@ -62,14 +63,12 @@ float CollisionDetection::distancaneFromIntersectionRayToSphere(const Vec3 &_o, 
 
     if (t0 > t1) std::swap(t0, t1);
 
-            if (t0 < 0) {
-                t0 = t1; // if t0 is negative, let's use t1 instead
-                if (t0 < 0) return 0.0; // both t0 and t1 are negative
-            }
+    if (t0 < 0) {
+        t0 = t1; // if t0 is negative, let's use t1 instead
+        if (t0 < 0) return 0.0; // both t0 and t1 are negative
+    }
 
-            float t = t0;
-
-//    qDebug()<<t;
+    float t = t0;
     return t;
 }
 
@@ -88,6 +87,30 @@ bool CollisionDetection::solveQuadratic(const float &a, const float &b, const fl
     if (x0 > x1) std::swap(x0, x1);
 
     return true;
+}
+
+bool CollisionDetection::intersectRaySphere(const Vec3 &_o, const Vec3 &_dir, const Vec3 &_center, Vec3 &point, const float _radius, float &t)
+{
+    // from: RealTime CollisionDetecton book [5.21]
+    //  Intersects ray r = p + td, |d| = 1, with sphere s and, if intersecting,
+    //  returns t value of intersection and intersection point q
+    Vec3 m = _o - _center;
+    float b = Vec3::dotProduct(m, _dir);
+    float c = Vec3::dotProduct(m,m) - _radius * _radius;
+    // Exit if r’s origin outside s (c > 0) and r pointing away from s (b > 0)
+    if(c > 0.0f && b > 0.0f)
+        return false;
+    float discr = b * b -c;
+    // A negative discriminant corresponds to ray missing sphere
+    if (discr < 0.0f) return false;
+    // Ray now found to intersect sphere, compute smallest t value of intersection
+    t = -b - std::sqrt(discr);
+    // If t is negative, ray started inside sphere so clamp t to zero
+    if (t < 0.0f) t = 0.0f;
+
+    point = _o + t * _dir;
+    return true;
+
 }
 
 Vec3 CollisionDetection::intersectRayPlane(const Vec3 &_n, const Vec3 &_pO, const Ray &_ray)

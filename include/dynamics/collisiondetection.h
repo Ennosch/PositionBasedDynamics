@@ -23,6 +23,8 @@ public:
     double distanceFromPointToPlane(const Vec3 &_p, const Vec3 &_n, const Vec3 &_o);
     float distancaneFromIntersectionRayToSphere(const Vec3 &_o, const Vec3 &_d, const Vec3 &_p, float r);
 
+    bool intersectRaySphere(const Vec3 &_o, const Vec3 &_dir, const Vec3 &_center, Vec3 &point, const float _radius, float &t);
+
     Vec3 intersectRayPlane(const Vec3 &_r1, const Vec3 &_r2, const Vec3 &_n, const Vec3 &_o);
     Vec3 intersectRayPlane(const Vec3 &_n, const Vec3 &_pO, const Ray &_ray);
     Vec3 intersectRayPlaneRec(const Vec3 &_n, const Vec3 &_pO, const Ray &_ray);

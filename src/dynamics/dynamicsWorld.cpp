@@ -90,11 +90,12 @@ void DynamicsWorld::update()
 //            qDebug()<<"Cell: "<<pCell.i<<pCell.j<<pCell.k;
 
         size_t pHash = m_hashGrid.hashFunction(pCell);
-        p->setHash(pHash);
+           p->setHash(pHash);
         m_hashGrid.insert(pHash, p);
         // get all neightbouring particles
         std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
         for(ParticlePtr n : neighbourParticles)
+//        for( ParticlePtr n : m_Particles)
         {
 //            bool isNonCollide = std::includes
             bool isNonCollider = false;
@@ -116,35 +117,35 @@ void DynamicsWorld::update()
     }
 
     // Constraint dirty to do something
-    for( ParticlePtr p : m_Particles)
-    {
-        for( ConstraintWeakPtr c : p->m_Constraints)
+        for( ParticlePtr p : m_Particles)
         {
-            if(auto constraint = c.lock()){
-                constraint->setDirty(true);
+
+            for( ConstraintWeakPtr c : p->m_Constraints)
+            {
+                if(auto constraint = c.lock()){
+                    constraint->setDirty(true);
+                }
+            }
+        }
+
+    for(int i = 0 ; i <20; i++)
+    {
+        for( ParticlePtr p : m_Particles)
+        {
+            for( ConstraintWeakPtr c : p->m_Constraints)
+            {
+    //            p->p += c->deltaP();
+    //            auto test = c.lock();
+    //            bool test2 = c.expired();
+                if(auto constraint = c.lock()){
+    //                for(int i=0; i<=5; i++)
+                    {
+                        constraint->project();
+                    }
+                }
             }
         }
     }
-
-
-//    for(int i = 0 ; i <20; i++)
-//    {
-//        for( ParticlePtr p : m_Particles)
-//        {
-//            for( ConstraintWeakPtr c : p->m_Constraints)
-//            {
-//    //            p->p += c->deltaP();
-//    //            auto test = c.lock();
-//    //            bool test2 = c.expired();
-//                if(auto constraint = c.lock()){
-//    //                for(int i=0; i<=5; i++)
-//                    {
-//                        constraint->project();
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     // Solver Iteration (9)
     for( ParticlePtr p : m_Particles)
@@ -236,8 +237,8 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
 {
     pCount++;
     QVector3D pos = _sceneObject->getPos();
-
     auto pDynamicObject = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), pCount);
+    pDynamicObject->setRadius(_sceneObject->getRadius());
     m_Particles.push_back(pDynamicObject);
     m_DynamicObjects.push_back(pDynamicObject);
     _sceneObject->makeDynamic(pDynamicObject);
@@ -248,24 +249,19 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
 {
     if(!_sceneObject->model())
         return nullptr;
-
     auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
-
-//    ModelPtr model = _sceneObject->model();
     ModelPtr model = nRB->getModel();
     _sceneObject->setModel(nRB->getModel());
-
-    auto shapeNum =  model->getNumShapes();
 
     for(unsigned int i = 0; i < model->getNumShapes(); i++)
     {
         ShapePtr shape = model->getShape(i);
-//        mlog<<"has shape"<<i;
 
         for(auto point : shape->getPoints())
         {
             QVector3D pos = _sceneObject->getMatrix() * point;
             auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
+            nParticle->setRadius(_sceneObject->getRadius());
             m_Particles.push_back(nParticle);
             nRB->addParticle(point, nParticle);
             m_scene->addSceneObjectFromParticle(nParticle);
@@ -284,9 +280,6 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
 {
     if(!_sceneObject->model())
         return nullptr;
-
-    mlog<<"LOG 1";
-
 
      auto nSB = std::make_shared<SoftBody>(_sceneObject->model());
      ModelPtr model = nSB->getModel();
@@ -307,32 +300,11 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
 
      std::vector< std::set<int> > constraintIdxs  = nSB->createConstraintNetwork();
 
-
-     int cout = 0;
-     mlog<<"size: "<<constraintIdxs.size();
-
      for(auto set : constraintIdxs)
      {
-         mlog<<"---";
-         for(auto a : set)
-         {
-             mlog<<a;
-             if(set.size() < 2)
-             {
-                 mlog<<"small---------------XXXxXxXXXxXXxXXXXX----------------------";
-             }
-         }
-     }
+         if(set.size() < 2)
+             continue;
 
-     for(auto set : constraintIdxs)
-     {
-         continue;
-         cout++;
-//         mlog<<"---";
-         for(auto a : set)
-         {
-//             mlog<<a;
-         }
          std::set<int>::iterator itA, itB;
          itA = set.begin();
          itB = set.begin();
@@ -341,34 +313,38 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
          int A = *itA;
          int B = *itB;
 
-         ParticleWeakPtr pW1 = nSB->getParticlels()[A];
-         ParticleWeakPtr pW2 = nSB->getParticlels()[B];
-
-
-         if(!(pW1.lock()))
-         {
-             mlog<<"stopA"<<A<<B;
-         }
-         if(!(pW2.lock()))
-         {
-             mlog<<"stopB"<<A<<B;
-             mlog<<"---"<<set.size()<<cout;
-             for(auto a : set)
-             {
-                    mlog<<a;
-             }
-         }
-
          ParticlePtr p1 = nSB->getParticlels()[A].lock();
          ParticlePtr p2 = nSB->getParticlels()[B].lock();
 
-        mlog<<p1->x<<p2->x;
+         float restLength = ((p1->x)-(p2->x)).length();
+         std::shared_ptr<DistanceEqualityConstraint> nCstrPtr = addDistanceEqualityConstraint(p1, p2);
+         nCstrPtr->setRestLength(restLength);
 
-//         float restLength = ((p1->x)-(p2->x)).length();
-//         std::shared_ptr<DistanceEqualityConstraint> nCstrPtr = addDistanceEqualityConstraint(p1, p2);
-//         nCstrPtr->setRestLength(restLength);
      }
+//     ParticlePtr particle = nSB->getParticlels()[0].lock();
+//     QVector3D pos = particle->x;
+//     std::shared_ptr<PinConstraint> pinCstr = std::make_shared<PinConstraint>(particle, pos);
+//     pinCstr->setDirty(true);
+//     pinCstr->setPositon(pos);
+//     m_Constraints.push_back(pinCstr);
 
+//     std::weak_ptr<PinConstraint> weakPtr = pinCstr;
+//     particle->m_Constraints.push_back(pinCstr);
+
+     for(auto p : nSB->getParticlels())
+     {
+         if(ParticlePtr particle = p.lock())
+         {
+             if(particle->x.y() > 12.0)
+             {
+                 QVector3D pos = particle->x;
+                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
+                 pinCstr->setPositon(pos);
+                 m_Constraints.push_back(pinCstr);
+                 particle->m_Constraints.push_back(pinCstr);
+             }
+         }
+     }
 
      nSB->turnOffSelfCollision();
      nSB->updateModelBuffers();
@@ -398,14 +374,13 @@ void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2
     float d;
     if(m_CollisionDetect.checkSphereSphere(p1->p, p2->p, d,p1->radius(), p2->radius())){
         addParticleParticleConstraint(p1, p2);
-        mlog<<"PP collsion";
     }
 }
 
 void DynamicsWorld::generateData()
 {
-    mlog<<"Gen Data";
-//    addDistanceEqualityConstraint(m_Particles[0], m_Particles[1]);
+
+
 
 }
 

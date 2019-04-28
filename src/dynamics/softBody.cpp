@@ -17,116 +17,34 @@ void SoftBody::addParticle(const QVector3D &_localPos, const ParticleWeakPtr _pa
     m_particles.push_back(_particle);
 }
 
-std::vector< std::set<int> > SoftBody::createConstraintNetwork()
+std::vector<std::set<int> > SoftBody::createConstraintNetwork()
 {
-    std::vector<int> constraintIdxs;
     std::vector< std::set<int> > constraintIdxPairs;
-
     ShapePtr shape = getModel()->getShape(0);
+    std:: vector<unsigned int> vertIndices = shape->getIndices();
     int verticesSize = shape->getVertices().size()-1;
-    /* step (1) build triangle springs
-     * assumed model is Quadrangulate mesh. Taking 1 triangle per quad.
-     *      |\
-     *      | \
-     *      |___\
-     */
-    for(int i=2; i < verticesSize; i += 4)
+
+    for(int i=2; i < vertIndices.size(); i+=3 )
     {
-        std::vector<int> triVertIdxs = {i-2, i-1, i};
-        std::vector<int> triPointIdx;
-        for(int vertIdx : triVertIdxs)
-        {
-            int pointIdx = findKbyValueElement(shape->getVertsMap(), vertIdx);
-//            if(pointIdx != -1)
-                triPointIdx.push_back(pointIdx);
-        }
-        std::set<int> pairA = {triPointIdx[0], triPointIdx[1]};
-        std::set<int> pairB = {triPointIdx[1], triPointIdx[2]};
-        std::set<int> pairC = {triPointIdx[2], triPointIdx[0]};
+        int vertIdxA = vertIndices[i-2];
+        int vertIdxB = vertIndices[i-1];
+        int vertIdxC = vertIndices[i];
 
-        if(pairA.size() <2)
-        {
-            mlog<<"small ------------A----------";
-            continue;
-        }
-        if(pairB.size() <2)
-        {
-            mlog<<"small ------------B----------";
-            continue;
-        }
-        if(pairB.size() <2)
-        {
-            mlog<<"small ------------C----------";
-            continue;
-        }
+        int poitIdxA = findKbyValueElement(shape->getVertsMap(), vertIdxA);
+        int poitIdxB = findKbyValueElement(shape->getVertsMap(), vertIdxB);
+        int poitIdxC = findKbyValueElement(shape->getVertsMap(), vertIdxC);
 
-        if(!hasPair(constraintIdxPairs, pairA))
-            constraintIdxPairs.push_back(pairA);
-        if(!hasPair(constraintIdxPairs, pairB))
-            constraintIdxPairs.push_back(pairB);
-        if(!hasPair(constraintIdxPairs, pairC))
-            constraintIdxPairs.push_back(pairC);
+        std::set<int> edgeAB = {poitIdxA, poitIdxB};
+        std::set<int> edgeBA = {poitIdxB, poitIdxC};
+        std::set<int> edgeCA = {poitIdxC, poitIdxA};
+
+        std::vector<std::set<int>> edges = {edgeAB, edgeBA, edgeCA};
+        for(auto edge : edges)
+        {
+            if(!hasPair(constraintIdxPairs, edge))
+                constraintIdxPairs.push_back(edge);
+        }
     }
-
-    /* step (2) build Z-edge springs
-     *        _______>
-     *      |\
-     *      | \
-     *      |___\
-     */
-    for(int i=3; i < shape->getIndices().size()-1; i += 6)
-    {
-        int vertIdxA = shape->getIndices()[i];
-        int vertIdxB = shape->getIndices()[i+2];
-
-        int pointIdxA = findKbyValueElement(shape->getVertsMap(), vertIdxA);
-        int pointIdxB = findKbyValueElement(shape->getVertsMap(), vertIdxB);
-        std::set<int> pair = {pointIdxA, pointIdxB};
-
-        if(pair.size() <2)
-        {
-            mlog<<"small ------------Z----------";
-            continue;
-        }
-        if(!hasPair(constraintIdxPairs, pair))
-            constraintIdxPairs.push_back(pair);
-    }
-
-    /* step (3) build x-edge springs
-     *
-     *      |\   |
-     *      | \  |
-     *      |___\|
-     *           v
-     */
-    for(int i=5; i < shape->getIndices().size(); i += 6)
-    {
-        int vertIdxA = shape->getIndices()[i];
-        int vertIdxB = shape->getIndices()[i-1];
-
-        int pointIdxA = findKbyValueElement(shape->getVertsMap(), vertIdxA);
-        int pointIdxB = findKbyValueElement(shape->getVertsMap(), vertIdxB);
-        std::set<int> pair = {pointIdxA, pointIdxB};
-
-        if(pair.size() <2)
-        {
-            mlog<<"small ------------X----------";
-            continue;
-        }
-        if(!hasPair(constraintIdxPairs, pair))
-            constraintIdxPairs.push_back(pair);
-    }
-
-//    for(auto p : constraintIdxPairs)
-//    {
-//        qDebug()<<"----";
-//        for(auto x : p )
-//        {
-//            qDebug()<<x;
-//        }
-//    }
-//    mlog<<"stop";
-
     return constraintIdxPairs;
 }
 

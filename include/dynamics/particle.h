@@ -14,14 +14,15 @@ class Particle : public DynamicObject, public std::enable_shared_from_this<Parti
 public:
     Particle();
     Particle(float _x, float _y, float _z, int _ID);
+//    Particle(float _x, float _y, float _z, int _ID, float _r);
 
+    void setRadius(float _radius);
     void setCell(int _i, int _j, int _k);
     void setHash(size_t _hashv);
     int ID = 0;
 
     QVector3D position();
     float radius();
-    float foo();
 
     ParticlePtr pointer(Particle *ptr);
 

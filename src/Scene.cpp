@@ -107,6 +107,8 @@ pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle)
     }
     auto pSO = std::make_shared<SceneObject>(this, pModel, 1 , _particle->getTranslation());
     pSO->setActiveObject(widget()->activeObject());
+    pSO->setRadius(_particle->radius());
+
     numCreation++;
     pSO->setID(numCreation);
     m_SceneObjects.push_back(pSO);
@@ -278,12 +280,17 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
         m_pickedObject->isActive(false);
     m_pickedObject.reset();
 
+    // Ray Sphere check
     for(uint i = 1; i < m_SceneObjects.size(); i++)
     {
-        float t = m_CollisionDetect.distancaneFromIntersectionRayToSphere(cameraRay.Origin,
-                                                    cameraRay.Dir.normalized(),
-                                                    m_SceneObjects[i]->getPos(),
-                                                    0.5);
+        float t;
+        QVector3D point;
+        m_CollisionDetect.intersectRaySphere(cameraRay.Origin,
+                                             cameraRay.Dir.normalized(),
+                                             m_SceneObjects[i]->getPos(),
+                                             point, m_SceneObjects[i]->getRadius(),
+                                             t);
+
         if(t > 0.0)
         {
             if(min_t == 0.0)
@@ -686,7 +693,7 @@ void Scene::paint()
                         }
                         if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
                         {
-                            continue;
+//                            continue;
                         }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
@@ -813,6 +820,10 @@ void Scene::setupScene()
 //        addPointLight(QVector3D(-5,0,0), QVector3D(0, 1, 0));
 //        addPointLight(QVector3D(0,5,0), QVector3D(1, 0, 0));
 
+         QVector3D pointLightA(0,25,0);
+         QVector3D pointLightB(10,25,0);
+         QVector3D pointLightC(0,15,10);
+
          addPointLight(QVector3D(0,25,0), QVector3D(1.0, 1.0, 1.0));
          addPointLight(QVector3D(10,25,0), QVector3D(0.6, 0.6, 1.0));
          addPointLight(QVector3D(0,15,10), QVector3D(0.8, 0.8, 0.8));
@@ -836,6 +847,11 @@ void Scene::setupScene()
                         QVector3D(1.0f , 1.0f ,1.0f),    // specular
                         15.0 );
 
+        addMaterial(    QVector3D(1.2f , 1.2f ,0.0f),   // ambient
+                        QVector3D(0.8f , 0.8f ,0.0f),   // diffuse
+                        QVector3D(0.0f , 0.0f ,0.0f),    // specular
+                        15.0 );
+
     //    MAKE MODEL TO RENDER
 //        addModel(this, "grid1", "../Grid1_16_points.obj");
 //       addModel(this, "grid1", "../Grid1_bend.obj");
@@ -843,7 +859,7 @@ void Scene::setupScene()
 //        addModel(this, "grid1", "../banana.obj");
 //        addModel(this, "grid1", "../Grid1.obj");
 //        addModel(this, "grid1", "../Grid1_12.obj");
-        addModel(this, "grid1", "../Grid_10x10.obj");
+        addModel(this, "grid1", "../Grid_3x3.obj");
 //       addModel(this, "grid1", "../triangle.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
@@ -864,26 +880,31 @@ void Scene::setupScene()
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
-       // Rope
-//        auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(0,6,-5), QQuaternion(1,0,0,0));
-//        auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(4.5,6,-5), QQuaternion(1,0,0,0));
-//        auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-4.5,6,-5), QQuaternion(1,0,0,0));
-//        makeDynamic(sceneObject1);
-//        makeDynamic(sceneObject2);
-//        makeDynamic(sceneObject3);
+
+//       addPointLight(QVector3D(0,25,0), QVector3D(1.0, 1.0, 1.0));
+//       addPointLight(QVector3D(10,25,0), QVector3D(0.6, 0.6, 1.0));
+//       addPointLight(QVector3D(0,15,10), QVector3D(0.8, 0.8, 0.8));
 
         //Spheres
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
-       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
-        auto sceneObject1 = addSceneObjectFromModel("bunny", 0, QVector3D(0, 8, 0), rot);
+       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
+        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 8, 0), rot);
+
+         auto sphere = addSceneObjectFromModel("sphere", 2, QVector3D(25, 10, 0), rot);
+//        sphere->setRadius(4);
+         m_DynamicsWorld->addDynamicObjectAsParticle(sphere);
 
 
 //       makeDynamicRigidBody(sceneObject1);
 //       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
-       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
+       auto nSB = m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
+
+       //        addSceneObjectFromModel("sphere", 3, pointLightA, rot);
+       //        addSceneObjectFromModel("sphere", 3, pointLightB, rot);
+       //        addSceneObjectFromModel("sphere", 3, pointLightC, rot);
 }
 
 
