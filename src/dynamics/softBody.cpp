@@ -43,6 +43,23 @@ std::vector< std::set<int> > SoftBody::createConstraintNetwork()
         std::set<int> pairA = {triPointIdx[0], triPointIdx[1]};
         std::set<int> pairB = {triPointIdx[1], triPointIdx[2]};
         std::set<int> pairC = {triPointIdx[2], triPointIdx[0]};
+
+        if(pairA.size() <2)
+        {
+            mlog<<"small ------------A----------";
+            continue;
+        }
+        if(pairB.size() <2)
+        {
+            mlog<<"small ------------B----------";
+            continue;
+        }
+        if(pairB.size() <2)
+        {
+            mlog<<"small ------------C----------";
+            continue;
+        }
+
         if(!hasPair(constraintIdxPairs, pairA))
             constraintIdxPairs.push_back(pairA);
         if(!hasPair(constraintIdxPairs, pairB))
@@ -65,6 +82,12 @@ std::vector< std::set<int> > SoftBody::createConstraintNetwork()
         int pointIdxA = findKbyValueElement(shape->getVertsMap(), vertIdxA);
         int pointIdxB = findKbyValueElement(shape->getVertsMap(), vertIdxB);
         std::set<int> pair = {pointIdxA, pointIdxB};
+
+        if(pair.size() <2)
+        {
+            mlog<<"small ------------Z----------";
+            continue;
+        }
         if(!hasPair(constraintIdxPairs, pair))
             constraintIdxPairs.push_back(pair);
     }
@@ -84,6 +107,12 @@ std::vector< std::set<int> > SoftBody::createConstraintNetwork()
         int pointIdxA = findKbyValueElement(shape->getVertsMap(), vertIdxA);
         int pointIdxB = findKbyValueElement(shape->getVertsMap(), vertIdxB);
         std::set<int> pair = {pointIdxA, pointIdxB};
+
+        if(pair.size() <2)
+        {
+            mlog<<"small ------------X----------";
+            continue;
+        }
         if(!hasPair(constraintIdxPairs, pair))
             constraintIdxPairs.push_back(pair);
     }
@@ -99,6 +128,21 @@ std::vector< std::set<int> > SoftBody::createConstraintNetwork()
 //    mlog<<"stop";
 
     return constraintIdxPairs;
+}
+
+void SoftBody::turnOffSelfCollision()
+{
+    for(auto p : m_particles)
+    {
+        if(auto particle = p.lock())
+        {
+            for_each(m_particles.begin(), m_particles.end(), [&particle](ParticleWeakPtr pNeighbour)
+            {
+                if(particle != pNeighbour.lock())
+                    particle->m_NonCollisionParticles.push_back(pNeighbour);
+            });
+        }
+    }
 }
 
 void SoftBody::updateModelBuffers()

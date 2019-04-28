@@ -684,10 +684,10 @@ void Scene::paint()
                         {
                             continue;
                         }
-//                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
-//                        {
-//                            continue;
-//                        }
+                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
+                        {
+                            continue;
+                        }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
                         m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
@@ -747,7 +747,7 @@ void Scene::paint()
           m_geometry_program->setUniformValue("projection", m_projection_matrix);
           m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
           m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
-          m_SceneObjects[1]->drawPoints();
+//          m_SceneObjects[1]->drawPoints();
 
          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
@@ -843,7 +843,7 @@ void Scene::setupScene()
 //        addModel(this, "grid1", "../banana.obj");
 //        addModel(this, "grid1", "../Grid1.obj");
 //        addModel(this, "grid1", "../Grid1_12.obj");
-        addModel(this, "grid1", "../Grid_4x4.obj");
+        addModel(this, "grid1", "../Grid_10x10.obj");
 //       addModel(this, "grid1", "../triangle.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
@@ -851,11 +851,12 @@ void Scene::setupScene()
        addModel(this, "sphere", "../Icosahedronf4.obj");
 
        addModel(this, "Vector", "../VectorShape.obj");
+       addModel(this, "torus", "../torus.obj");
        addModel(this, "Circle", "../TorusShape.obj");
        addModel(this, "Plane", "../PlaneShape.obj");
 //       addModel(this, "Axis", "../AxisShape.obj");
 //       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
-       addModel(this, "bunny", "../bunny.obj");
+       addModel(this, "bunny", "../bunny_low.obj");
 //       addModel(this, "teapot", "../MegaTeapot.obj");
 
 //       addModel(this, "gridTransform", "../Grid1_transfrom.obj");
@@ -873,9 +874,8 @@ void Scene::setupScene()
 
         //Spheres
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
-       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(88,0,0));
-
-        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 8, 0), rot);
+       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
+        auto sceneObject1 = addSceneObjectFromModel("bunny", 0, QVector3D(0, 8, 0), rot);
 
 
 //       makeDynamicRigidBody(sceneObject1);
