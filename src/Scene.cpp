@@ -223,7 +223,7 @@ ModelPtr Scene::getModelFromPool(std::string _key)
     ModelMap::const_iterator got = m_ModelPool.find(_key);
     if ( got == m_ModelPool.end())
     {
-        qDebug()<< "WARNING: NO MODEL WAS FOUND";
+        qDebug()<< "WARNING: NO MODEL WAS FOUND for getModelFromPool()"<<QString::fromStdString( _key);
     }
     else
     {
@@ -859,8 +859,8 @@ void Scene::setupScene()
 //        addModel(this, "grid1", "../banana.obj");
 //        addModel(this, "grid1", "../Grid1.obj");
 //        addModel(this, "grid1", "../Grid1_12.obj");
-        addModel(this, "grid1", "../Grid_3x3.obj");
-//       addModel(this, "grid1", "../triangle.obj");
+//        addModel(this, "grid1", "../Grid_3x3.obj");
+       addModel(this, "grid1", "../Cube10.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
        addModel(this, "grid", "../Grid100.obj");
@@ -896,8 +896,8 @@ void Scene::setupScene()
 
 
 //       makeDynamicRigidBody(sceneObject1);
-//       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
-       auto nSB = m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
+       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+//       auto nSB = m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);

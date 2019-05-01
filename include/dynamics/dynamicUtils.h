@@ -8,6 +8,10 @@
 #include <map>
 #include <set>
 
+#include <eigen3/Eigen/Dense>
+#include <QMatrix3x3>
+
+
 class DynamicObject;
 class Particle;
 class AbstractConstraint;

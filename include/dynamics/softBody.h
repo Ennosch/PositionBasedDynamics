@@ -20,7 +20,7 @@ public:
     ModelPtr getModel();
     const QMatrix4x4 getTransfrom();
 
-    std::vector<ParticleWeakPtr>& getParticlels();
+    std::vector<ParticleWeakPtr>& getParticles();
 
 private:
     ModelPtr m_model;

@@ -96,6 +96,11 @@ const QVector3D RigidBody::getTranslation()
     return QVector3D(0,0,0);
 }
 
+std::vector<ParticleWeakPtr> &RigidBody::getParticles()
+{
+    return m_particles;
+}
+
 //std::shared_ptr<RigidBody> RigidBody::getPointer()
 //{
 //    return shared_from_this();

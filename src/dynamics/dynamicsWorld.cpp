@@ -5,6 +5,8 @@
 
 #include <Qdebug>
 
+Eigen::Matrix3f QMatrix3toEigen(const QMatrix3x3 &_qMat);
+QMatrix3x3 EigenMatrix3toQt(const Eigen::Matrix3f &_eMat);
 
 
 DynamicsWorld::DynamicsWorld()
@@ -63,6 +65,50 @@ void DynamicsWorld::update()
     }
 
     // damp Velocities (6)
+    for(auto dObject : m_DynamicObjects)
+    {
+        QVector3D xcm, vcm, ri, L, w;
+        QMatrix3x3 I;
+        int totalMass = 0;
+
+        for(auto p : dObject->getParticles())
+        {
+            if(auto particle = p.lock())
+            {
+                xcm += particle->m * particle->x;
+                vcm += particle->m * particle->v;
+                totalMass += particle->m;
+            }
+        }
+        xcm /= totalMass;
+        vcm /= totalMass;
+
+//        mlog<<xcm<<vcm;
+
+        for(auto p : dObject->getParticles())
+        {
+            if(auto particle = p.lock())
+            {
+                ri = particle->x - xcm;
+                L += QVector3D::crossProduct(ri, (particle->m * particle->v));
+                QMatrix3x3 rt;
+                rt(0,0) =            0 ; rt(0,1) =       -ri[2] ; rt(0,2) =        ri[1] ;
+                rt(1,0) =         ri[2]; rt(1,1) =            0 ; rt(1,2) =       -ri[0] ;
+                rt(2,0) =        -ri[1]; rt(2,1) =        ri[0] ; rt(1,2) =            0 ;
+                rt *= particle->m;
+
+
+                Eigen::Matrix3f rtMat = QMatrix3toEigen(rt);
+                Eigen::Matrix3f IMat = rtMat * rtMat.transpose() * particle->m;
+                I += EigenMatrix3toQt(IMat);
+            }
+        }
+        Eigen::Vector3f wM = QMatrix3toEigen(I).inverse() * Eigen::Vector3f(L.x(), L.y(), L.z());
+        w = QVector3D(wM.x(), wM.y(), wM.z());
+
+        mlog<<w;
+    }
+
 
     for( ParticlePtr p : m_Particles)
     {
@@ -128,24 +174,24 @@ void DynamicsWorld::update()
             }
         }
 
-    for(int i = 0 ; i <20; i++)
-    {
-        for( ParticlePtr p : m_Particles)
-        {
-            for( ConstraintWeakPtr c : p->m_Constraints)
-            {
-    //            p->p += c->deltaP();
-    //            auto test = c.lock();
-    //            bool test2 = c.expired();
-                if(auto constraint = c.lock()){
-    //                for(int i=0; i<=5; i++)
-                    {
-                        constraint->project();
-                    }
-                }
-            }
-        }
-    }
+//    for(int i = 0 ; i <10; i++)
+//    {
+//        for( ParticlePtr p : m_Particles)
+//        {
+//            for( ConstraintWeakPtr c : p->m_Constraints)
+//            {
+//    //            p->p += c->deltaP();
+//    //            auto test = c.lock();
+//    //            bool test2 = c.expired();
+//                if(auto constraint = c.lock()){
+//    //                for(int i=0; i<=5; i++)
+//                    {
+//                        constraint->project();
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     // Solver Iteration (9)
     for( ParticlePtr p : m_Particles)
@@ -247,6 +293,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
 
 DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObject)
 {
+
     if(!_sceneObject->model())
         return nullptr;
     auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
@@ -269,6 +316,8 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     }
     auto smCstr = nRB->createConstraint();
     m_Constraints.push_back(smCstr);
+
+    m_DynamicObjects.push_back(nRB);
 
     nRB->updateModelBuffers();
     _sceneObject->makeDynamic(nRB);
@@ -313,8 +362,8 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
          int A = *itA;
          int B = *itB;
 
-         ParticlePtr p1 = nSB->getParticlels()[A].lock();
-         ParticlePtr p2 = nSB->getParticlels()[B].lock();
+         ParticlePtr p1 = nSB->getParticles()[A].lock();
+         ParticlePtr p2 = nSB->getParticles()[B].lock();
 
          float restLength = ((p1->x)-(p2->x)).length();
          std::shared_ptr<DistanceEqualityConstraint> nCstrPtr = addDistanceEqualityConstraint(p1, p2);
@@ -331,7 +380,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
 //     std::weak_ptr<PinConstraint> weakPtr = pinCstr;
 //     particle->m_Constraints.push_back(pinCstr);
 
-     for(auto p : nSB->getParticlels())
+     for(auto p : nSB->getParticles())
      {
          if(ParticlePtr particle = p.lock())
          {
@@ -379,6 +428,40 @@ void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2
 
 void DynamicsWorld::generateData()
 {
+    auto rb = m_DynamicObjects[1];
+
+//    for(int i=0; i< rb->getParticles().size(); i++)
+//    {
+//        if(ParticlePtr p = rb->getParticles()[i].lock())
+//        {
+
+//        }
+//    }
+    float av = 100;
+
+    rb->getParticles()[0].lock()->v = QVector3D(av,-av,0);
+    rb->getParticles()[3].lock()->v = QVector3D(av,-av,0);
+
+    rb->getParticles()[2].lock()->v = QVector3D(av,av,0);
+    rb->getParticles()[1].lock()->v = QVector3D(av,av,0);
+
+    rb->getParticles()[4].lock()->v = QVector3D(-av,-av,0);
+    rb->getParticles()[5].lock()->v = QVector3D(-av,-av,0);
+
+    rb->getParticles()[6].lock()->v = QVector3D(-av,av,0);
+    rb->getParticles()[7].lock()->v = QVector3D(-av,av,0);
+
+//    rb->getParticles()[0].lock()->v = QVector3D(1,-1,0);
+//    rb->getParticles()[3].lock()->v = QVector3D(1,-1,0);
+
+//    rb->getParticles()[2].lock()->v = QVector3D(1,1,0);
+//    rb->getParticles()[1].lock()->v = QVector3D(1,1,0);
+
+//    rb->getParticles()[4].lock()->v = QVector3D(-1,-1,0);
+//    rb->getParticles()[5].lock()->v = QVector3D(-1,-1,0);
+
+//    rb->getParticles()[6].lock()->v = QVector3D(-1,1,0);
+//    rb->getParticles()[7].lock()->v = QVector3D(-1,1,0);
 
 
 
@@ -453,6 +536,25 @@ void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
                 m_Constraints.end()
                 );
 
+}
+
+
+Eigen::Matrix3f QMatrix3toEigen(const QMatrix3x3 &_qMat)
+{
+    Eigen::Matrix3f mat;
+    mat(0,0) = _qMat(0,0); mat(0,1) = _qMat(0,1); mat(0,2) = _qMat(0,2);
+    mat(1,0) = _qMat(1,0); mat(1,1) = _qMat(1,1); mat(1,2) = _qMat(1,2);
+    mat(2,0) = _qMat(2,0); mat(2,1) = _qMat(2,1); mat(2,2) = _qMat(2,2);
+    return mat;
+}
+
+QMatrix3x3 EigenMatrix3toQt(const Eigen::Matrix3f &_eMat)
+{
+    QMatrix3x3 mat;
+    mat(0,0) = _eMat(0,0); mat(0,1) = _eMat(0,1); mat(0,2) = _eMat(0,2);
+    mat(1,0) = _eMat(1,0); mat(1,1) = _eMat(1,1); mat(1,2) = _eMat(1,2);
+    mat(2,0) = _eMat(2,0); mat(2,1) = _eMat(2,1); mat(2,2) = _eMat(2,2);
+    return mat;
 }
 
 

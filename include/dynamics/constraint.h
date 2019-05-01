@@ -99,6 +99,7 @@ private:
     float d;
     QVector3D Vp1, Vp2;
     ParticlePtr pptr1, pptr2;
+    int stretchK, compressK;
 };
 
 //class ShapeMatchingConstraint : public AbstractConstraint, public std::enable_shared_from_this<ShapeMatchingConstraint>

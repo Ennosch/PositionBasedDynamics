@@ -23,6 +23,8 @@ public:
     const QMatrix4x4 getTransfrom();
     const QVector3D getTranslation();
 
+    std::vector<ParticleWeakPtr>& getParticles();
+
 
 private:
     friend ShapeMatchingConstraint;

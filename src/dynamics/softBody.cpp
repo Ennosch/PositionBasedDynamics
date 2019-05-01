@@ -97,7 +97,8 @@ const QMatrix4x4 SoftBody::getTransfrom()
     return  identity;
 }
 
-std::vector<ParticleWeakPtr>& SoftBody::getParticlels()
+std::vector<ParticleWeakPtr> &SoftBody::getParticles()
 {
     return m_particles;
 }
+
