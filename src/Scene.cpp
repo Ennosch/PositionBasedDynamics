@@ -859,8 +859,8 @@ void Scene::setupScene()
 //        addModel(this, "grid1", "../banana.obj");
 //        addModel(this, "grid1", "../Grid1.obj");
 //        addModel(this, "grid1", "../Grid1_12.obj");
-//        addModel(this, "grid1", "../Grid_3x3.obj");
-       addModel(this, "grid1", "../Cube10.obj");
+        addModel(this, "grid1", "../Grid_3x3.obj");
+//       addModel(this, "grid1", "../Cube10.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
        addModel(this, "grid", "../Grid100.obj");
@@ -870,7 +870,7 @@ void Scene::setupScene()
        addModel(this, "torus", "../torus.obj");
        addModel(this, "Circle", "../TorusShape.obj");
        addModel(this, "Plane", "../PlaneShape.obj");
-//       addModel(this, "Axis", "../AxisShape.obj");
+       addModel(this, "Axis", "../AxisShape.obj");
 //       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "../bunny_low.obj");
 //       addModel(this, "teapot", "../MegaTeapot.obj");
@@ -888,16 +888,16 @@ void Scene::setupScene()
         //Spheres
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
-        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 8, 0), rot);
+        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 10, 0), rot);
 
-         auto sphere = addSceneObjectFromModel("sphere", 2, QVector3D(25, 10, 0), rot);
+//         auto sphere = addSceneObjectFromModel("sphere", 2, QVector3D(25, 10, 0), rot);
 //        sphere->setRadius(4);
-         m_DynamicsWorld->addDynamicObjectAsParticle(sphere);
+//         m_DynamicsWorld->addDynamicObjectAsParticle(sphere);
 
 
 //       makeDynamicRigidBody(sceneObject1);
-       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
-//       auto nSB = m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);

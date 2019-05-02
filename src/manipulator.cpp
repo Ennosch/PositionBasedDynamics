@@ -456,7 +456,6 @@ void Manipulator::dragTranslate()
             t = m_dragStart + (axis * ds);
             m_Transform.setTranslation(t);
             break;
-
     }
 }
 

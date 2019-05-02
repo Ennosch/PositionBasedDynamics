@@ -151,6 +151,7 @@ Vec3 CollisionDetection::intersectRayPlaneRec(const Vec3 &_n, const Vec3 &_pO, c
         result = intersectRayPlaneRec(_n, _pO, _ray2);
     }
     return result;
+
 }
 
 Vec3 CollisionDetection::intersectLinePlane(const Vec3 &_n, const Vec3 &_pO, const Vec3 &_A, const Vec3 &_B)

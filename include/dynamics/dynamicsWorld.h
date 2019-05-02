@@ -39,6 +39,8 @@ class DynamicsWorld
         void reset();
         void step();
 
+        void pbdDamping();
+
         void addDynamicObject(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject);
