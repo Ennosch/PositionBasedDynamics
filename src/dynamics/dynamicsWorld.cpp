@@ -261,7 +261,7 @@ void DynamicsWorld::pbdDamping()
                 QMatrix3x3 rt;
                 rt(0,0) =            0 ; rt(0,1) =       -ri[2] ; rt(0,2) =        ri[1] ;
                 rt(1,0) =         ri[2]; rt(1,1) =            0 ; rt(1,2) =       -ri[0] ;
-                rt(2,0) =        -ri[1]; rt(2,1) =        ri[0] ; rt(1,2) =            0 ;
+                rt(2,0) =        -ri[1]; rt(2,1) =        ri[0] ; rt(2,2) =            0 ;
                 rt *= particle->m;
 
                 Eigen::Matrix3f rtMat = QMatrix3toEigen(rt);
@@ -271,20 +271,19 @@ void DynamicsWorld::pbdDamping()
         }
         Eigen::Vector3f wM = QMatrix3toEigen(I).inverse() * Eigen::Vector3f(L.x(), L.y(), L.z());
         w = QVector3D(wM.x(), wM.y(), wM.z());
-//        mlog<<w;
+
+        int i = 0;
         for(auto p : dObject->getParticles())
         {
             if(auto particle = p.lock())
             {
                 ri = particle->x - xcm;
-                QVector3D test = w;
-                w = QVector3D(0,0,0);
-//                QVector3D dv = vcm + (QVector3D::crossProduct(w,ri) - particle->v);
-                QVector3D dv = vcm + (QVector3D::crossProduct(ri, w) - particle->v);
-
-
-                particle->v +=  (0.1 * dv);
-
+                QVector3D dv = vcm + (QVector3D::crossProduct(w, ri)) - particle->v;
+                i++;
+                if(i == 1){
+//                    mlog<<"  v: "<< particle->v<< "ri "<<ri<< "vcm: "<<vcm<<"xcm:"<<xcm<<"dv: "<<dv<<" w x ri: "<<QVector3D::crossProduct(w, ri);
+                }
+                particle->v +=  (1.0 * dv);
             }
         }
     }
@@ -397,22 +396,22 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
          nCstrPtr->setRestLength(restLength);
 
      };
-     for(auto p : nSB->getParticles())
-     {
-         if(ParticlePtr particle = p.lock())
-         {
-             if(particle->x.y() > 12.0)
-             {
-                 QVector3D pos = particle->x;
-                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
-                 pinCstr->setPositon(pos);
-                 m_Constraints.push_back(pinCstr);
-                 particle->m_Constraints.push_back(pinCstr);
-             }
-         }
-     }
+//     // pin rows !
+//     for(auto p : nSB->getParticles())
+//     {
+//         if(ParticlePtr particle = p.lock())
+//         {
+//             if(particle->x.y() > 12.0)
+//             {
+//                 QVector3D pos = particle->x;
+//                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
+//                 pinCstr->setPositon(pos);
+//                 m_Constraints.push_back(pinCstr);
+//                 particle->m_Constraints.push_back(pinCstr);
+//             }
+//         }
+//     }
      m_DynamicObjects.push_back(nSB);
-
      nSB->turnOffSelfCollision();
      nSB->updateModelBuffers();
      _sceneObject->makeDynamic(nSB);
@@ -447,7 +446,28 @@ void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2
 void DynamicsWorld::generateData()
 {
 
+    auto rb = m_DynamicObjects[0];
 
+    //    for(int i=0; i< rb->getParticles().size(); i++)
+    //    {
+    //        if(ParticlePtr p = rb->getParticles()[i].lock())
+    //        {
+
+    //        }
+    //    }
+    float av = 100;
+
+    rb->getParticles()[0].lock()->v = QVector3D(av,-av,0);
+    rb->getParticles()[3].lock()->v = QVector3D(av,-av,0);
+
+    rb->getParticles()[2].lock()->v = QVector3D(av,av,0);
+    rb->getParticles()[1].lock()->v = QVector3D(av,av,0);
+
+    rb->getParticles()[4].lock()->v = QVector3D(-av,-av,0);
+    rb->getParticles()[5].lock()->v = QVector3D(-av,-av,0);
+
+    rb->getParticles()[6].lock()->v = QVector3D(-av,av,0);
+    rb->getParticles()[7].lock()->v = QVector3D(-av,av,0);
 
 }
 
