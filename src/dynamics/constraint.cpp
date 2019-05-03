@@ -385,10 +385,23 @@ double infNorm(const Matrix3r &A)
 
 
 
+FrictionConstraint::FrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2, const QVector3D _collisionN)
+    : pptr1(_p1),
+      pptr2(_p2),
+      m_collisionNormal(_collisionN)
+{
+
+}
+
+void FrictionConstraint::project()
+{
+    QVector3D td;
+    td = (pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x) - constraintFunction() * m_collisionNormal;
 
 
+}
 
-
-
-
-
+float FrictionConstraint::constraintFunction()
+{
+    return QVector3D::dotProduct((pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x), m_collisionNormal);
+}

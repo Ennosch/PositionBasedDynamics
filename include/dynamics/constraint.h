@@ -123,6 +123,19 @@ private:
     Eigen::Quaternionf q, qPrev;
 };
 
+class FrictionConstraint : public AbstractConstraint
+{
+public:
+    FrictionConstraint(){}
+    FrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2, const QVector3D _collisionN);
+
+    void project();
+    float constraintFunction();
+private:
+    ParticlePtr pptr1, pptr2;
+    QVector3D m_collisionNormal;
+
+};
 
 void polarDecompositionStable(const Matrix3r &M, const double tolerance, Matrix3r &R);
 

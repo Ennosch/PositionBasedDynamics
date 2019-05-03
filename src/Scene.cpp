@@ -884,9 +884,11 @@ void Scene::setupScene()
        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
 //       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
 
-       auto sphere = addSceneObjectFromModel("sphere", 2, QVector3D(25, 10, 0), rot);
-//        sphere->setRadius(4);
-       m_DynamicsWorld->addDynamicObjectAsParticle(sphere);
+       auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.2, 0.5, 0), rot);
+       m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
+
+//       auto sphere2 = addSceneObjectFromModel("sphere", 1, QVector3D(0, 1.7, 0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere2);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);

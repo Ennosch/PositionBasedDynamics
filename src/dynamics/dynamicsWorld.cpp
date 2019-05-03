@@ -446,28 +446,28 @@ void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2
 void DynamicsWorld::generateData()
 {
 
-    auto rb = m_DynamicObjects[0];
+//    auto rb = m_DynamicObjects[0];
 
-    //    for(int i=0; i< rb->getParticles().size(); i++)
-    //    {
-    //        if(ParticlePtr p = rb->getParticles()[i].lock())
-    //        {
+//    //    for(int i=0; i< rb->getParticles().size(); i++)
+//    //    {
+//    //        if(ParticlePtr p = rb->getParticles()[i].lock())
+//    //        {
 
-    //        }
-    //    }
-    float av = 100;
+//    //        }
+//    //    }
+//    float av = 100;
 
-    rb->getParticles()[0].lock()->v = QVector3D(av,-av,0);
-    rb->getParticles()[3].lock()->v = QVector3D(av,-av,0);
+//    rb->getParticles()[0].lock()->v = QVector3D(av,-av,0);
+//    rb->getParticles()[3].lock()->v = QVector3D(av,-av,0);
 
-    rb->getParticles()[2].lock()->v = QVector3D(av,av,0);
-    rb->getParticles()[1].lock()->v = QVector3D(av,av,0);
+//    rb->getParticles()[2].lock()->v = QVector3D(av,av,0);
+//    rb->getParticles()[1].lock()->v = QVector3D(av,av,0);
 
-    rb->getParticles()[4].lock()->v = QVector3D(-av,-av,0);
-    rb->getParticles()[5].lock()->v = QVector3D(-av,-av,0);
+//    rb->getParticles()[4].lock()->v = QVector3D(-av,-av,0);
+//    rb->getParticles()[5].lock()->v = QVector3D(-av,-av,0);
 
-    rb->getParticles()[6].lock()->v = QVector3D(-av,av,0);
-    rb->getParticles()[7].lock()->v = QVector3D(-av,av,0);
+//    rb->getParticles()[6].lock()->v = QVector3D(-av,av,0);
+//    rb->getParticles()[7].lock()->v = QVector3D(-av,av,0);
 
 }
 
