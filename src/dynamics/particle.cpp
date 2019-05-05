@@ -41,6 +41,12 @@ ParticlePtr Particle::pointer(Particle *ptr)
     return  shared_from_this();
 }
 
+std::vector<ParticleWeakPtr> &Particle::getParticles()
+{
+    m_particlesPlaceholder.clear();
+    return m_particlesPlaceholder;
+}
+
 void Particle::pinToPosition(const QVector3D &_pos)
 {
 

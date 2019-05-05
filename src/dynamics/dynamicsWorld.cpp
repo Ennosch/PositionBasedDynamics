@@ -66,8 +66,6 @@ void DynamicsWorld::update()
         p->v = p->v + dt * p->w*forceExt;
     }
 
-
-
     // damp Velocities (6)
     pbdDamping();
 
@@ -178,6 +176,15 @@ void DynamicsWorld::update()
             c->project();
         }
         p->m_CollisionConstraints.clear();
+
+        for( ConstraintPtr c : p->m_CollisionConstraints_B)
+        {
+//            if(auto constraint = c.lock())
+//                p->p += constraint->deltaP();
+//            p->p += c->deltaP();
+            c->project();
+        }
+        p->m_CollisionConstraints_B.clear();
     }
 
 
@@ -283,7 +290,7 @@ void DynamicsWorld::pbdDamping()
                 if(i == 1){
 //                    mlog<<"  v: "<< particle->v<< "ri "<<ri<< "vcm: "<<vcm<<"xcm:"<<xcm<<"dv: "<<dv<<" w x ri: "<<QVector3D::crossProduct(w, ri);
                 }
-                particle->v +=  (1.0 * dv);
+                particle->v +=  (0.0 * dv);
             }
         }
     }
@@ -396,21 +403,21 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
          nCstrPtr->setRestLength(restLength);
 
      };
-//     // pin rows !
-//     for(auto p : nSB->getParticles())
-//     {
-//         if(ParticlePtr particle = p.lock())
-//         {
-//             if(particle->x.y() > 12.0)
-//             {
-//                 QVector3D pos = particle->x;
-//                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
-//                 pinCstr->setPositon(pos);
-//                 m_Constraints.push_back(pinCstr);
-//                 particle->m_Constraints.push_back(pinCstr);
-//             }
-//         }
-//     }
+     // pin rows !
+     for(auto p : nSB->getParticles())
+     {
+         if(ParticlePtr particle = p.lock())
+         {
+             if(particle->x.y() > 12.0)
+             {
+                 QVector3D pos = particle->x;
+                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
+                 pinCstr->setPositon(pos);
+                 m_Constraints.push_back(pinCstr);
+                 particle->m_Constraints.push_back(pinCstr);
+             }
+         }
+     }
      m_DynamicObjects.push_back(nSB);
      nSB->turnOffSelfCollision();
      nSB->updateModelBuffers();
@@ -440,6 +447,7 @@ void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2
     float d;
     if(m_CollisionDetect.checkSphereSphere(p1->p, p2->p, d,p1->radius(), p2->radius())){
         addParticleParticleConstraint(p1, p2);
+        addFrictionConstraint(p1, p2);
     }
 }
 
@@ -490,6 +498,7 @@ void DynamicsWorld::checkSpherePlane(const ParticlePtr p1, const Plane &_plane)
 //    qc -= (p1->r *_plane.Normal);
     auto hsCstr = std::make_shared<HalfSpaceConstraint>(p1, qc, _plane.Normal);
     p1->m_CollisionConstraints.push_back(hsCstr);
+    addHalfSpaceFrictionConstraint(p1, QVector3D(0,0,0), QVector3D(0,1,0));
 }
 
 std::shared_ptr<DistanceEqualityConstraint> DynamicsWorld::addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
@@ -512,6 +521,19 @@ void DynamicsWorld::addParticleParticleConstraint(const ParticlePtr _p1, const P
     _p1->m_CollisionConstraints.push_back(ppCstr);
     _p2->m_CollisionConstraints.push_back(ppCstr);
 
+}
+
+void DynamicsWorld::addFrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
+{
+    auto fCstr = std::make_shared<FrictionConstraint>(_p1, _p2);
+    _p1->m_CollisionConstraints_B.push_back(fCstr);
+    _p2->m_CollisionConstraints_B.push_back(fCstr);
+}
+
+void DynamicsWorld::addHalfSpaceFrictionConstraint(const ParticlePtr _p1, const QVector3D _o, const QVector3D _n)
+{
+    auto fCstr = std::make_shared<HalfSpaceFrictionConstraint>(_p1, QVector3D(0,0,0), QVector3D(0,1,0));
+    _p1->m_CollisionConstraints_B.push_back(fCstr);
 }
 
 void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)

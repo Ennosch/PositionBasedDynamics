@@ -31,6 +31,7 @@ HalfSpaceConstraint::HalfSpaceConstraint(const ParticlePtr _p, const QVector3D &
 
 void HalfSpaceConstraint::project()
 {
+//    mlog<<"HalfSpaceConstraint::project()";
     if(constraintFunction(pptr->p) > 0)
         return;
     pptr->p += deltaP();
@@ -385,23 +386,79 @@ double infNorm(const Matrix3r &A)
 
 
 
-FrictionConstraint::FrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2, const QVector3D _collisionN)
+FrictionConstraint::FrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
     : pptr1(_p1),
-      pptr2(_p2),
-      m_collisionNormal(_collisionN)
+      pptr2(_p2)
 {
+    m_collisionNormal = (_p2->x - _p1->x).normalized();
 
 }
 
 void FrictionConstraint::project()
 {
-    QVector3D td;
+    if(!m_dirty)
+        return;
+
+    QVector3D td, xj;
     td = (pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x) - constraintFunction() * m_collisionNormal;
+    float tdLength = td.length();
+
+    float usd = 0.8;
+    float ukd = 0.5;
+    return;
+    if(tdLength < usd)
+    {
+        pptr1->p += -td;
+        xj = td;
+    }
+    else
+    {
+        pptr1->p += -td * std::min( (ukd / tdLength) , float(1.0));
+        xj = td * std::min( (ukd / tdLength) , float(1.0));
+    }
+    pptr2->p += xj;
 
 
+    mlog<<"hello friction";
+    m_dirty = false;
 }
 
 float FrictionConstraint::constraintFunction()
 {
     return QVector3D::dotProduct((pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x), m_collisionNormal);
+}
+
+
+HalfSpaceFrictionConstraint::HalfSpaceFrictionConstraint(const ParticlePtr _p1, const QVector3D _o, const QVector3D _n) :
+    pptr1(_p1),
+    m_collisionNormal(_n),
+    planeOrigin(_o)
+{
+//    mlog<<"HalfSfriction ctro";
+}
+
+void HalfSpaceFrictionConstraint::project()
+{
+    QVector3D td, xj;
+    td = (pptr1->p - pptr1->x)   - constraintFunction() * m_collisionNormal;
+    float tdLength = td.length();
+
+    float usd = 0.2;
+    float ukd = 0.1;
+
+    if(tdLength < usd)
+    {
+//        mlog<<"project usd";
+        pptr1->p += -td;
+    }
+    else
+    {
+//         mlog<<"project ukd";
+        pptr1->p += -td * std::min( (ukd / tdLength) , float(1.0));
+    }
+}
+
+float HalfSpaceFrictionConstraint::constraintFunction()
+{
+    return QVector3D::dotProduct((pptr1->p - pptr1->x) , m_collisionNormal);
 }

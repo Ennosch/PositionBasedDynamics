@@ -127,13 +127,27 @@ class FrictionConstraint : public AbstractConstraint
 {
 public:
     FrictionConstraint(){}
-    FrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2, const QVector3D _collisionN);
+    FrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
 
     void project();
     float constraintFunction();
 private:
     ParticlePtr pptr1, pptr2;
     QVector3D m_collisionNormal;
+
+};
+
+class HalfSpaceFrictionConstraint : public AbstractConstraint
+{
+public:
+    HalfSpaceFrictionConstraint(){}
+    HalfSpaceFrictionConstraint(const ParticlePtr _p1, const QVector3D _o, const QVector3D _n);
+
+    void project();
+    float constraintFunction();
+private:
+    ParticlePtr pptr1, pptr2;
+    QVector3D m_collisionNormal, planeOrigin;
 
 };
 

@@ -861,6 +861,7 @@ void Scene::setupScene()
        addModel(this, "grid1", "../Cube10.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
+       addModel(this, "cloth", "../Grid_3x3.obj");
        addModel(this, "grid", "../Grid100.obj");
        addModel(this, "sphere", "../Icosahedronf4.obj");
 
@@ -879,13 +880,15 @@ void Scene::setupScene()
 
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
-       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
+       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,20,0));
+       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(90,-40,0));
         auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 10, 0), rot);
-       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
-//       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
+        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+        auto sceneObject2 = addSceneObjectFromModel("cloth", 2, QVector3D(15, 10, 0), rot2);
+        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
 
-       auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.2, 0.5, 0), rot);
-       m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
+//       auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.02, 0.5, 0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
 
 //       auto sphere2 = addSceneObjectFromModel("sphere", 1, QVector3D(0, 1.7, 0), rot);
 //       m_DynamicsWorld->addDynamicObjectAsParticle(sphere2);

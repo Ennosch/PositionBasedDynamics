@@ -25,6 +25,7 @@ public:
     float radius();
 
     ParticlePtr pointer(Particle *ptr);
+    std::vector<ParticleWeakPtr>& getParticles();
 
     // virtuals
     void pinToPosition(const QVector3D &_pos);
@@ -41,7 +42,10 @@ public:
     QVector3D p, pp, v, vt, x, xt, qc;
     int3 cell;
 
+    std::vector<ParticleWeakPtr> m_particlesPlaceholder;
+
     std::vector<ConstraintPtr> m_CollisionConstraints;
+    std::vector<ConstraintPtr> m_CollisionConstraints_B;
     std::list<ParticleWeakPtr> m_NonCollisionParticles;
 
 };
