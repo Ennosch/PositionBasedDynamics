@@ -403,9 +403,10 @@ void FrictionConstraint::project()
     td = (pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x) - constraintFunction() * m_collisionNormal;
     float tdLength = td.length();
 
-    float usd = 0.8;
+    float usd = 0.5;
     float ukd = 0.5;
-    return;
+
+//    return;
     if(tdLength < usd)
     {
         pptr1->p += -td;
@@ -444,8 +445,8 @@ void HalfSpaceFrictionConstraint::project()
     float tdLength = td.length();
 
     float usd = 0.2;
-    float ukd = 0.1;
-
+    float ukd = 0.2;
+    return;
     if(tdLength < usd)
     {
 //        mlog<<"project usd";

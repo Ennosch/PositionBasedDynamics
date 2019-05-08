@@ -4,29 +4,45 @@ project(QtOpenGL)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(include)
 
-#set(CMAKE_PREFIX_PATH ~/Qt/5.10.1/clang_64/lib/cmake)
-#message('log------------------------:' ${CMAKE_PREFIX_PATH})
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/Users/enno/Qt/5.10.1/clang_64")
+
+include_directories(include)
 
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Gui CONFIG REQUIRED)
-find_package(Qt5OpenGL CONFIG REQUIRED)
+find_package(Qt5OpenGL)
 find_package(assimp)
 find_package(eigen3)
 
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/resources/Forms/")
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_VERBOSE_MAKEFILE True)
+
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB INCLUDES "include/*.h")
-add_executable(PlayCmake
+file(GLOB DYNAMIC_SOURCES "src/dynamics/*.cpp")
+file(GLOB DYNAMIC_INCLUDES "include/dynamics/*.h")
+
+#message("DYNAMIC SRC:          " ${DYNAMIC_SOURCES})
+
+set(SOURCES "${SOURCES}" "resources/Forms/ControlWidget.ui")
+set(SOURCES "${SOURCES}" "src/ui/DynamicsUiWidget.cpp")
+
+set(SOURCES "${SOURCES}" "${DYNAMIC_SOURCES}")
+set(INCLUDES "${INCLUDES}" "${DYNAMIC_INCLUDES}")
+
+message("INCLUDE:          " ${INCLUDES})
+message("SOURCES:          " ${SOURCES})
+
+add_executable(QtOpenGL
     ${SOURCES}
     ${INCLUDES}
     resources.qrc
 )
 
-target_link_libraries(PlayCmake Qt5::Widgets Qt5::OpenGL assimp)
+target_link_libraries(QtOpenGL Qt5::Widgets assimp)

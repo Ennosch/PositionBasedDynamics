@@ -134,7 +134,6 @@ public:
 private:
     ParticlePtr pptr1, pptr2;
     QVector3D m_collisionNormal;
-
 };
 
 class HalfSpaceFrictionConstraint : public AbstractConstraint

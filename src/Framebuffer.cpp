@@ -6,8 +6,6 @@
 #include <iostream>
 
 
-
-
 Framebuffer::Framebuffer()
 {
     WindowWidth = 1392;
