@@ -1,88 +1,45 @@
-
-// Qt
-#include <QGuiApplication>
-#include <QPropertyAnimation>
-
-#include <QFile>
-#include <Qdebug>
-#include <QTextStream>
-
-
-// Project
-#include "Scene.h"
-#include "Window.h"
-#include "vertex.h"
-#include "AbstractScene.h"
-
 #include <iostream>
 
-QString getString(QString Filename)
-{
-    QFile mFile(Filename);
-    if(!mFile.open(QFile::ReadOnly | QFile::Text))
-    {
-        qDebug()<< "could not open file for writing";
-        return 0;
-    }
-    QTextStream in (&mFile);
-    QString mText = in.readAll();
-    //qDebug() << mText;
-    mFile.close();
-    return mText;
-}
+#include <QGuiApplication>
+#include <QOpenGLFunctions>
+#include "Window.h"
+#include "Scene.h"
 
-
-void Read(QString Filename)
-{
-    QFile mFile(Filename);
-    if(!mFile.open(QFile::ReadOnly | QFile::Text))
-    {
-        qDebug()<< "could not open file for writing";
-        return;
-    }
-    QTextStream in (&mFile);
-    QString mText = in.readAll();
-    qDebug() << mText;
-    mFile.close();
-}
 
 
 int main(int argc, char *argv[])
 {
 
-  QGuiApplication app(argc, argv);
+//    Transform x;
 
-  Window window;
+//    uint test;
+//    glGenBuffers(100, &test);
 
+    QGuiApplication app(argc, argv);
 
-  QSurfaceFormat fmt;
-  fmt.setMinorVersion(3);
-  fmt.setMajorVersion(3);
-  fmt.setSamples(16);
-  fmt.setSwapInterval(1);
-  
-  fmt.setRenderableType(QSurfaceFormat::OpenGL);
-  fmt.setProfile(QSurfaceFormat::CoreProfile);
-  window.setFormat(fmt);
+    Window window;
 
 
-  //AbstractScene aScene(&window);
 
-  Scene scene(&window);
-  window.setScene(&scene);
+    QSurfaceFormat fmt;
+    fmt.setMinorVersion(3);
+    fmt.setMajorVersion(3);
+    fmt.setSamples(16);
+    fmt.setSwapInterval(1);
 
-  window.resize(720, 720);
 
-  window.show();
+    fmt.setRenderableType(QSurfaceFormat::OpenGL);
+    fmt.setProfile(QSurfaceFormat::CoreProfile);
+    window.setFormat(fmt);
 
-  QString mFilename = "/Users/ennoschlunder/Dev/QtOpenGLBoilerplate/test.txt";
-  QString shader = ":/shader/simple.vert";
 
-  //:/shader/simple.vert
-  //:/shaders/simple.vert
-  //Write(mFilename);
-  //Read(shader);
+    Scene scene(&window);
+    window.setScene(&scene);
 
-  return app.exec();
+    window.resize(720, 720);
+    window.show();
 
+    std::cout<<"---k"<<std::endl;
+
+    return app.exec();
 }

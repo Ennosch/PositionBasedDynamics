@@ -9,12 +9,41 @@
 #include <QString>
 
 
+#include "Scene.h"
+#include <QOpenGLFunctions>
+
+
 // now include Scene.h, to define Window::initializeGL() which calls things from the scene()
 // class Scene has only been forward declared to this point (?)
 // if not #included we get:
 //      member access into incomlpete type 'Scene' (whereever scene()->something is called)
 
-#include "Scene.h"
+void Window::printVersionInformation()
+{
+    uint test;
+//    glGenBuffers(100, &test);
+//  QString glType;
+//  QString glVersion;
+//  QString glProfile;
+
+//  // Get Version Information
+//  glType = (context()->isOpenGLES()) ? "OpenGL ES" : "OpenGL";
+//  glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+
+//  // Get Profile Information
+//#define CASE(c) case QSurfaceFormat::c: glProfile = #c; break
+//  switch (format().profile())
+//  {
+//    CASE(NoProfile);
+//    CASE(CoreProfile);
+//    CASE(CompatibilityProfile);
+//  }
+//#undef CASE
+
+  // qPrintable() will print our QString w/o quotes around it.
+//  qDebug() << qPrintable(glType) << qPrintable(glVersion) << "(" << qPrintable(glProfile) << ")";
+}
+
 
 Window::Window(QWindow *parent) : QOpenGLWindow(NoPartialUpdate, parent)
 {
@@ -163,26 +192,3 @@ void Window::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
-void Window::printVersionInformation()
-{
-  QString glType;
-  QString glVersion;
-  QString glProfile;
-
-  // Get Version Information
-  glType = (context()->isOpenGLES()) ? "OpenGL ES" : "OpenGL";
-  glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-
-  // Get Profile Information
-#define CASE(c) case QSurfaceFormat::c: glProfile = #c; break
-  switch (format().profile())
-  {
-    CASE(NoProfile);
-    CASE(CoreProfile);
-    CASE(CompatibilityProfile);
-  }
-#undef CASE
-
-  // qPrintable() will print our QString w/o quotes around it.
-  qDebug() << qPrintable(glType) << qPrintable(glVersion) << "(" << qPrintable(glProfile) << ")";
-}

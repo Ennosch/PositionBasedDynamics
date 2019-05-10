@@ -4,6 +4,7 @@
 #include <QVector3D>
 #include <QQuaternion>
 #include <QMatrix4x4>
+#include <QOpenGLFunctions>
 
 class Transform
 {
@@ -55,7 +56,10 @@ private:
 
 Q_DECLARE_TYPEINFO(Transform, Q_MOVABLE_TYPE);
 
-inline Transform::Transform() : m_dirty(true), m_scale(1.0f, 1.0f, 1.0f) {}
+inline Transform::Transform() : m_dirty(true), m_scale(1.0f, 1.0f, 1.0f) {
+    uint test;
+//    glGenBuffers(100, &test);
+}
 
 // Transform By (Add/Scale)
 inline void Transform::translate(float dx, float dy,float dz) { translate(QVector3D(dx, dy, dz)); }
