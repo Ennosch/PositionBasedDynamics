@@ -31,8 +31,16 @@ bool Framebuffer::init()
 
     ms = true;
 //    glGenFramebuffers(1, &m_msfbo);
+
+
+
+
+    mlog<<"  ---------------------------Framebuffer glBindFramebuffer"<<(void *)&glBindFramebuffer;
+    mlog<<"  ---------------------------Framebuffer glBindFramebuffer"<<(void *)&glBindFramebuffer;
+//    mlog<<QOpenGLFunctions::*
     glBindFramebuffer(GL_FRAMEBUFFER, m_msfbo);
 
+//    auto test = QOpenGLFunctions(*m_scene);
 
     glGenTextures(1, &m_msColorBuffer);
     if(ms){ glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_msColorBuffer);}

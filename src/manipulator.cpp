@@ -47,6 +47,8 @@ void Manipulator::draw()
     if(!isActive())
         return;
 //    m_framebuffer->bind();
+    mlog<<"  ---------------------------Manipulator glBindFramebuffer"<<(void *)&glBindFramebuffer;
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer->m_msfbo);
 //    m_shaderProgram->setUniformValue("test",  scene->m_arcCamera.translation());
 

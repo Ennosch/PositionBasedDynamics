@@ -4,12 +4,14 @@
 #include <QDebug>
 
 #include <iostream>
+#include <memory>
 
 
 void AbstractScene::foo()
 {
     qDebug("foo foo ");
 }
+
 
 AbstractScene::AbstractScene(QOpenGLWindow *_window)
 {
@@ -59,11 +61,15 @@ void AbstractScene::initialize()
   initializeOpenGLFunctions();
   qDebug()<<"init openglfucntions end";
 
+
+
+
+  mlog<<"---------------------------Abstract Pointer type glBindFramebuffer"<<(void (QOpenGLFunctions::*)(GLenum, GLuint))&QOpenGLFunctions::glBindFramebuffer;
+//    mlog<<"-------------------test"<<(void*)QOpenGLFunctions::glBindFramebuffer;
+//  mlog<<"  ---------------------------Scene glBindFramebuffer"<<(void *)&glBindFramebuffer;
+
 //  const uint test = &this->glBindTexture;
 //  printf("address of function funct() is : %p\n", this->glBindTexture());
-
-
-
 }
 
 

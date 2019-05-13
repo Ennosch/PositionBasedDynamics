@@ -16,8 +16,7 @@
 
 #include <QDebug>
 
-
-#define myqDebug() qDebug() << fixed << qSetRealNumberPrecision(2)
+#define mlog qDebug() << fixed << qSetRealNumberPrecision(2)
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
 
 // Front Verticies

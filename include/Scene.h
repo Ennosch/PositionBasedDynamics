@@ -35,10 +35,11 @@
 #include "dynamics/collisiondetection.h"
 #include "Framebuffer.h"
 
+
+
 class Scene : public AbstractScene
 {
   static int numCreation;
-
 public:
   Scene(Window *_window);
   Scene(GLWidget *_widget);
@@ -150,6 +151,8 @@ private:
 
   pSceneOb m_pickedObject;
 };
+
+
 
 inline MaterialPtr Scene::getMaterial(int _index){ return m_Materials[_index]; };
 inline pSceneOb Scene::getSceneObjectFromIndex(int _index){ return m_SceneObjects[_index]; };

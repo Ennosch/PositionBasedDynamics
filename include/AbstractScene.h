@@ -8,11 +8,13 @@
 #include <QOpenGLWidget>
 #include "GLWidget.h"
 
-class AbstractScene : protected QOpenGLFunctions
+//class AbstractScene : protected QOpenGLFunctions
+class AbstractScene : public QOpenGLFunctions
 {
 
 public:
-  AbstractScene(QOpenGLWindow *_window = 0);
+
+  AbstractScene(QOpenGLWindow *_window = nullptr);
 //  AbstractScene(QOpenGLWidget *_widget = 0);
   AbstractScene(GLWidget *_widget = 0);
   virtual ~AbstractScene();

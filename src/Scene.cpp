@@ -11,6 +11,8 @@
 
 int Scene::numCreation = 0;
 
+
+
 Scene::Scene(Window *_window) : AbstractScene(_window)
 {
 
@@ -462,6 +464,22 @@ void Scene::debug(const QVector3D &_pos)
 
 void Scene::QtOpenGLinitialize()
 {
+//    mlog<<"  ---------------------------Scene glBindFramebuffer"<<(void QOpenGLFunctions::glBindFramebuffer*)&QOpenGLFunctions::glBindFramebuffer;
+
+
+    auto test = (void (QOpenGLFunctions::*)(GLenum, GLuint))&QOpenGLFunctions::glBindFramebuffer;
+    auto testB = (void (QOpenGLFunctions::*)(GLenum, GLuint))&QOpenGLFunctions::glBindFramebuffer;
+    std::cout<<"WHY "<<&test<<std::endl;
+    std::cout<<"WHY "<<&testB<<std::endl;
+    std::cout<<typeid (test).name()<<std::endl;
+
+    mlog<<"---------------------------Scene Pointer type glBindFramebuffer"<<(void (QOpenGLFunctions::*)(GLenum, GLuint))&QOpenGLFunctions::glBindFramebuffer;
+
+//    mlog<<"  ---------------------------Scene glBindFramebuffer"<<(void *)&glBindFramebuffer;
+
+//    int address = (void *)&QOpenGLFunctions::glBindFramebuffer;
+//    auto a2 = void (QOpenGLFunctions::*) &QOpenGLFunctions::glBindFramebuffer;
+
     if(widget())
         widget()->makeCurrent();
 
