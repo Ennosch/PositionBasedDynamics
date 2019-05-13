@@ -1,6 +1,10 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 
+#Directories to ignore
+CMakeFiles/
+QtOpenGL_autogen/
+
 *~
 *.autosave
 *.a

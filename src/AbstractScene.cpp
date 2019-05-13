@@ -8,6 +8,10 @@
 #include "AbstractScene.h"
 #include <Qdebug>
 
+#include <stdio.h>
+
+
+
 void AbstractScene::foo()
 {
     qDebug("foo foo ");
@@ -41,7 +45,6 @@ const QOpenGLContext *AbstractScene::context() const
 void AbstractScene::initialize()
 {
   initializeOpenGLFunctions();
-
 }
 
 

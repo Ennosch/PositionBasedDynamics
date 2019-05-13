@@ -3,6 +3,8 @@
 #include "Window.h"
 #include <iostream>
 
+#include <stdio.h>
+
 #include <QDebug>
 #include <QKeyEvent>
 #include <QString>
@@ -10,7 +12,8 @@
 
 
 #include "Scene.h"
-#include <QOpenGLFunctions>
+//#include "AbstractScene.h"
+//#include <QOpenGLFunctions>
 
 
 // now include Scene.h, to define Window::initializeGL() which calls things from the scene()
@@ -21,7 +24,14 @@
 void Window::printVersionInformation()
 {
     uint test;
-//    glGenBuffers(100, &test);
+    glGenBuffers(100, &test);
+//    qDebug()<<"HELLO---";
+//    qDebug()<<"qDebug genBuffers "<<(void *)glGenBuffers;
+//    std::cout<<"std::cout &glGenBuffers  "<<&glGenBuffers<<std::endl;
+//    qDebug()<<"HELLO---2";
+//    printf("Window GL glGenBuffers :%p\n", &glGenBuffers);
+//    printf("Window GL glGenBuffers :%p\n", glGenBuffers);
+
 //  QString glType;
 //  QString glVersion;
 //  QString glProfile;

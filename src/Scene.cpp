@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QString>
 
+#include <stdio.h>
 
 /*
 //                   P               V              M               Pos
@@ -60,6 +61,10 @@ void Scene::initialize()
   AbstractScene::initialize();
   //OpenGLinitialize();
   QtOpenGLinitialize();
+
+//  qDebug()<<"hello Scene Initialize";
+//  qDebug()<<"qDebug genBuffers "<<(void *)glGenBuffers;
+//  printf("Scene::initialize() GL glGenBuffers :%p \n", foo);
 }
 
 void Scene::QtOpenGLinitialize()
