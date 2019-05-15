@@ -8,10 +8,8 @@ CONFIG -= app_bundle
 
 SOURCES += \
     src/main.cpp \
-    src/AbstractScene.cpp \
     src/Scene.cpp \
     src/Window.cpp \
-    src/vertex.cpp \
     src/transform.cpp \
     src/inputManager.cpp
 
@@ -22,10 +20,8 @@ MOC_DIR = build/moc
 INCLUDEPATH += include
 
 HEADERS += \
-    include/AbstractScene.h \
     include/Scene.h \
     include/Window.h \
-    include/vertex.h \
     include/transform.h \
     include/inputManager.h
 

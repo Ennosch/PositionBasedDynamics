@@ -47,8 +47,9 @@ static const QVector3D myShape[] = {
 };
 
 
-Scene::Scene(Window *_window) : AbstractScene(_window)
+Scene::Scene(Window *_window)
 {
+    m_window = _window;
     m_myTransform.translate(0.0f, 0.0f, 0.0f);
 }
 
@@ -58,13 +59,11 @@ Scene::~Scene()
 
 void Scene::initialize()
 {
-  AbstractScene::initialize();
-  //OpenGLinitialize();
+
+  initializeOpenGLFunctions();
+
   QtOpenGLinitialize();
 
-//  qDebug()<<"hello Scene Initialize";
-//  qDebug()<<"qDebug genBuffers "<<(void *)glGenBuffers;
-//  printf("Scene::initialize() GL glGenBuffers :%p \n", foo);
 }
 
 void Scene::QtOpenGLinitialize()
@@ -77,14 +76,6 @@ void Scene::QtOpenGLinitialize()
     m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/simple.frag");
     m_program->link();
     m_program->bind();
-
-//    m_model_matrix.setToIdentity();
-//    m_model_matrix.translate(0.0, 0.0, 0.0);
-//    m_projection_matrix.setToIdentity();
-//    m_transform.reset();
-
-    u_modelToWorld = m_program->uniformLocation("ModelMatrix");
-    //m_projection_matrix.perspective(45.0f, width / float(height), 0.0f, 1000.0f);
 
     m_vvbo.create();
     m_vvbo.bind();
@@ -111,24 +102,12 @@ void Scene::paint()
   //glViewport(0, 0, window()->width(), window()->height());
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-
-  /*
-  //                   P               V              M               Pos
-    gl_Position = cameraToView * worldToCamera * modelToWorld * vec4(position, 1.0);
-
-
-    modelToWorld = M
-    worldToView = P
-   */
   m_program->bind();
   m_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
   {
     m_vao.bind();
-
-    //float tx = sin(m_window->m_timer);
     m_model_matrix.translate(0.0, 0.0, 0.0);
     m_program->setUniformValue("ModelMatrix", m_myTransform.toMatrix());
-    //m_program->setUniformValue(u_modelToWorld, m_model_matrix);
     glDrawArrays(GL_TRIANGLES, 0, sizeof(myShape) / sizeof(myShape[0]));
     m_vao.release();
   }
@@ -137,17 +116,8 @@ void Scene::paint()
 
 void Scene::update()
 {
-    // update from Window Qtimer
-    // (?)  adding to QTransform m_transform, moves the
-    //m_count += 0.05;
-    //m_transform.translate(m_count , 0.0);
     m_myTransform.rotate(1.0f, QVector3D(0.4f, 0.3f, 0.3f));
-    //qDebug()<<"update";
-
 }
 
-void Scene::foo()
-{
-    qDebug("Scene foo");
-}
+
 

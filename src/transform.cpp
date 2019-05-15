@@ -17,6 +17,7 @@ void Transform::scale(const QVector3D &ds)
 void Transform::rotate(const QQuaternion &dr)
 {
   m_dirty = true;
+ float m= 3.0;
   m_rotation = dr * m_rotation;
 }
 

@@ -7,6 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/Users/enno/Qt/5.10.1/clang_64")
 include_directories(include)
 
+
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Gui CONFIG REQUIRED)
@@ -27,22 +28,19 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(CMAKE_AUTOMOC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(CMAKE_AUTORCC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-add_executable(QtOpenGL
+add_executable(QtOpenGL MACOSX_BUNDLE
     src/main.cpp
-    src/AbstractScene.cpp
     src/inputManager.cpp
     src/Scene.cpp
-    src/transform.cpp
-    src/vertex.cpp
     src/Window.cpp
+    src/transform.cpp
+
 
     resources.qrc
 
-    include/AbstractScene.h
     include/inputManager.h
     include/Scene.h
     include/transform.h
-    include/vertex.h
     include/Window.h
 
     ui_ControlWidget.h

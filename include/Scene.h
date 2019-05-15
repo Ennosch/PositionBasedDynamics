@@ -10,12 +10,13 @@
 #include <QOpenGLVertexArrayObject>
 #include <QtGui/QOpenGLShaderProgram>
 
+#include <QOpenGLFunctions>
+
 // Project
-#include "AbstractScene.h"
 #include "Window.h"
 #include "transform.h"
 
-class Scene : public AbstractScene
+class Scene : public QOpenGLFunctions
 {
 
 public:
@@ -27,24 +28,17 @@ public:
   void QtOpenGLinitialize();
   void update();
 
-  void foo();
-
-  float m_count = 0.0;
+  QOpenGLWindow *m_window = nullptr;
 
 private:
   friend class Window;
-  int u_modelToWorld;
 
   QOpenGLShaderProgram* m_program;
   QOpenGLBuffer m_vvbo;
   QOpenGLVertexArrayObject m_vao;
-  unsigned int shaderProgram;
-  unsigned int VAO;
-  unsigned int VBO;
   QMatrix4x4 m_model_matrix;
   QMatrix4x4 m_view_matrix;
   QMatrix4x4 m_projection_matrix;
-  QTransform m_transform;
 
   Transform m_myTransform;
 
