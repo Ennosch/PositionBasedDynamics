@@ -49,4 +49,5 @@ add_executable(QtOpenGL
     resources.qrc
 )
 
-target_link_libraries(QtOpenGL Qt5::Widgets assimp)
+#target_link_libraries(QtOpenGL Qt5::Widgets assimp)
+target_link_libraries(QtOpenGL Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL)

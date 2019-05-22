@@ -27,20 +27,7 @@ Framebuffer::Framebuffer(Scene *_scene) :
 
 bool Framebuffer::init()
 {
-    qDebug()<<"Framebuffer initFramebuffer"<<m_msfbo<<m_msColorBuffer<<m_msDepthBuffer<<m_fbo<<m_colorBuffer;
-
-    ms = true;
-//    glGenFramebuffers(1, &m_msfbo);
-
-
-
-
-    mlog<<"  ---------------------------Framebuffer glBindFramebuffer"<<(void *)&glBindFramebuffer;
-    mlog<<"  ---------------------------Framebuffer glBindFramebuffer"<<(void *)&glBindFramebuffer;
-//    mlog<<QOpenGLFunctions::*
     glBindFramebuffer(GL_FRAMEBUFFER, m_msfbo);
-
-//    auto test = QOpenGLFunctions(*m_scene);
 
     glGenTextures(1, &m_msColorBuffer);
     if(ms){ glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_msColorBuffer);}
@@ -57,7 +44,6 @@ bool Framebuffer::init()
 
     if(ms){ glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_msColorBuffer, 0);}
     else{glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_msColorBuffer, 0);}
-
 
     glGenRenderbuffers(1, &m_msDepthBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, m_msDepthBuffer);
