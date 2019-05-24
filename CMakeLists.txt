@@ -12,9 +12,11 @@ find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Gui CONFIG REQUIRED)
 find_package(Qt5OpenGL)
+find_package(OpenGL)
 find_package(assimp)
 find_package(eigen3)
 
+find_package(OpenMP)
 
 set(CMAKE_AUTOMOC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(CMAKE_AUTORCC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -50,4 +52,4 @@ add_executable(QtOpenGL
 )
 
 #target_link_libraries(QtOpenGL Qt5::Widgets assimp)
-target_link_libraries(QtOpenGL Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL)
+target_link_libraries(QtOpenGL Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL OpenGL::GL assimp OpenMP::OpenMP_CXX)

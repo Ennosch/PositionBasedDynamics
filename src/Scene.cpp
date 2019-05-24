@@ -883,11 +883,11 @@ void Scene::setupScene()
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,20,0));
-//       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(90,-40,0));
-//        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 10, 0), rot);
-//        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
-//        auto sceneObject2 = addSceneObjectFromModel("cloth", 2, QVector3D(15, 10, 0), rot2);
-//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
+       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(90,-40,0));
+        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 10, 0), rot);
+        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+        auto sceneObject2 = addSceneObjectFromModel("cloth", 2, QVector3D(15, 10, 0), rot2);
+        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
 
        auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.02, 0.5, 0), rot);
        m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
