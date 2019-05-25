@@ -418,9 +418,7 @@ void FrictionConstraint::project()
         xj = td * std::min( (ukd / tdLength) , float(1.0));
     }
     pptr2->p += xj;
-
-
-    mlog<<"hello friction";
+//    mlog<<"hello friction";
     m_dirty = false;
 }
 

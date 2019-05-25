@@ -404,20 +404,21 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
 
      };
      // pin rows !
-     for(auto p : nSB->getParticles())
-     {
-         if(ParticlePtr particle = p.lock())
-         {
-             if(particle->x.y() > 12.0)
-             {
-                 QVector3D pos = particle->x;
-                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
-                 pinCstr->setPositon(pos);
-                 m_Constraints.push_back(pinCstr);
-                 particle->m_Constraints.push_back(pinCstr);
-             }
-         }
-     }
+//     for(auto p : nSB->getParticles())
+//     {
+//         if(ParticlePtr particle = p.lock())
+//         {
+//             if(particle->x.y() > 12.0)
+//             {
+//                 QVector3D pos = particle->x;
+//                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
+//                 pinCstr->setPositon(pos);
+//                 m_Constraints.push_back(pinCstr);
+//                 particle->m_Constraints.push_back(pinCstr);
+//             }
+//         }
+//     }
+
      m_DynamicObjects.push_back(nSB);
      nSB->turnOffSelfCollision();
      nSB->updateModelBuffers();

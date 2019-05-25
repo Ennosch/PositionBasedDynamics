@@ -45,7 +45,7 @@ set(INCLUDES "${INCLUDES}" "${DYNAMIC_INCLUDES}")
 message("INCLUDE:          " ${INCLUDES})
 message("SOURCES:          " ${SOURCES})
 
-add_executable(QtOpenGL
+add_executable(QtOpenGL MACOSX_BUNDLE
     ${SOURCES}
     ${INCLUDES}
     resources.qrc

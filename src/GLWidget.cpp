@@ -317,6 +317,14 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                         scene()->mainpulator->setTransform(test);}
                         break;
 
+                case Qt::Key_B:{
+                            QElapsedTimer timer;
+                            timer.start();
+                            scene()->setupScene();
+                            mlog<<" setupScene() took: "<<timer.elapsed()<<" ms";
+                            }
+                        break;
+
                 case Qt::Key_A:{
                             if(m_activeObject->isActive())
                             {

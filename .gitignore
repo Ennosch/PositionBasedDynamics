@@ -38,7 +38,13 @@ Thumbs.db
 *.rc
 /.qmake.cache
 /.qmake.stash
+
+
 /build
+/QtOpenGL_autogen
+/CMakeFiles
+CMakeLists.txt.user
+callgrind*
 
 # qtcreator generated files
 *.pro.user*

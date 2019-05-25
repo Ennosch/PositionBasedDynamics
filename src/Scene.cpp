@@ -46,9 +46,9 @@ void Scene::initialize()
       qDebug()<<"widget"<<SCR_WIDTH<<SCR_HEIGHT;
   }
   QtOpenGLinitialize();
-//  DynamicsInitialize();
-  setupScene();
-  m_DynamicsWorld->generateData();
+  DynamicsInitialize();
+//  setupScene();
+//  m_DynamicsWorld->generateData();
 }
 
 void Scene::addShape(Scene *_scene, std::string _name, const QVector3D *_data, int _size)
@@ -639,6 +639,7 @@ void Scene::resize(int width, int height)
 void Scene::paint()
 {
 
+
     QVector4D null = QVector4D(0,0,0,1);
     QMatrix4x4 model;
     model.setToIdentity();
@@ -739,7 +740,7 @@ void Scene::paint()
               m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
               m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
               m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
-              if(m_SceneObjects[0])
+              if(m_SceneObjects.size() > 0)
               {
                   glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
                   m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
@@ -749,11 +750,11 @@ void Scene::paint()
          drawLines();
 
          // -------------------------Geometry Shader-----------------------------------------------------------
-         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-          m_geometry_program->bind();
-          m_geometry_program->setUniformValue("projection", m_projection_matrix);
-          m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
-          m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
+//         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//          m_geometry_program->bind();
+//          m_geometry_program->setUniformValue("projection", m_projection_matrix);
+//          m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
+//          m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
 //          m_SceneObjects[1]->drawPoints();
 
          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
@@ -863,7 +864,10 @@ void Scene::setupScene()
        addModel(this, "grid1", "../Cube10.obj");
 //        addModel(this, "grid1", "../Icosahedron.obj");
 
-       addModel(this, "cloth", "../Grid_3x3.obj");
+//       addModel(this, "cloth", "../Grid_3x3.obj");
+//       addModel(this, "cloth", "../Grid_1681points.obj");
+       addModel(this, "cloth", "../Grid_441points.obj");
+
        addModel(this, "grid", "../Grid100.obj");
        addModel(this, "sphere", "../Icosahedronf4.obj");
 
@@ -880,13 +884,12 @@ void Scene::setupScene()
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
-
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,20,0));
-       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(90,-40,0));
-        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 10, 0), rot);
-        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
-        auto sceneObject2 = addSceneObjectFromModel("cloth", 2, QVector3D(15, 10, 0), rot2);
+       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45,-40,0));
+//        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 10, 0), rot);
+//        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+        auto sceneObject2 = addSceneObjectFromModel("cloth", 2, QVector3D(0, 15, 0), rot2);
         m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
 
        auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.02, 0.5, 0), rot);
@@ -897,7 +900,6 @@ void Scene::setupScene()
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
-
 
        //        addSceneObjectFromModel("sphere", 3, pointLightA, rot);
        //        addSceneObjectFromModel("sphere", 3, pointLightB, rot);
