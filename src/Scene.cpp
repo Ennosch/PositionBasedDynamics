@@ -853,33 +853,35 @@ void Scene::setupScene()
                         QVector3D(0.0f , 0.0f ,0.0f),    // specular
                         15.0 );
 
+
+
     //    MAKE MODEL TO RENDER
-//        addModel(this, "grid1", "../Grid1_16_points.obj");
-//       addModel(this, "grid1", "../Grid1_bend.obj");
-//        addModel(this, "grid1", "../Grid2_small.obj");
-//        addModel(this, "grid1", "../banana.obj");
-//        addModel(this, "grid1", "../Grid1.obj");
-//        addModel(this, "grid1", "../Grid1_12.obj");
-//        addModel(this, "grid1", "../Grid_3x3.obj");
-       addModel(this, "grid1", "../Cube10.obj");
-//        addModel(this, "grid1", "../Icosahedron.obj");
+//        addModel(this, "grid1", "/Users/enno/Dev/Grid1_16_points.obj");
+//       addModel(this, "grid1", "/Users/enno/Dev/Grid1_bend.obj");
+//        addModel(this, "grid1", "/Users/enno/Dev/Grid2_small.obj");
+//        addModel(this, "grid1", "/Users/enno/Dev/banana.obj");
+//        addModel(this, "grid1", "/Users/enno/Dev/Grid1.obj");
+//        addModel(this, "grid1", "/Users/enno/Dev/Grid1_12.obj");
+//        addModel(this, "grid1", "/Users/enno/Dev/Grid_3x3.obj");
+       addModel(this, "grid1", "/Users/enno/Dev/Cube10.obj");
+//        addModel(this, "grid1", "/Users/enno/Dev/Icosahedron.obj");
 
-//       addModel(this, "cloth", "../Grid_3x3.obj");
-//       addModel(this, "cloth", "../Grid_1681points.obj");
-       addModel(this, "cloth", "../Grid_441points.obj");
+//       addModel(this, "cloth", "/Users/enno/Dev/Grid_3x3.obj");
+//       addModel(this, "cloth", "/Users/enno/Dev/Grid_1681points.obj");
+       addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
 
-       addModel(this, "grid", "../Grid100.obj");
-       addModel(this, "sphere", "../Icosahedronf4.obj");
+       addModel(this, "grid", "/Users/enno/Dev/Grid100.obj");
+       addModel(this, "sphere", "/Users/enno/Dev/Icosahedronf4.obj");
 
-       addModel(this, "Vector", "../VectorShape.obj");
-       addModel(this, "torus", "../torus.obj");
-       addModel(this, "Circle", "../TorusShape.obj");
-       addModel(this, "Plane", "../PlaneShape.obj");
-       addModel(this, "Axis", "../AxisShape.obj");
+       addModel(this, "Vector", "/Users/enno/Dev/VectorShape.obj");
+       addModel(this, "torus", "/Users/enno/Dev/torus.obj");
+       addModel(this, "Circle", "/Users/enno/Dev/TorusShape.obj");
+       addModel(this, "Plane", "/Users/enno/Dev/PlaneShape.obj");
+       addModel(this, "Axis", "/Users/enno/Dev/AxisShape.obj");
 //       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
-       addModel(this, "bunny", "../bunny_low.obj");
-//       addModel(this, "teapot", "../MegaTeapot.obj");
-//       addModel(this, "gridTransform", "../Grid1_transfrom.obj");
+       addModel(this, "bunny", "/Users/enno/Dev/bunny_low.obj");
+//       addModel(this, "teapot", "/Users/enno/Dev/MegaTeapot.obj");
+//       addModel(this, "gridTransform", "/Users/enno/Dev/Grid1_transfrom.obj");
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
