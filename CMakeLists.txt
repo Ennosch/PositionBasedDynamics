@@ -15,7 +15,6 @@ find_package(Qt5OpenGL)
 find_package(OpenGL)
 find_package(assimp)
 find_package(eigen3)
-
 find_package(OpenMP)
 
 set(CMAKE_AUTOMOC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -51,5 +50,6 @@ add_executable(QtOpenGL MACOSX_BUNDLE
     resources.qrc
 )
 
+
 #target_link_libraries(QtOpenGL Qt5::Widgets assimp)
-target_link_libraries(QtOpenGL Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL OpenGL::GL assimp OpenMP::OpenMP_CXX)
+target_link_libraries(QtOpenGL Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL OpenGL::GL assimp ${OpenMP_CXX_LIBRARIES})
