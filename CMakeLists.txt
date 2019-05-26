@@ -4,9 +4,9 @@ project(QtOpenGL)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(include)
 
-set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/Users/enno/Qt/5.10.1/clang_64")
+#set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/Users/enno/Qt/5.10.1/clang_64")
 
-include_directories(include)
+
 
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Core CONFIG REQUIRED)
@@ -53,4 +53,4 @@ add_executable(QtOpenGL
 
 
 #target_link_libraries(QtOpenGL Qt5::Widgets assimp)
-target_link_libraries(QtOpenGL Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL OpenGL::GL assimp ${OpenMP_CXX_LIBRARIES})
+target_link_libraries(QtOpenGL Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL OpenGL::GL assimp ${OpenMP_CXX_LIBRARIES} OpenMP::OpenMP_CXX)

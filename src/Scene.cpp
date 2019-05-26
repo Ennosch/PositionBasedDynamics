@@ -736,16 +736,16 @@ void Scene::paint()
             }
 
             //-------------------------Draw Wireframe-----------------------------------------------------------
-//              m_flat_program->bind();
-//              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-//              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-//              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
-//              if(m_SceneObjects.size() > 0)
-//              {
-//                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-//                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
-//                  m_SceneObjects[0]->draw();
-//              }
+              m_flat_program->bind();
+              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
+              if(m_SceneObjects.size() > 0)
+              {
+                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
+                  m_SceneObjects[0]->draw();
+              }
 
 //         drawLines();
 
@@ -886,7 +886,7 @@ void Scene::setupScene()
        QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 40,0));
 //        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(0, 1.8, 0), rot);
 //        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
-        auto sceneObject2 = addSceneObjectFromModel("cloth", 2, QVector3D(0, 15, 0), rot2);
+        auto sceneObject2 = addSceneObjectFromModel("cloth", 1, QVector3D(0, 15, 0), rot2);
         m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
 
 //       auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.02, 0.5, 0), rot);

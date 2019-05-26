@@ -5,6 +5,8 @@
 
 #include <Qdebug>
 
+#include <omp.h>
+
 Eigen::Matrix3f QMatrix3toEigen(const QMatrix3x3 &_qMat);
 QMatrix3x3 EigenMatrix3toQt(const Eigen::Matrix3f &_eMat);
 
@@ -111,7 +113,7 @@ void DynamicsWorld::update()
         checkSpherePlane(p, m_Planes[0]);
     }*/
 
-    collisionCheck();
+//    collisionCheck();
 
     // Constraint dirty to do something
         for( ParticlePtr p : m_Particles)
@@ -156,12 +158,17 @@ for( ParticlePtr p : m_Particles)
 
 
 // Solver Iteration (9)
-int numIterations = 5;
+int numIterations = 15;
+
+int nthreads, tid, test;
+
 for(int i=0; i<numIterations; i++)
 {
-    for( ParticlePtr p : m_Particles)
+    #pragma omp parallel for
+    for(int j=0; j < m_Particles.size(); j++)
     {
-        for( ConstraintWeakPtr c : p->m_Constraints)
+//        for( ConstraintWeakPtr c : p->m_Constraints)
+        for( ConstraintWeakPtr c : m_Particles[j]->m_Constraints)
         {
             if(auto constraint = c.lock()){
                 {
@@ -169,6 +176,19 @@ for(int i=0; i<numIterations; i++)
                 }
             }
         }
+    }
+
+//    for( ParticlePtr p : m_Particles)
+//    {
+//        for( ConstraintWeakPtr c : p->m_Constraints)
+//        {
+//            if(auto constraint = c.lock()){
+//                {
+//                    constraint->project();
+//                }
+//            }
+//        }
+
         // generate new collision constraint
 //        checkSpherePlane(p, m_Planes[0]);
 //        // particle particle Check
@@ -178,7 +198,8 @@ for(int i=0; i<numIterations; i++)
 //            c->project();
 //        }
 //        p->m_CollisionConstraints.clear();
-    }
+
+//    }
 
 //    for( ParticlePtr p : m_Particles)
 //    {

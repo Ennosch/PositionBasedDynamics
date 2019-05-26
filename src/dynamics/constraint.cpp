@@ -153,13 +153,11 @@ void DistanceEqualityConstraint::project()
     w1 = pptr1->w;
     w2 = pptr2->w;
 
-    dp1 =  -w1/(w1 + w2) * constraintFunction() * ((p1 - p2) / (p1-p2).length());
-    dp2 =  +w2/(w1 + w2) * constraintFunction() * ((p1 - p2) / (p1-p2).length());
+    dp1 =  -w1/(w1 + w2) * c1 * ((p1 - p2) / (p1-p2).length());
+    dp2 =  +w2/(w1 + w2) * c1 * ((p1 - p2) / (p1-p2).length());
 
     pptr1->p += (dp1 * 0.5);
     pptr2->p += (dp2 * 0.5);
-
-    float c2 = constraintFunction();
 
     m_dirty = false;
 //    qDebug()<<"projecting DistanceEqualityConstraint";

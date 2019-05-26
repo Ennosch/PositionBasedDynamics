@@ -75,10 +75,15 @@ void GLWidget::loop()
         i++;
     }
 
-    QThread::msleep(16);
-
+//    QThread::msleep(16);
     // physics
-//    scene()->dynamicsWorld()->update();
+
+    QElapsedTimer timer;
+    timer.start();
+
+    scene()->dynamicsWorld()->update();
+
+    mlog<<"physics step2: "<<timer.elapsed();
 
     if(render < 16)
     {
