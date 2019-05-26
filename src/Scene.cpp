@@ -99,7 +99,7 @@ pSceneOb Scene::addSceneObjectFromModel(std::string _name, const uint _materialI
     return pSO;
 }
 
-pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle)
+pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle, int matID)
 {
     auto pModel = getModelFromPool("sphere");
     if(pModel == nullptr)
@@ -107,7 +107,7 @@ pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle)
         qDebug()<<"WARNING: COULD NOT ADD SceneObject as Particle";
         return nullptr;
     }
-    auto pSO = std::make_shared<SceneObject>(this, pModel, 1 , _particle->getTranslation());
+    auto pSO = std::make_shared<SceneObject>(this, pModel, matID , _particle->getTranslation());
     pSO->setActiveObject(widget()->activeObject());
     pSO->setRadius(_particle->radius());
 
@@ -694,7 +694,7 @@ void Scene::paint()
                         }
                         if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
                         {
-//                            continue;
+                            continue;
                         }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
@@ -736,18 +736,18 @@ void Scene::paint()
             }
 
             //-------------------------Draw Wireframe-----------------------------------------------------------
-              m_flat_program->bind();
-              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
-              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
-              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
-              if(m_SceneObjects.size() > 0)
-              {
-                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
-                  m_SceneObjects[0]->draw();
-              }
+//              m_flat_program->bind();
+//              m_flat_program->setUniformValue("ProjectionMatrix", m_projection_matrix);
+//              m_flat_program->setUniformValue("ViewMatrix", m_arcCamera.toMatrix());
+//              m_flat_program->setUniformValue("Color", QVector3D(0.3,0.3,0.3));
+//              if(m_SceneObjects.size() > 0)
+//              {
+//                  glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+//                  m_flat_program->setUniformValue("ModelMatrix",  m_SceneObjects[0]->getMatrix());
+//                  m_SceneObjects[0]->draw();
+//              }
 
-         drawLines();
+//         drawLines();
 
          // -------------------------Geometry Shader-----------------------------------------------------------
 //         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -856,21 +856,18 @@ void Scene::setupScene()
 
 
     //    MAKE MODEL TO RENDER
-//        addModel(this, "grid1", "/Users/enno/Dev/Grid1_16_points.obj");
-//       addModel(this, "grid1", "/Users/enno/Dev/Grid1_bend.obj");
-//        addModel(this, "grid1", "/Users/enno/Dev/Grid2_small.obj");
-//        addModel(this, "grid1", "/Users/enno/Dev/banana.obj");
-//        addModel(this, "grid1", "/Users/enno/Dev/Grid1.obj");
-//        addModel(this, "grid1", "/Users/enno/Dev/Grid1_12.obj");
-//        addModel(this, "grid1", "/Users/enno/Dev/Grid_3x3.obj");
+        addModel(this, "grid", "/Users/enno/Dev/Grid100.obj");
        addModel(this, "grid1", "/Users/enno/Dev/Cube10.obj");
-//        addModel(this, "grid1", "/Users/enno/Dev/Icosahedron.obj");
+
 
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_3x3.obj");
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_1681points.obj");
+//       addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
        addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
 
-       addModel(this, "grid", "/Users/enno/Dev/Grid100.obj");
+//       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
+       addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
+
        addModel(this, "sphere", "/Users/enno/Dev/Icosahedronf4.obj");
 
        addModel(this, "Vector", "/Users/enno/Dev/VectorShape.obj");
@@ -878,27 +875,25 @@ void Scene::setupScene()
        addModel(this, "Circle", "/Users/enno/Dev/TorusShape.obj");
        addModel(this, "Plane", "/Users/enno/Dev/PlaneShape.obj");
        addModel(this, "Axis", "/Users/enno/Dev/AxisShape.obj");
-//       addModel(this, "nanoSuit", "resources/objects/nanosuit.obj");
        addModel(this, "bunny", "/Users/enno/Dev/bunny_low.obj");
-//       addModel(this, "teapot", "/Users/enno/Dev/MegaTeapot.obj");
-//       addModel(this, "gridTransform", "/Users/enno/Dev/Grid1_transfrom.obj");
+
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,20,0));
-       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45,-40,0));
-//        auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0, 10, 0), rot);
+       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 40,0));
+//        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(0, 1.8, 0), rot);
 //        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
         auto sceneObject2 = addSceneObjectFromModel("cloth", 2, QVector3D(0, 15, 0), rot2);
         m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
 
-       auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.02, 0.5, 0), rot);
-       m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
+//       auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.02, 0.5, 0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
 
-       auto sphere2 = addSceneObjectFromModel("sphere", 1, QVector3D(0, 1.7, 0), rot);
-       m_DynamicsWorld->addDynamicObjectAsParticle(sphere2);
+//       auto sphere2 = addSceneObjectFromModel("sphere", 1, QVector3D(0, 1.7, 0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere2);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);
@@ -906,6 +901,8 @@ void Scene::setupScene()
        //        addSceneObjectFromModel("sphere", 3, pointLightA, rot);
        //        addSceneObjectFromModel("sphere", 3, pointLightB, rot);
        //        addSceneObjectFromModel("sphere", 3, pointLightC, rot);
+
+       mlog<<"NUm particles:"<<m_DynamicsWorld->pCount;
 }
 
 

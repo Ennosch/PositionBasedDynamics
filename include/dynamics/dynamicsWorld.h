@@ -49,6 +49,7 @@ class DynamicsWorld
         ParticlePtr getParticlePtrFromRawPtr (Particle *_ptr);
         ParticlePtr addParticle(float _x, float _y, float _z);
         void addPlane(const Plane &_plane);
+        void collisionCheck();
 
         void checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2);
         void checkSpherePlane(const ParticlePtr p1, const Plane &_plane);

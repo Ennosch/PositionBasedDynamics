@@ -17,6 +17,7 @@ find_package(assimp)
 find_package(eigen3)
 find_package(OpenMP)
 
+
 set(CMAKE_AUTOMOC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(CMAKE_AUTORCC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/resources/Forms/")
@@ -44,7 +45,7 @@ set(INCLUDES "${INCLUDES}" "${DYNAMIC_INCLUDES}")
 message("INCLUDE:          " ${INCLUDES})
 message("SOURCES:          " ${SOURCES})
 
-add_executable(QtOpenGL MACOSX_BUNDLE
+add_executable(QtOpenGL
     ${SOURCES}
     ${INCLUDES}
     resources.qrc

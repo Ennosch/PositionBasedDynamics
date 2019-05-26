@@ -39,6 +39,8 @@ void HalfSpaceConstraint::project()
 
 float HalfSpaceConstraint::constraintFunction(const QVector3D &_p)
 {
+    if(_p == qc)
+        return 0;
     float C = QVector3D::dotProduct((_p-qc),  n);
     return C;
 }
@@ -137,8 +139,8 @@ QVector3D DistanceEqualityConstraint::deltaP()
 
 void DistanceEqualityConstraint::project()
 {
-    if(!m_dirty)
-        return;
+//    if(!m_dirty)
+//        return;
 
 //    p1.p = QVector3D(0,0.1,0);
     float w1, w2;
@@ -230,6 +232,7 @@ void ShapeMatchingConstraint::project()
     if(!m_dirty)
         return;
 
+
     cm.setZero();
     for(auto p : m_particles)
     {
@@ -269,6 +272,7 @@ void ShapeMatchingConstraint::project()
         m_particles[i]->p = QVector3D(gi.x(), gi.y(), gi.z());
     }
 
+//    mlog<<"ShapeMatchingConstraint::project()";
     m_dirty = false;
 }
 
@@ -399,6 +403,8 @@ void FrictionConstraint::project()
     if(!m_dirty)
         return;
 
+    return;
+
     QVector3D td, xj;
     td = (pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x) - constraintFunction() * m_collisionNormal;
     float tdLength = td.length();
@@ -438,13 +444,15 @@ HalfSpaceFrictionConstraint::HalfSpaceFrictionConstraint(const ParticlePtr _p1, 
 
 void HalfSpaceFrictionConstraint::project()
 {
+    if(!m_dirty)
+        return;
     QVector3D td, xj;
     td = (pptr1->p - pptr1->x)   - constraintFunction() * m_collisionNormal;
     float tdLength = td.length();
 
     float usd = 0.2;
-    float ukd = 0.2;
-    return;
+    float ukd = 0.1;
+
     if(tdLength < usd)
     {
 //        mlog<<"project usd";
@@ -455,6 +463,7 @@ void HalfSpaceFrictionConstraint::project()
 //         mlog<<"project ukd";
         pptr1->p += -td * std::min( (ukd / tdLength) , float(1.0));
     }
+    m_dirty = false;
 }
 
 float HalfSpaceFrictionConstraint::constraintFunction()

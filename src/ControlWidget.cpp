@@ -100,7 +100,7 @@ void TransformUiWidget::connectWidgets()
     connect(mat33Edit, SIGNAL(valueChanged(double)), this, SLOT(emitTransformChange()));
 }
 
-void TransformUiWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t, const QVector3D _r, const QVector3D _s)
+void TransformUiWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t, const QVector3D _r, const QVector3D _s, int var)
 {
     // loop over Units block signal set value allow signals
     transform00Edit->blockSignals(true);
@@ -114,6 +114,8 @@ void TransformUiWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t,
     transform02Edit->blockSignals(true);
     transform02Edit->setValue(_t.z());
     transform02Edit->blockSignals(false);
+
+    transform10Edit->setValue(var);
 }
 
 void TransformUiWidget::emitTransformChange()

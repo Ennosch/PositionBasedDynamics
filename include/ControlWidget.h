@@ -53,7 +53,7 @@ signals:
     void matrixChanged(const QVector3D _t, const QVector3D _r, const QVector3D _s);
 
 protected slots:
-    void setTransform(const QMatrix4x4 _mat4, const QVector3D _t, const QVector3D _r, const QVector3D _s);
+    void setTransform(const QMatrix4x4 _mat4, const QVector3D _t, const QVector3D _r, const QVector3D _s, int var);
     void emitTransformChange();
     void foo(double _v)
     {

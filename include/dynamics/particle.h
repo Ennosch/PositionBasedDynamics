@@ -35,6 +35,8 @@ public:
     const QMatrix4x4 getTransfrom();
     const QVector3D getTranslation();
 
+
+
 //private:
     unsigned age;
     float w, r, m;

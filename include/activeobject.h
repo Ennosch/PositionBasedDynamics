@@ -30,7 +30,7 @@ public:
     void setTransform(const QVector3D _t, const QVector3D _r, const QVector3D _s);
 
 signals:
-    void transformChanged(const QMatrix4x4 _modelMat, const QVector3D num, const QVector3D num1, const QVector3D num2);
+    void transformChanged(const QMatrix4x4 _modelMat, const QVector3D num, const QVector3D num1, const QVector3D num2, int var=0);
     void testSignal(int p);
 
 

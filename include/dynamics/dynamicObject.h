@@ -31,6 +31,8 @@ public:
     virtual std::vector<ParticleWeakPtr>& getParticles(){ std::vector<ParticleWeakPtr> vec; return vec; }
 
     std::vector<ConstraintWeakPtr> m_Constraints;
+
+    int mID;
 private:
 //    bool m_IsParticle = false;
 

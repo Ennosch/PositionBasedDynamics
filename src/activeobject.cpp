@@ -43,10 +43,17 @@ void ActiveObject::notify(pSceneOb _sender)
 
     m_manipulator->setActive(true);
 
+    int var = 0;
+    if(activeSceneObject->isDynamic())
+    {
+        var = activeSceneObject->dynamicObject()->mID;
+    }
+
     emit transformChanged(_sender->getMatrix(),
                           _sender->getPos(),
                           _sender->getPos(),
-                          _sender->getPos());
+                          _sender->getPos(),
+                          var);
     m_manipulator->setTranslation(_sender->getTransform().translation());
     m_manipulator->setRotation(_sender->getTransform().rotation());
 }

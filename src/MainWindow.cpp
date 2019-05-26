@@ -18,9 +18,9 @@ void MainWindow::setGLController(GLWidget *_glw)
     glw = _glw;
 
     connect(glw->activeObject(),
-            SIGNAL(transformChanged(const QMatrix4x4, const QVector3D, const QVector3D, const QVector3D)),
+            SIGNAL(transformChanged(const QMatrix4x4, const QVector3D, const QVector3D, const QVector3D, int)),
             controlWidget->transformWidget,
-            SLOT(setTransform(const QMatrix4x4, const QVector3D, const QVector3D, const QVector3D)));
+            SLOT(setTransform(const QMatrix4x4, const QVector3D, const QVector3D, const QVector3D, int)));
 
     connect(controlWidget->transformWidget,
             SIGNAL(matrixChanged(const QVector3D, const QVector3D, const QVector3D)),
