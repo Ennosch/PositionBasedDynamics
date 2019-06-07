@@ -13,7 +13,7 @@ Particle::Particle()
 Particle::Particle(float _x, float _y, float _z, int _ID)
 {
     r = 0.5;
-    m = 0.01;
+    m = 0.10;
     x = QVector3D(_x, _y, _z);
     v = QVector3D(0, 0, 0);
     w = 1.0/m;

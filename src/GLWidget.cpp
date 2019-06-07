@@ -86,7 +86,7 @@ void GLWidget::loop()
 //       mlog<<simFrameCounter;
     simPerFrame = simFrameCounter;
 
-    QThread::msleep(12);
+//    QThread::msleep(16);
 
     //// play every sim frame
 //    timer.start();

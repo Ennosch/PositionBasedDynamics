@@ -694,7 +694,7 @@ void Scene::paint()
                         }
                         if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
                         {
-                            continue;
+//                            continue;
                         }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
@@ -867,8 +867,9 @@ void Scene::setupScene()
        addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
        addModel(this, "cloth2", "/Users/enno/Dev/Grid_441points_scaled.obj");
 
-//       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
-       addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
+       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
+//       addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
+       addModel(this, "quad", "/Users/enno/Dev/Quad_1.obj");
 
        addModel(this, "sphere", "/Users/enno/Dev/Icosahedronf4.obj");
 
@@ -884,12 +885,16 @@ void Scene::setupScene()
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
-       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,20,0));
+       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
        QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 40,0));
-//        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(0, 1.8, 0), rot);
-//        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
-        auto sceneObject2 = addSceneObjectFromModel("cloth", 1, QVector3D(0, 15, 0), rot2);
-        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2, 0.5);
+        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(0, 5.0, 0), rot);
+        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+
+//        auto sceneObject3 = addSceneObjectFromModel("quad", 1, QVector3D(0, 20.0, 0), rot);
+//        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject3);
+
+//        auto sceneObject2 = addSceneObjectFromModel("cloth", 1, QVector3D(0, 15, 0), rot2);
+//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2, 0.5);
 
 //        auto sceneObject3 = addSceneObjectFromModel("cloth2", 0, QVector3D(5, 20.5, 0), rot2);
 //        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject3, 2.5);

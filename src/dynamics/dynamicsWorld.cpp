@@ -17,6 +17,7 @@ DynamicsWorld::DynamicsWorld()
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
     m_dt = 0.02;
+//    m_dt = 0.1;
     m_frameCount = 0;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
@@ -75,45 +76,7 @@ void DynamicsWorld::update()
         p->p = p->x + dt * p->v;
     }
 
-    //  Collision Detection (8)
-    /*
-    m_hashGrid.clear();
-    for( ParticlePtr p : m_Particles)
-    {
-        int3 pCell = m_hashGrid.pointToCell(
-                    p->position().x(),
-                    p->position().y(),
-                    p->position().z() );
-
-        size_t pHash = m_hashGrid.hashFunction(pCell);
-           p->setHash(pHash);
-        m_hashGrid.insert(pHash, p);
-        // get all neightbouring particles
-        std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
-        for(ParticlePtr n : neighbourParticles)
-//        for( ParticlePtr n : m_Particles)
-        {
-//            bool isNonCollide = std::includes
-            bool isNonCollider = false;
-            for(auto ntest : p->m_NonCollisionParticles)
-            {
-                if(ntest.lock() == n)
-                {
-                    isNonCollider =true;
-                }
-            }
-            if(isNonCollider)
-                continue;
-
-            if(n != p)
-                // check predicted postion for particle particle collisions
-                checkSphereSphere(p,n);
-        }
-
-        checkSpherePlane(p, m_Planes[0]);
-    }*/
-
-//    collisionCheck();
+    collisionCheckAll();
 
     // Constraint dirty to do something
         for( ParticlePtr p : m_Particles)
@@ -127,25 +90,6 @@ void DynamicsWorld::update()
             }
         }
 
-//    for(int i = 0 ; i <10; i++)
-//    {
-//        for( ParticlePtr p : m_Particles)
-//        {
-//            for( ConstraintWeakPtr c : p->m_Constraints)
-//            {
-//    //            p->p += c->deltaP();
-//    //            auto test = c.lock();
-//    //            bool test2 = c.expired();
-//                if(auto constraint = c.lock()){
-//    //                for(int i=0; i<=5; i++)
-//                    {
-//                        constraint->project();
-//                    }
-//                }
-//            }
-//        }
-//    }
-
 // Preconditioning (solve particle plane cstrs once)
 for( ParticlePtr p : m_Particles)
 {
@@ -158,17 +102,18 @@ for( ParticlePtr p : m_Particles)
 
 
 // Solver Iteration (9)
-int numIterations = 10;
+int numIterations = 25;
 
 int nthreads, tid, test;
 
 for(int i=0; i<numIterations; i++)
 {
-    #pragma omp parallel for
+//    #pragma omp parallel for
     for(int j=0; j < m_Particles.size(); j++)
     {
 //        for( ConstraintWeakPtr c : p->m_Constraints)
-        for( ConstraintWeakPtr c : m_Particles[j]->m_Constraints)
+        auto p = m_Particles[j];
+        for( ConstraintWeakPtr c : p->m_Constraints)
         {
             if(auto constraint = c.lock()){
                 {
@@ -176,30 +121,22 @@ for(int i=0; i<numIterations; i++)
                 }
             }
         }
+
+        checkSpherePlane(p, m_Planes[0]);
+//        collisionCheck(p);
+
+        for( ConstraintPtr c : p->m_CollisionConstraints)
+        {
+            c->project();
+        }
+        p->m_CollisionConstraints.clear();
     }
-
-//    for( ParticlePtr p : m_Particles)
-//    {
-//        for( ConstraintWeakPtr c : p->m_Constraints)
-//        {
-//            if(auto constraint = c.lock()){
-//                {
-//                    constraint->project();
-//                }
-//            }
-//        }
-
         // generate new collision constraint
 //        checkSpherePlane(p, m_Planes[0]);
 //        // particle particle Check
 
-//        for( ConstraintPtr c : p->m_CollisionConstraints)
-//        {
-//            c->project();
-//        }
-//        p->m_CollisionConstraints.clear();
 
-//    }
+//        p->m_CollisionConstraints.clear();
 
     for( ParticlePtr p : m_Particles)
     {
@@ -211,11 +148,11 @@ for(int i=0; i<numIterations; i++)
                 }
             }
         }
-//        for( ConstraintPtr c : p->m_CollisionConstraints_B)
-//        {
-//            c->project();
-//        }
-//        p->m_CollisionConstraints_B.clear();
+        for( ConstraintPtr c : p->m_CollisionConstraints_B)
+        {
+            c->project();
+        }
+        p->m_CollisionConstraints_B.clear();
     }
 }
 
@@ -487,10 +424,47 @@ void DynamicsWorld::addPlane(const Plane &_plane)
     m_Planes.push_back(_plane);
 }
 
-void DynamicsWorld::collisionCheck()
+void DynamicsWorld::collisionCheckAll()
 {
     m_hashGrid.clear();
     for( ParticlePtr p : m_Particles)
+    {
+        int3 pCell = m_hashGrid.pointToCell(
+                    p->position().x(),
+                    p->position().y(),
+                    p->position().z() );
+
+        size_t pHash = m_hashGrid.hashFunction(pCell);
+           p->setHash(pHash);
+        m_hashGrid.insert(pHash, p);
+        // get all neightbouring particles
+        std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
+        for(ParticlePtr n : neighbourParticles)
+//        for( ParticlePtr n : m_Particles)
+        {
+//            bool isNonCollide = std::includes
+            bool isNonCollider = false;
+            for(auto ntest : p->m_NonCollisionParticles)
+            {
+                if(ntest.lock() == n)
+                {
+                    isNonCollider =true;
+                }
+            }
+            if(isNonCollider)
+                continue;
+
+            if(n != p)
+                // check predicted postion for particle particle collisions
+                checkSphereSphere(p,n);
+        }
+
+        checkSpherePlane(p, m_Planes[0]);
+    }
+}
+
+void DynamicsWorld::collisionCheck(ParticlePtr p)
+{
     {
         int3 pCell = m_hashGrid.pointToCell(
                     p->position().x(),
