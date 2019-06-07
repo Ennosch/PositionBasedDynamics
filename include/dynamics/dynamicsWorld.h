@@ -38,13 +38,14 @@ class DynamicsWorld
         void setSimulate(bool _isSimulating);
         void reset();
         void step();
+        int getTimeStepSizeMS();
 
         void pbdDamping();
 
         void addDynamicObject(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject);
-        DynamicObjectPtr addDynamicObjectAsSoftBody(pSceneOb _sceneObject);
+        DynamicObjectPtr addDynamicObjectAsSoftBody(pSceneOb _sceneObject, float _mass = 1);
 
         ParticlePtr getParticlePtrFromRawPtr (Particle *_ptr);
         ParticlePtr addParticle(float _x, float _y, float _z);

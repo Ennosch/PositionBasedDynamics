@@ -16,7 +16,7 @@ DynamicsWorld::DynamicsWorld()
 {
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
-    m_dt = 0.1;
+    m_dt = 0.02;
     m_frameCount = 0;
     m_DynamicsWorldController = new DynamicsWorldController(this);
 }
@@ -68,7 +68,7 @@ void DynamicsWorld::update()
     }
 
     // damp Velocities (6)
-    pbdDamping();
+//    pbdDamping();
 
     for( ParticlePtr p : m_Particles)
     {
@@ -158,7 +158,7 @@ for( ParticlePtr p : m_Particles)
 
 
 // Solver Iteration (9)
-int numIterations = 15;
+int numIterations = 10;
 
 int nthreads, tid, test;
 
@@ -201,22 +201,22 @@ for(int i=0; i<numIterations; i++)
 
 //    }
 
-//    for( ParticlePtr p : m_Particles)
-//    {
-//        for( ConstraintWeakPtr c : p->m_Constraints)
-//        {
-//            if(auto constraint = c.lock()){
-//                {
-//                    constraint->setDirty(true);
-//                }
-//            }
-//        }
+    for( ParticlePtr p : m_Particles)
+    {
+        for( ConstraintWeakPtr c : p->m_Constraints)
+        {
+            if(auto constraint = c.lock()){
+                {
+                    constraint->setDirty(true);
+                }
+            }
+        }
 //        for( ConstraintPtr c : p->m_CollisionConstraints_B)
 //        {
 //            c->project();
 //        }
 //        p->m_CollisionConstraints_B.clear();
-//    }
+    }
 }
 
 
@@ -263,6 +263,11 @@ void DynamicsWorld::step()
     m_simulate = true;
     update();
     m_simulate = false;
+}
+
+int DynamicsWorld::getTimeStepSizeMS()
+{
+    return m_dt * 1000;
 }
 
 void DynamicsWorld::pbdDamping()
@@ -396,7 +401,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     return nRB;
 }
 
-DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject)
+DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject, float _mass)
 {
     if(!_sceneObject->model())
         return nullptr;
@@ -413,6 +418,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
              QVector3D pos = _sceneObject->getMatrix() * point;
              pCount++;
              auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
+             nParticle->setMass(100);
              nParticle->mID = pCount;
              m_Particles.push_back(nParticle);
              nSB->addParticle(point, nParticle);

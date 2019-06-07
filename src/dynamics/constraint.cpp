@@ -139,8 +139,8 @@ QVector3D DistanceEqualityConstraint::deltaP()
 
 void DistanceEqualityConstraint::project()
 {
-//    if(!m_dirty)
-//        return;
+    if(!m_dirty)
+        return;
 
 //    p1.p = QVector3D(0,0.1,0);
     float w1, w2;
@@ -153,11 +153,19 @@ void DistanceEqualityConstraint::project()
     w1 = pptr1->w;
     w2 = pptr2->w;
 
-    dp1 =  -w1/(w1 + w2) * c1 * ((p1 - p2) / (p1-p2).length());
-    dp2 =  +w2/(w1 + w2) * c1 * ((p1 - p2) / (p1-p2).length());
+    float massCo = w1/(w1 + w2);
 
-    pptr1->p += (dp1 * 0.5);
-    pptr2->p += (dp2 * 0.5);
+    dp1 =  (-w1/(w1 + w2)) * c1 * ((p1 - p2) / (p1-p2).length());
+    dp2 =  (+w2/(w1 + w2)) * c1 * ((p1 - p2) / (p1-p2).length());
+
+
+//    qDebug()<<"w1: "<<w1<<"w2: "<<w2<<massCo;
+
+    pptr1->p += (dp1 * 1.0);
+    pptr2->p += (dp2 * 1.0);
+
+//    pptr1->p += (dp1 * 0.5);
+//    pptr2->p += (dp2 * 0.5);
 
     m_dirty = false;
 //    qDebug()<<"projecting DistanceEqualityConstraint";

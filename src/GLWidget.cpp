@@ -33,6 +33,7 @@ GLWidget::GLWidget(QWindow *parent) : QOpenGLWidget()
     second = 0;
     previous = m_elpasedTimer.elapsed();
     lag = 0.0;
+    render = 0.0;
 
     m_timer.start();
     this->setWindowTitle("QOpenGLWidget");
@@ -63,36 +64,51 @@ void GLWidget::update()
 void GLWidget::loop()
 {
     countFPS();
-
-//    processInput();
-
-    scene()->updateSceneObjects();
-    int i = 0;
-
-    while(lag >= 10)
-    {
-        lag -= 10;
-        i++;
-    }
-
-//    QThread::msleep(16);
-    // physics
-
+    processInput();
     QElapsedTimer timer;
-    timer.start();
 
-    scene()->dynamicsWorld()->update();
+    double timeStepSize  = scene()->dynamicsWorld()->getTimeStepSizeMS();
+    int simFrameCounter = 0;
 
-    mlog<<"physics step2: "<<timer.elapsed();
+    //// WIP play sim in Realtime
+    while(lag >= timeStepSize)
+    {
+        simFrameCounter++;
+//        mlog<<"lag:"<<lag;
 
+        timer.start();
+        scene()->updateSceneObjects();
+        scene()->dynamicsWorld()->update();
+        msDynamics = timer.elapsed();
+
+        lag -= timeStepSize;
+    }
+//       mlog<<simFrameCounter;
+    simPerFrame = simFrameCounter;
+
+    QThread::msleep(12);
+
+    //// play every sim frame
+//    timer.start();
+//    scene()->updateSceneObjects();
+//    scene()->dynamicsWorld()->update();
+//    msDynamics = timer.elapsed();
+
+
+
+//    mlog<<"physics step2: "<<timer.elapsed();
     if(render < 16)
     {
         render += elapsed;
+//        qDebug()<<elapsed;
     }
     else
     {
+//        qDebug()<<"update";
         render = 0;
+        timer.restart();
         QOpenGLWidget::update();
+        msRender = timer.elapsed();
     }
 }
 
@@ -124,9 +140,12 @@ void GLWidget::renderText()
     QPainter painter(this);
     painter.setPen(QColor(0,0,0));
 
-    QString fps = QString::number(fpsRate) + " fps";
-    QString a = QString::number(scene()->dynamicsWorld()->frameCount());
-    QString b = QString::number(render);
+//    QString fps = QString::number(fpsRate) + " fps";
+    QString fps = " fps" + QString::number(msRender) ;
+//    QString a = QString::number(scene()->dynamicsWorld()->frameCount());
+    QString a = QString::number(simPerFrame);
+//    QString b = QString::number(render);
+    QString b = " sim fps:  " + QString::number(1000 / msDynamics);
     painter.drawText(QRect(5, 5, 100, 50), fps);
     painter.drawText(QRect(5, 19, 100, 50), a);
     painter.drawText(QRect(5, 33, 100, 50), b);

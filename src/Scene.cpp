@@ -863,7 +863,9 @@ void Scene::setupScene()
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_3x3.obj");
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_1681points.obj");
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
+
        addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
+       addModel(this, "cloth2", "/Users/enno/Dev/Grid_441points_scaled.obj");
 
 //       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
        addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
@@ -887,7 +889,10 @@ void Scene::setupScene()
 //        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(0, 1.8, 0), rot);
 //        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
         auto sceneObject2 = addSceneObjectFromModel("cloth", 1, QVector3D(0, 15, 0), rot2);
-        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
+        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2, 0.5);
+
+//        auto sceneObject3 = addSceneObjectFromModel("cloth2", 0, QVector3D(5, 20.5, 0), rot2);
+//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject3, 2.5);
 
 //       auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.02, 0.5, 0), rot);
 //       m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);

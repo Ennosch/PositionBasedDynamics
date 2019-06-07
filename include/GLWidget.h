@@ -66,6 +66,8 @@ private:
   double lag;
   float fpsRate, fpsCount;
   double previous, current, elapsed, second, render;
+  double msDynamics, msRender, simPerFrame = 0;
+  Tool m_tool;
   ActiveObject *m_activeObject;
   QTimer m_timer;
   QElapsedTimer m_elpasedTimer;
