@@ -47,7 +47,8 @@ void Scene::initialize()
   }
   QtOpenGLinitialize();
   DynamicsInitialize();
-//  setupScene();
+  setupScene();
+  m_DynamicsWorld->m_simulate = true;
 //  m_DynamicsWorld->generateData();
 }
 
@@ -782,7 +783,10 @@ void Scene::paint()
         if(mainpulator)
         {
 //            mainpulator->drawPickingBufferDebug();
-            mainpulator->draw();
+//            for(int i=0; i < 2000; i++)
+            {
+                mainpulator->draw();
+            }
         }
 }
 
@@ -867,8 +871,8 @@ void Scene::setupScene()
        addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
        addModel(this, "cloth2", "/Users/enno/Dev/Grid_441points_scaled.obj");
 
-       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
-//       addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
+//       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
+       addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
        addModel(this, "quad", "/Users/enno/Dev/Quad_1.obj");
 
        addModel(this, "sphere", "/Users/enno/Dev/Icosahedronf4.obj");
@@ -886,8 +890,8 @@ void Scene::setupScene()
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
-       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 40,0));
-        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(0, 5.0, 0), rot);
+       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 40, 20));
+        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(0, 5.0, 0), rot2);
         m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
 
 //        auto sceneObject3 = addSceneObjectFromModel("quad", 1, QVector3D(0, 20.0, 0), rot);
@@ -935,7 +939,6 @@ pSceneOb Scene::addSceneObject(std::string _shape, const QVector3D &_pos)
 
 pSceneOb Scene::addSceneObject(std::string _name, const QVector3D &_pos, const QQuaternion &_rot)
 {
-
         auto pShape = getShapeFromPool(_name);
         if(pShape == nullptr)
         {

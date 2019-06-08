@@ -209,6 +209,13 @@ Vec3 CollisionDetection::closetPointFromRayToRay(const Ray &_r1, const Ray &_r2)
 
 bool CollisionDetection::checkSphereSphere(const Vec3 &_s1, const Vec3 &_s2, float &d,float _r1, float _r2)
 {
+
+//    Vec3 sqrtD = _s1 - _s2;
+//    float dist1 = Vec3::dotProduct(sqrtD, sqrtD);
+//    float radiusSum = _r1 + _r2;
+//    return dist1 <= radiusSum * radiusSum;
+
+
     float dist = (_s2 - _s1).length();
     float minDist = _r1 + _r2;
     bool isColliding =  (dist < minDist);
@@ -218,10 +225,21 @@ bool CollisionDetection::checkSphereSphere(const Vec3 &_s1, const Vec3 &_s2, flo
     float b = _r1 + _r2;
 
     return isColliding;
+
 }
 
 
-
+/*
+ *OPtimize Sphere Sphere Check
+    int TestSphereSphere(Sphere a, Sphere b)
+ {
+     // Calculate squared distance between centers
+Vector d = a.c - b.c;
+float dist2 = Dot(d, d);
+// Spheres intersect if squared distance is less than squared sum of radii float radiusSum = a.r + b.r;
+return dist2 <= radiusSum * radiusSum;
+}
+ */
 
 
 

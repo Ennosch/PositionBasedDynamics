@@ -102,7 +102,7 @@ for( ParticlePtr p : m_Particles)
 
 
 // Solver Iteration (9)
-int numIterations = 25;
+int numIterations = 5;
 
 int nthreads, tid, test;
 
@@ -122,8 +122,8 @@ for(int i=0; i<numIterations; i++)
             }
         }
 
-        checkSpherePlane(p, m_Planes[0]);
-//        collisionCheck(p);
+//        checkSpherePlane(p, m_Planes[0]);
+        collisionCheck(p);
 
         for( ConstraintPtr c : p->m_CollisionConstraints)
         {
@@ -447,6 +447,7 @@ void DynamicsWorld::collisionCheckAll()
             for(auto ntest : p->m_NonCollisionParticles)
             {
                 if(ntest.lock() == n)
+//                if(ntest.lock() )
                 {
                     isNonCollider =true;
                 }
@@ -484,6 +485,7 @@ void DynamicsWorld::collisionCheck(ParticlePtr p)
             for(auto ntest : p->m_NonCollisionParticles)
             {
                 if(ntest.lock() == n)
+//                if(ntest == n)
                 {
                     isNonCollider =true;
                 }
