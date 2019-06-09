@@ -20,17 +20,15 @@ void HashGrid::clear()
 
 bool HashGrid::insert(size_t _hashV, ParticlePtr _p)
 {
+
     bool CellExists = false;
     if(cellExists(_hashV))
     {
         CellExists = true;
     }
-    else
-    {
-        CellExists = false;
-    }
     m_buckets[_hashV].push_back(_p);
     return CellExists;
+
 }
 
 bool HashGrid::cellExists(size_t _hashV)

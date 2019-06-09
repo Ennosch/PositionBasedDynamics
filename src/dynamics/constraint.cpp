@@ -37,6 +37,12 @@ void HalfSpaceConstraint::project()
     pptr->p += deltaP();
 }
 
+float HalfSpaceConstraint::constraintFunction()
+{
+//    qDebug()<<" HalfSpace C"; return 2.0;
+    return constraintFunction(pptr->p);
+}
+
 float HalfSpaceConstraint::constraintFunction(const QVector3D &_p)
 {
     if(_p == qc)

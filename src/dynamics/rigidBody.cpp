@@ -35,14 +35,21 @@ ConstraintPtr RigidBody::createConstraint()
         if(auto particle = p.lock())
         {
             particle->m_Constraints.push_back(smCstrWeak);
+//            for_each(m_particles.begin(), m_particles.end(), [&particle](ParticleWeakPtr pNeighbour)
             for_each(m_particles.begin(), m_particles.end(), [&particle](ParticleWeakPtr pNeighbour)
             {
                 if(particle != pNeighbour.lock())
-                    particle->m_NonCollisionParticles.push_back(pNeighbour);
+                {
+                    std::shared_ptr<Particle> sharedNeighbour = pNeighbour.lock();
+                    particle->m_NonCollisionParticles.push_back(sharedNeighbour);
+//                    particle->m_NonCollisionParticles.push_back(pNeighbour);
+                }
             });
         }
     }
-    return smCstr;
+    //// (?) check std::move
+//    return smCstr
+    return std::move(smCstr);
 }
 
 

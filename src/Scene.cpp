@@ -48,7 +48,7 @@ void Scene::initialize()
   QtOpenGLinitialize();
   DynamicsInitialize();
   setupScene();
-  m_DynamicsWorld->m_simulate = true;
+//  m_DynamicsWorld->m_simulate = true;
 //  m_DynamicsWorld->generateData();
 }
 
@@ -873,6 +873,7 @@ void Scene::setupScene()
 
 //       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
        addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
+//       addModel(this, "cube", "/Users/enno/Dev/Cube_8.obj");
        addModel(this, "quad", "/Users/enno/Dev/Quad_1.obj");
 
        addModel(this, "sphere", "/Users/enno/Dev/Icosahedronf4.obj");
@@ -888,11 +889,22 @@ void Scene::setupScene()
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
+
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
-       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(90,0,0));
+       QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
        QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 40, 20));
-        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(0, 5.0, 0), rot2);
+        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(2, 5.0, 0), rot);
         m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+
+        auto sceneObject2 = addSceneObjectFromModel("cube", 0, QVector3D(0, 9.0, 0), rot);
+        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject2, 1);
+
+//        for(int i=0; i < 100; i++)
+//        {
+//            QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(rand() % 90,rand() % 90,rand() % 90));
+//            auto sceneObjectX = addSceneObjectFromModel("cube", (i%4), QVector3D(rand() % 20, rand() % 500 + 35, rand() % 17), rotX);
+//            m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX, (i%3));
+//        }
 
 //        auto sceneObject3 = addSceneObjectFromModel("quad", 1, QVector3D(0, 20.0, 0), rot);
 //        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject3);

@@ -46,7 +46,7 @@ public:
     HalfSpaceConstraint(const ParticlePtr _p, const QVector3D &_qc, const QVector3D &_n);
 
     void project();
-    float constraintFunction(){qDebug()<<" HalfSpace C"; return 2.0;}
+    float constraintFunction();
     float constraintFunction(const QVector3D &_p);
     QVector3D deltaP();
 

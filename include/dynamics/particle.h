@@ -50,8 +50,8 @@ public:
 
     std::vector<ConstraintPtr> m_CollisionConstraints;
     std::vector<ConstraintPtr> m_CollisionConstraints_B;
-    std::list<ParticleWeakPtr> m_NonCollisionParticles;
-//    std::list<ParticlePtr> m_NonCollisionParticles;
+//    std::list<ParticleWeakPtr> m_NonCollisionParticles;
+    std::list<ParticlePtr> m_NonCollisionParticles;
 
 };
 

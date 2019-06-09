@@ -44,7 +44,7 @@ class DynamicsWorld
 
         void addDynamicObject(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
-        DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject);
+        DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject, int color=0);
         DynamicObjectPtr addDynamicObjectAsSoftBody(pSceneOb _sceneObject, float _mass = 1);
 
         ParticlePtr getParticlePtrFromRawPtr (Particle *_ptr);

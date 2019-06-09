@@ -97,9 +97,8 @@ for( ParticlePtr p : m_Particles)
     {
         c->project();
     }
-    p->m_CollisionConstraints.clear();
+//    p->m_CollisionConstraints.clear();
 }
-
 
 // Solver Iteration (9)
 int numIterations = 5;
@@ -123,13 +122,14 @@ for(int i=0; i<numIterations; i++)
         }
 
 //        checkSpherePlane(p, m_Planes[0]);
-        collisionCheck(p);
+//        collisionCheck(p);
 
         for( ConstraintPtr c : p->m_CollisionConstraints)
         {
+//            if(c->constraintFunction() < 0)
             c->project();
         }
-        p->m_CollisionConstraints.clear();
+//        p->m_CollisionConstraints.clear();
     }
         // generate new collision constraint
 //        checkSpherePlane(p, m_Planes[0]);
@@ -152,12 +152,16 @@ for(int i=0; i<numIterations; i++)
         {
             c->project();
         }
-        p->m_CollisionConstraints_B.clear();
+//        p->m_CollisionConstraints_B.clear();
     }
 }
 
-
-
+//delte collisions
+for( ParticlePtr p : m_Particles)
+{
+    p->m_CollisionConstraints.clear();
+    p->m_CollisionConstraints_B.clear();
+}
 
     // Apply correction (13,14)
     for( ParticlePtr p : m_Particles)
@@ -303,7 +307,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
     return pDynamicObject;
 }
 
-DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObject)
+DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObject, int color)
 {
     if(!_sceneObject->model())
         return nullptr;
@@ -324,7 +328,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
             nParticle->setRadius(_sceneObject->getRadius());
             m_Particles.push_back(nParticle);
             nRB->addParticle(point, nParticle);
-            m_scene->addSceneObjectFromParticle(nParticle, 0);
+            m_scene->addSceneObjectFromParticle(nParticle, color);
         }
     }
     auto smCstr = nRB->createConstraint();
@@ -429,43 +433,15 @@ void DynamicsWorld::collisionCheckAll()
     m_hashGrid.clear();
     for( ParticlePtr p : m_Particles)
     {
-        int3 pCell = m_hashGrid.pointToCell(
-                    p->position().x(),
-                    p->position().y(),
-                    p->position().z() );
-
-        size_t pHash = m_hashGrid.hashFunction(pCell);
-           p->setHash(pHash);
-        m_hashGrid.insert(pHash, p);
-        // get all neightbouring particles
-        std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
-        for(ParticlePtr n : neighbourParticles)
-//        for( ParticlePtr n : m_Particles)
-        {
-//            bool isNonCollide = std::includes
-            bool isNonCollider = false;
-            for(auto ntest : p->m_NonCollisionParticles)
-            {
-                if(ntest.lock() == n)
-//                if(ntest.lock() )
-                {
-                    isNonCollider =true;
-                }
-            }
-            if(isNonCollider)
-                continue;
-
-            if(n != p)
-                // check predicted postion for particle particle collisions
-                checkSphereSphere(p,n);
-        }
-
-        checkSpherePlane(p, m_Planes[0]);
+        collisionCheck( p);
     }
+//    mlog<<"stop the block ";
 }
 
 void DynamicsWorld::collisionCheck(ParticlePtr p)
 {
+//    checkSpherePlane(p, m_Planes[0]);
+//    return;
     {
         int3 pCell = m_hashGrid.pointToCell(
                     p->position().x(),
@@ -475,17 +451,18 @@ void DynamicsWorld::collisionCheck(ParticlePtr p)
         size_t pHash = m_hashGrid.hashFunction(pCell);
            p->setHash(pHash);
         m_hashGrid.insert(pHash, p);
-        // get all neightbouring particles
+//        // get all neightbouring particles
         std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
         for(ParticlePtr n : neighbourParticles)
 //        for( ParticlePtr n : m_Particles)
         {
+//            continue;
 //            bool isNonCollide = std::includes
             bool isNonCollider = false;
             for(auto ntest : p->m_NonCollisionParticles)
             {
-                if(ntest.lock() == n)
-//                if(ntest == n)
+//                if(ntest.lock() == n)
+                if(ntest == n)
                 {
                     isNonCollider =true;
                 }

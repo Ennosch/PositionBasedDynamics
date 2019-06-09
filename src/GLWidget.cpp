@@ -64,8 +64,8 @@ void GLWidget::update()
 void GLWidget::loop()
 {
 
-    if(m_elpasedTimer.elapsed() > 5000)
-        close();
+//    if(m_elpasedTimer.elapsed() > 5000)
+//        close();
 
     QElapsedTimer timer;
     timer.start();
@@ -87,7 +87,6 @@ void GLWidget::loop()
         scene()->dynamicsWorld()->update();
         msDynamics = timer.elapsed();
         timer.restart();
-
 
         lag -= timeStepSize;
     }
