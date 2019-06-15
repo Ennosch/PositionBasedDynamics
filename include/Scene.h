@@ -65,7 +65,7 @@ public:
   ModelPtr addModel(Scene *_scene, std::string _name, std::string _path);
 
   pSceneOb addSceneObjectFromModel(std::string _name, const uint _materialID, const QVector3D &_pos, const QQuaternion &_rot);
-  pSceneOb addSceneObjectFromParticle( const ParticlePtr _particle, int matID = 1);
+  pSceneOb addSceneObjectFromParticle(const DynamicObjectPtr _particle, ParticlePtr _p, int matID = 1);
 
   LightPtr addPointLight();
   LightPtr addPointLight(const QVector3D &_pos, const QVector3D &_color);

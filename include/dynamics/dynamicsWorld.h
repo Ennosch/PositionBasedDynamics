@@ -18,6 +18,7 @@
 #include "dynamics/particle.h"
 #include "dynamics/rigidBody.h"
 #include "dynamics/softBody.h"
+#include "dynamics/singleParticle.h"
 #include "dynamics/collisiondetection.h"
 #include "dynamics/constraint.h"
 #include "dynamicsWorldController.h"

@@ -9,7 +9,8 @@
 
 class AbstractConstraint;
 
-class Particle : public DynamicObject, public std::enable_shared_from_this<Particle>
+//class Particle : public DynamicObject, public std::enable_shared_from_this<Particle>
+class Particle : public std::enable_shared_from_this<Particle>
 {
 public:
     Particle();
@@ -52,6 +53,8 @@ public:
     std::vector<ConstraintPtr> m_CollisionConstraints_B;
 //    std::list<ParticleWeakPtr> m_NonCollisionParticles;
     std::list<ParticlePtr> m_NonCollisionParticles;
+
+    std::vector<ConstraintWeakPtr> m_Constraints;
 
 };
 

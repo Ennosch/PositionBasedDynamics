@@ -101,7 +101,7 @@ for( ParticlePtr p : m_Particles)
 }
 
 // Solver Iteration (9)
-int numIterations = 5;
+int numIterations = 15;
 
 int nthreads, tid, test;
 
@@ -134,7 +134,6 @@ for(int i=0; i<numIterations; i++)
         // generate new collision constraint
 //        checkSpherePlane(p, m_Planes[0]);
 //        // particle particle Check
-
 
 //        p->m_CollisionConstraints.clear();
 
@@ -298,12 +297,16 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
 {
     pCount++;
     QVector3D pos = _sceneObject->getPos();
-    auto pDynamicObject = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), pCount);
-    pDynamicObject->mID = pCount;
-    pDynamicObject->setRadius(_sceneObject->getRadius());
-    m_Particles.push_back(pDynamicObject);
+    auto pParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), pCount);
+    pParticle->ID = pCount;
+    pParticle->setRadius(_sceneObject->getRadius());
+    m_Particles.push_back(pParticle);
+
+//    SingleParticle pDynamicObject(pParticle);
+    std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(pParticle);
     m_DynamicObjects.push_back(pDynamicObject);
     _sceneObject->makeDynamic(pDynamicObject);
+    // std::move (?)
     return pDynamicObject;
 }
 
@@ -324,11 +327,13 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
             QVector3D pos = _sceneObject->getMatrix() * point;
             pCount++;
             auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
-            nParticle->mID = pCount;
+            nParticle->ID = pCount;
             nParticle->setRadius(_sceneObject->getRadius());
             m_Particles.push_back(nParticle);
             nRB->addParticle(point, nParticle);
-            m_scene->addSceneObjectFromParticle(nParticle, color);
+
+            std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
+            m_scene->addSceneObjectFromParticle(pDynamicObject, nParticle, color);
         }
     }
     auto smCstr = nRB->createConstraint();
@@ -360,10 +365,12 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
              pCount++;
              auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
              nParticle->setMass(100);
-             nParticle->mID = pCount;
+             nParticle->ID = pCount;
              m_Particles.push_back(nParticle);
              nSB->addParticle(point, nParticle);
-             m_scene->addSceneObjectFromParticle(nParticle);
+
+             std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
+             m_scene->addSceneObjectFromParticle(pDynamicObject, nParticle);
          }
      }
      std::vector< std::set<int> > constraintIdxs  = nSB->createConstraintNetwork();

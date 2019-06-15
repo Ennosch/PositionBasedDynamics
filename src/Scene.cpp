@@ -100,7 +100,7 @@ pSceneOb Scene::addSceneObjectFromModel(std::string _name, const uint _materialI
     return pSO;
 }
 
-pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle, int matID)
+pSceneOb Scene::addSceneObjectFromParticle(const DynamicObjectPtr _particle, ParticlePtr _p,  int matID)
 {
     auto pModel = getModelFromPool("sphere");
     if(pModel == nullptr)
@@ -108,9 +108,11 @@ pSceneOb Scene::addSceneObjectFromParticle(const ParticlePtr _particle, int matI
         qDebug()<<"WARNING: COULD NOT ADD SceneObject as Particle";
         return nullptr;
     }
+//    QVector3D test = _p->
+
     auto pSO = std::make_shared<SceneObject>(this, pModel, matID , _particle->getTranslation());
     pSO->setActiveObject(widget()->activeObject());
-    pSO->setRadius(_particle->radius());
+    pSO->setRadius(_p->radius());
 
     numCreation++;
     pSO->setID(numCreation);

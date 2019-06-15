@@ -33,6 +33,7 @@ public:
     std::vector<ConstraintWeakPtr> m_Constraints;
 
     int mID;
+
 private:
 //    bool m_IsParticle = false;
 
