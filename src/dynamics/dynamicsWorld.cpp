@@ -17,6 +17,7 @@ DynamicsWorld::DynamicsWorld()
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
     m_dt = 0.02;
+//      m_dt = 0.01;
 //    m_dt = 0.1;
     m_frameCount = 0;
     m_DynamicsWorldController = new DynamicsWorldController(this);
@@ -69,7 +70,7 @@ void DynamicsWorld::update()
     }
 
     // damp Velocities (6)
-//    pbdDamping();
+    pbdDamping();
 
     for( ParticlePtr p : m_Particles)
     {
@@ -90,95 +91,123 @@ void DynamicsWorld::update()
             }
         }
 
-// Preconditioning (solve particle plane cstrs once)
-for( ParticlePtr p : m_Particles)
-{
-    for( ConstraintPtr c : p->m_CollisionConstraints)
+    // Preconditioning (solve particle plane cstrs once)
+    int PreConditionIterations = 2;
+    for(int i=0; i < PreConditionIterations; i++)
     {
-        c->project();
-    }
-//    p->m_CollisionConstraints.clear();
-}
-
-// Solver Iteration (9)
-int numIterations = 15;
-
-int nthreads, tid, test;
-
-for(int i=0; i<numIterations; i++)
-{
-//    #pragma omp parallel for
-    for(int j=0; j < m_Particles.size(); j++)
-    {
-//        for( ConstraintWeakPtr c : p->m_Constraints)
-        auto p = m_Particles[j];
-        for( ConstraintWeakPtr c : p->m_Constraints)
+        for( ParticlePtr p : m_Particles)
         {
-            if(auto constraint = c.lock()){
-                {
-                    constraint->project();
+            for( ConstraintPtr c : p->m_PreConditionConstraints)
+            {
+                c->project();
+            }
+
+
+//            for( ConstraintPtr c : p->m_CollisionConstraints)
+//            {
+//                c->project();
+//            }
+//            p->m_CollisionConstraints.clear();
+        }
+    }
+    m_frameCount++;
+
+
+    // Solver Iteration (9)
+    int numIterations = 5;
+
+    int nthreads, tid, test;
+
+    for(int i=0; i<numIterations; i++)
+    {
+    //    #pragma omp parallel for
+        for(int j=0; j < m_Particles.size(); j++)
+        {
+    //        for( ConstraintWeakPtr c : p->m_Constraints)
+            auto p = m_Particles[j];
+            for( ConstraintWeakPtr c : p->m_Constraints)
+            {
+                if(auto constraint = c.lock()){
+                    {
+                        constraint->project();
+                    }
                 }
             }
+
+    //        checkSpherePlane(p, m_Planes[0]);
+    //        collisionCheck(p);
+
+//            for( ConstraintPtr c : p->m_CollisionConstraints)
+//            {
+//    //            if(c->constraintFunction() < 0)
+//                c->project();
+//            }
         }
 
-//        checkSpherePlane(p, m_Planes[0]);
-//        collisionCheck(p);
-
-        for( ConstraintPtr c : p->m_CollisionConstraints)
+        for( ParticlePtr p : m_Particles)
         {
-//            if(c->constraintFunction() < 0)
-            c->project();
+            for( ConstraintWeakPtr c : p->m_Constraints)
+            {
+                if(auto constraint = c.lock()){
+                    {
+                        constraint->setDirty(true);
+                    }
+                }
+            }
+
+            for( ConstraintPtr c : p->m_CollisionConstraints_B)
+            {
+                c->project();
+            }
+
+            for( ConstraintPtr c : p->m_CollisionConstraints)
+            {
+    //            if(c->constraintFunction() < 0)
+                c->project();
+            }
+
+    //        p->m_CollisionConstraints_B.clear();
         }
-//        p->m_CollisionConstraints.clear();
     }
-        // generate new collision constraint
-//        checkSpherePlane(p, m_Planes[0]);
-//        // particle particle Check
 
-//        p->m_CollisionConstraints.clear();
-
+    //delte collisions
     for( ParticlePtr p : m_Particles)
     {
-        for( ConstraintWeakPtr c : p->m_Constraints)
-        {
-            if(auto constraint = c.lock()){
-                {
-                    constraint->setDirty(true);
-                }
-            }
-        }
-        for( ConstraintPtr c : p->m_CollisionConstraints_B)
-        {
-            c->project();
-        }
-//        p->m_CollisionConstraints_B.clear();
+        p->m_CollisionConstraints.clear();
+        p->m_CollisionConstraints_B.clear();
+        p->m_PreConditionConstraints.clear();
     }
-}
-
-//delte collisions
-for( ParticlePtr p : m_Particles)
-{
-    p->m_CollisionConstraints.clear();
-    p->m_CollisionConstraints_B.clear();
-}
 
     // Apply correction (13,14)
     for( ParticlePtr p : m_Particles)
     {
-        p->v = (p->p - p->x) / dt;
+        QVector3D xp = (p->p - p->x);
+
+        // sleep
+//        if(xp.length() < 0.008){
+//            p->v = QVector3D(0,0,0);
+//            continue;
+//        }
+
+//        if(xp.length() > 1.00){
+//            mlog<<"explode "<<p->ID<<" "<<m_frameCount;
+//            m_simulate = false;
+//        }
+
+        p->v = xp / dt;
         p->x = p->p;
-//        p->x = p->x + QVector3D(0, -0.01, 0);
+    //        p->x = p->x + QVector3D(0, -0.01, 0);
     }
 
-//     modify velocity (16)
-//    for( ParticlePtr p : m_Particles)
-//    {
-//        p->v = p->v + p->pp;
-//        p->pp = QVector3D(0,0,0);
-//    }
-    m_frameCount++;
+    //     modify velocity (16)
+    //    for( ParticlePtr p : m_Particles)
+    //    {
+    //        p->v = p->v + p->pp;
+    //        p->pp = QVector3D(0,0,0);
+    //    }
 
-//    mlog<<m_Particles[12]->x;
+
+    //    mlog<<m_Particles[12]->x;
 }
 
 void DynamicsWorld::info()
@@ -304,6 +333,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
 
 //    SingleParticle pDynamicObject(pParticle);
     std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(pParticle);
+    pDynamicObject->mID = pCount;
     m_DynamicObjects.push_back(pDynamicObject);
     _sceneObject->makeDynamic(pDynamicObject);
     // std::move (?)
@@ -490,9 +520,15 @@ void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2
 {
     // Check predicted positon
     float d;
-    if(m_CollisionDetect.checkSphereSphere(p1->p, p2->p, d,p1->radius(), p2->radius())){
+//    mlog<<p1->ID<<" - "<<p2->ID;
+    if(m_CollisionDetect.checkSphereSphere(p1->p, p2->p, d, p1->radius(), p2->radius())){
         addParticleParticleConstraint(p1, p2);
         addFrictionConstraint(p1, p2);
+    }
+
+    float d2;
+    if(m_CollisionDetect.checkSphereSphere(p1->x, p2->x, d2,p1->radius(), p2->radius())){
+        addParticleParticlePreConditionConstraint(p1, p2);
     }
 }
 
@@ -550,7 +586,9 @@ void DynamicsWorld::checkSpherePlane(const ParticlePtr p1, const Plane &_plane)
 
     auto hsCstr = std::make_shared<HalfSpaceConstraint>(p1, qc, _plane.Normal);
     p1->m_CollisionConstraints.push_back(hsCstr);
-    addHalfSpaceFrictionConstraint(p1, QVector3D(0,0,0), QVector3D(0,1,0));
+    addHalfSpaceFrictionConstraint(p1, _plane.Offset, _plane.Normal);
+    addHalfSpacePreConditionConstraint(p1, qc, _plane.Normal);
+
 }
 
 std::shared_ptr<DistanceEqualityConstraint> DynamicsWorld::addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
@@ -575,17 +613,33 @@ void DynamicsWorld::addParticleParticleConstraint(const ParticlePtr _p1, const P
 
 }
 
+void DynamicsWorld::addParticleParticlePreConditionConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
+{
+    auto ppCstr = std::make_shared<ParticleParticlePreConditionConstraint>(_p1, _p2);
+    _p1->m_PreConditionConstraints.push_back(ppCstr);
+    _p2->m_PreConditionConstraints.push_back(ppCstr);
+}
+
 void DynamicsWorld::addFrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
 {
     auto fCstr = std::make_shared<FrictionConstraint>(_p1, _p2);
     _p1->m_CollisionConstraints_B.push_back(fCstr);
     _p2->m_CollisionConstraints_B.push_back(fCstr);
+
+//    auto fCstr2 = std::make_shared<FrictionConstraint>(_p2, _p1);
+//    _p2->m_CollisionConstraints_B.push_back(fCstr2);
 }
 
 void DynamicsWorld::addHalfSpaceFrictionConstraint(const ParticlePtr _p1, const QVector3D _o, const QVector3D _n)
 {
     auto fCstr = std::make_shared<HalfSpaceFrictionConstraint>(_p1, QVector3D(0,0,0), QVector3D(0,1,0));
     _p1->m_CollisionConstraints_B.push_back(fCstr);
+}
+
+void DynamicsWorld::addHalfSpacePreConditionConstraint(const ParticlePtr _p1, const QVector3D _qc, const QVector3D _planeNormal)
+{
+    auto HsPreCCstr = std::make_shared<HalfSpacePreConditionConstraint>(_p1, _qc, _planeNormal);
+    _p1->m_PreConditionConstraints.push_back(HsPreCCstr);
 }
 
 void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)

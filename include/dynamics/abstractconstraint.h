@@ -16,6 +16,7 @@ class AbstractConstraint
 public:
     AbstractConstraint();
     inline virtual void project(){}
+    inline virtual void projectPrevious(){}
     inline virtual float constraintFunction(){qDebug()<<" Abstract C"; return 1.0;}
     inline virtual QVector3D deltaP(){}
 

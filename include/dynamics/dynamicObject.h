@@ -30,7 +30,7 @@ public:
     virtual const QVector3D getTranslation();
     virtual std::vector<ParticleWeakPtr>& getParticles(){ std::vector<ParticleWeakPtr> vec; return vec; }
 
-    std::vector<ConstraintWeakPtr> m_Constraints;
+//    std::vector<ConstraintWeakPtr> m_Constraints;
 
     int mID;
 

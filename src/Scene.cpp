@@ -697,7 +697,7 @@ void Scene::paint()
                         }
                         if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
                         {
-//                            continue;
+                            continue;
                         }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
@@ -891,23 +891,91 @@ void Scene::setupScene()
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
-
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
        QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 40, 20));
-        auto sceneObject1 = addSceneObjectFromModel("cube", 0, QVector3D(2, 5.0, 0), rot);
-        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
 
-        auto sceneObject2 = addSceneObjectFromModel("cube", 0, QVector3D(0, 9.0, 0), rot);
-        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject2, 1);
+/// Rigid Body Bunnies
+//       for(int i=0; i < 5; i++)
+//       {
+//           float x,y,z;
+//           x= randfinRange(-5,5);
+//           y= randfinRange(2,30);
+//           z= randfinRange(-5,5);
+//           QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(rand() % 90,rand() % 90,rand() % 90));
+//       auto sceneObject1 = addSceneObjectFromModel("bunny", (i%3), QVector3D(x, y, z), rotX);
+//        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
+//       }
+//        auto sceneObject2 = addSceneObjectFromModel("cube", 0, QVector3D(7.5, 9.0, 0), rot);
+//        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject2, 1);
 
-//        for(int i=0; i < 100; i++)
+//// RigidBody Rain
+//        for(int i=0; i < 10; i++)
 //        {
 //            QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(rand() % 90,rand() % 90,rand() % 90));
-//            auto sceneObjectX = addSceneObjectFromModel("cube", (i%4), QVector3D(rand() % 20, rand() % 500 + 35, rand() % 17), rotX);
+//            auto sceneObjectX = addSceneObjectFromModel("cube", (i%4), QVector3D(rand() % 4, rand() % 60 + 10, rand() % 4), rotX);
 //            m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX, (i%3));
 //        }
 
+
+/// Rigid Body Stack
+//        for(int i=0; i < 10; i++)
+//        {
+//            QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
+//            auto sceneObjectX = addSceneObjectFromModel("cube", (i%4), QVector3D(0.01*randfinRange(-1,1) ,(1.5 + 3* i),0), rotX);
+////            auto sceneObjectX = addSceneObjectFromModel("cube", (i%4), QVector3D(0 ,(1.5 + 3* i),0), rotX);
+//            m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX, (i%3));
+//        }
+
+//// Two Particle pairs
+//       auto sphere2 = addSceneObjectFromModel("sphere", 1, QVector3D(0.4, 1.5, 0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere2);
+
+//        auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(0, 0.5, 0), rot);
+//        m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
+
+//        auto sphere4 = addSceneObjectFromModel("sphere", 0, QVector3D(2, 0.5, 0), rot);
+//        m_DynamicsWorld->addDynamicObjectAsParticle(sphere4);
+
+//        auto sphere3 = addSceneObjectFromModel("sphere", 1, QVector3D(2.4, 1.5, 0), rot);
+//        m_DynamicsWorld->addDynamicObjectAsParticle(sphere3);
+
+
+//// particle pyramid
+//       auto sphere1 = addSceneObjectFromModel("sphere", 0, QVector3D(-1, 0.5, 0), rot);
+//       auto sphere2 = addSceneObjectFromModel("sphere", 0, QVector3D(0, 0.5, 0), rot);
+//       auto sphere3 = addSceneObjectFromModel("sphere", 0, QVector3D(1, 0.5, 0), rot);
+//       auto sphere4 = addSceneObjectFromModel("sphere", 1, QVector3D(-0.5, 1.35, 0), rot);
+//       auto sphere5 = addSceneObjectFromModel("sphere", 1, QVector3D(0.5, 1.35, 0), rot);
+//       auto sphere6 = addSceneObjectFromModel("sphere", 2, QVector3D(0, 2.20, 0), rot);
+
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere2);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere3);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere4);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere5);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere6);
+
+//// Particle Rain
+//        for(int i=0; i < 1000; i++)
+//        {
+//            auto sphere1 = addSceneObjectFromModel("sphere", (i%3), QVector3D(randfinRange(0,5), randfinRange(2,255), randfinRange(0,5)), rot);
+//            m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
+//        }
+
+//// particle Cube Pile
+//        int dim = 5;
+//       for(int k=0; k< dim ; k++){
+//           for(int i=0; i < dim; i++){
+//               for(int j=0; j < dim; j++){
+//                   float rand = randfinRange(-1,1) * 0.01;
+//                   auto sphere1 = addSceneObjectFromModel("sphere", (i%3), QVector3D(i+rand, k+0.5, j+rand), rot);
+//                   m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
+//               }
+//           }
+//       }
+
+//// cloth
 //        auto sceneObject3 = addSceneObjectFromModel("quad", 1, QVector3D(0, 20.0, 0), rot);
 //        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject3);
 
@@ -917,11 +985,7 @@ void Scene::setupScene()
 //        auto sceneObject3 = addSceneObjectFromModel("cloth2", 0, QVector3D(5, 20.5, 0), rot2);
 //        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject3, 2.5);
 
-//       auto sphere1 = addSceneObjectFromModel("sphere", 2, QVector3D(-0.02, 0.5, 0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere1);
 
-//       auto sphere2 = addSceneObjectFromModel("sphere", 1, QVector3D(0, 1.7, 0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsParticle(sphere2);
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
        mainpulator = new Manipulator(this, _vectorShape, m_manipulator_program);

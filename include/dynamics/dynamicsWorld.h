@@ -59,8 +59,10 @@ class DynamicsWorld
 
         std::shared_ptr<DistanceEqualityConstraint> addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void addParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
+        void addParticleParticlePreConditionConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void addFrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void addHalfSpaceFrictionConstraint(const ParticlePtr _p1, const QVector3D _o, const QVector3D _n);
+        void addHalfSpacePreConditionConstraint(const ParticlePtr _p1, const const QVector3D _qc, const QVector3D _planeNormal);
         void deleteConstraint(const ConstraintPtr _constraint);
         void deleteParticle();
 

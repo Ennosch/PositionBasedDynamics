@@ -56,6 +56,19 @@ private:
     QVector3D n, p, dp, qc;
 };
 
+class HalfSpacePreConditionConstraint : public AbstractConstraint
+{
+public:
+    HalfSpacePreConditionConstraint(const ParticlePtr _p, const QVector3D &_qc, const QVector3D &_n);
+    void project();
+    float constraintFunction();
+private:
+    float d;
+    ParticlePtr pptr;
+    QVector3D n, p, dp, qc;
+
+};
+
 class PinConstraint : public AbstractConstraint
 {
 public:
@@ -74,6 +87,19 @@ class ParticleParticleConstraint : public AbstractConstraint
 public:
     ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
     ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2, float _d);
+    void project();
+    float constraintFunction();
+    QVector3D deltaP();
+private:
+    int id;
+    float d;
+    ParticlePtr pptr1, pptr2;
+};
+
+class ParticleParticlePreConditionConstraint : public AbstractConstraint
+{
+public:
+    ParticleParticlePreConditionConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
     void project();
     float constraintFunction();
     QVector3D deltaP();

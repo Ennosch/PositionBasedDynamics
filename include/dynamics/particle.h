@@ -51,6 +51,7 @@ public:
 
     std::vector<ConstraintPtr> m_CollisionConstraints;
     std::vector<ConstraintPtr> m_CollisionConstraints_B;
+    std::vector<ConstraintPtr> m_PreConditionConstraints;
 //    std::list<ParticleWeakPtr> m_NonCollisionParticles;
     std::list<ParticlePtr> m_NonCollisionParticles;
 

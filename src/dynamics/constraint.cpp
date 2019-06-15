@@ -56,6 +56,28 @@ QVector3D HalfSpaceConstraint::deltaP()
     return constraintFunction(pptr->p) * -n;
 }
 
+HalfSpacePreConditionConstraint::HalfSpacePreConditionConstraint(const ParticlePtr _p, const QVector3D &_qc, const QVector3D &_n) :
+    pptr(_p),
+    n(_n),
+    qc(_qc)
+{
+
+}
+
+void HalfSpacePreConditionConstraint::project()
+{
+    float c = constraintFunction();
+    pptr->x += c * -n;
+    pptr->p += c * -n;
+}
+
+float HalfSpacePreConditionConstraint::constraintFunction()
+{
+    if(pptr->x == qc)
+        return 0;
+    float C = QVector3D::dotProduct((pptr->x-qc),  n);
+    return C;
+}
 
 PinConstraint::PinConstraint(const ParticlePtr _particle, const QVector3D &_pos) :
     pinPosition(_pos) ,
@@ -91,6 +113,43 @@ ParticleParticleConstraint::ParticleParticleConstraint(const ParticlePtr _p1, co
     d = (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());
 }
 
+ParticleParticlePreConditionConstraint::ParticleParticlePreConditionConstraint(const ParticlePtr _p1, const ParticlePtr _p2) :
+    pptr1(_p1),
+    pptr2(_p2)
+{
+    d = (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());
+}
+
+void ParticleParticlePreConditionConstraint::project()
+{
+    if(!m_dirty)
+        return;
+
+    QVector3D n = (pptr2->x - pptr1->x).normalized();
+
+    QVector3D correctionA = (d/2) * n;
+    QVector3D correctionB = (d/2) * -n;
+
+    pptr1->x += correctionA;
+    pptr2->x += correctionB;
+
+    pptr1->p += correctionA;
+    pptr2->p += correctionB;
+
+    m_dirty = false;
+}
+
+float ParticleParticlePreConditionConstraint::constraintFunction()
+{
+
+}
+
+QVector3D ParticleParticlePreConditionConstraint::deltaP()
+{
+    return QVector3D(0,0,0);
+}
+
+
 ParticleParticleConstraint::ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2, float _d) :
     pptr1(_p1),
     pptr2(_p2),
@@ -106,15 +165,19 @@ void ParticleParticleConstraint::project()
 
     QVector3D n = (pptr2->p - pptr1->p).normalized();
 
+    d = constraintFunction();
+
     pptr1->p += (d/2) * n;
     pptr2->p += (d/2) * -n;
 
-     m_dirty = false;
+    m_dirty = false;
 }
+
 
 float ParticleParticleConstraint::constraintFunction()
 {
-    return 0.0;
+    return  (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());;
+//    return 0.0;
 }
 
 QVector3D ParticleParticleConstraint::deltaP()
@@ -420,22 +483,24 @@ void FrictionConstraint::project()
     QVector3D td, xj;
     td = (pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x) - constraintFunction() * m_collisionNormal;
     float tdLength = td.length();
+    float totalWeight = pptr1->w + pptr2->w;
 
-    float usd = 0.5;
-    float ukd = 0.5;
+    float usd = 0.01;
+    float ukd = 0.01;
 
 //    return;
     if(tdLength < usd)
     {
-        pptr1->p += -td;
         xj = td;
+        pptr1->p += (pptr1->w / totalWeight) * -xj;
     }
     else
     {
-        pptr1->p += -td * std::min( (ukd / tdLength) , float(1.0));
         xj = td * std::min( (ukd / tdLength) , float(1.0));
+        pptr1->p += (pptr1->w / totalWeight) * -xj;
     }
-    pptr2->p += xj;
+
+    pptr2->p += (pptr2->w / totalWeight) * xj;
 //    mlog<<"hello friction";
     m_dirty = false;
 }
@@ -444,7 +509,6 @@ float FrictionConstraint::constraintFunction()
 {
     return QVector3D::dotProduct((pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x), m_collisionNormal);
 }
-
 
 HalfSpaceFrictionConstraint::HalfSpaceFrictionConstraint(const ParticlePtr _p1, const QVector3D _o, const QVector3D _n) :
     pptr1(_p1),
@@ -482,3 +546,6 @@ float HalfSpaceFrictionConstraint::constraintFunction()
 {
     return QVector3D::dotProduct((pptr1->p - pptr1->x) , m_collisionNormal);
 }
+
+
+

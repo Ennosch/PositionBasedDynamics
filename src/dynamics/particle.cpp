@@ -13,12 +13,13 @@ Particle::Particle()
 Particle::Particle(float _x, float _y, float _z, int _ID)
 {
     r = 0.5;
-    m = 0.010;
+    m = 1.0;
     x = QVector3D(_x, _y, _z);
     v = QVector3D(0, 0, 0);
     w = 1.0/m;
-
-    mlog<<"Particle "<<m<<" "<<w;
+    if(isinf(w) || w < 0)
+        w = 0;
+    mlog<<w;
 }
 
 void Particle::setRadius(float _radius)
