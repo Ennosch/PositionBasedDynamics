@@ -47,6 +47,8 @@ class DynamicsWorld
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject, int color=0);
         DynamicObjectPtr addDynamicObjectAsSoftBody(pSceneOb _sceneObject, float _mass = 1);
+        void addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject);
+        void addDynamicObjectAsNonUniformParticle(pSceneOb _sceneObject, float radius);
 
         ParticlePtr getParticlePtrFromRawPtr (Particle *_ptr);
         ParticlePtr addParticle(float _x, float _y, float _z);
@@ -82,6 +84,7 @@ class DynamicsWorld
         DynamicsWorldController         *m_DynamicsWorldController;
         std::vector <DynamicObjectPtr>  m_DynamicObjects;
         std::vector <ParticlePtr>       m_Particles;
+        std::vector <ParticlePtr>       m_NonUniformParticles;
         std::vector <ConstraintPtr>     m_Constraints;
         std::vector <Plane>             m_Planes;
 

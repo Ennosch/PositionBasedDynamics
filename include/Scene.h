@@ -114,7 +114,7 @@ private:
   QOpenGLShaderProgram* m_manipulator_program;
   QOpenGLShaderProgram* m_picking_program;
 
-  QOpenGLShaderProgram* m_geometry_program;
+  QOpenGLShaderProgram* m_wireframe_program;
 
   //  QOpenGLFramebufferObject* m_gbuffer_fbo;
   // fbo raw OpenGL

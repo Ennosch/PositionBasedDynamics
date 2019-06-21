@@ -189,10 +189,10 @@ void Scene::drawGeometryShader()
 {
     //------------------Geometry Shader testing -----------------------------------------------
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-     m_geometry_program->bind();
-     m_geometry_program->setUniformValue("projection", m_projection_matrix);
-     m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
-     m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
+     m_wireframe_program->bind();
+     m_wireframe_program->setUniformValue("projection", m_projection_matrix);
+     m_wireframe_program->setUniformValue("view", m_arcCamera.toMatrix());
+     m_wireframe_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
      pointsVAO->bind();
      glDrawArrays(GL_POINTS, 0, somePoints.size());
      pointsVAO->release();
@@ -493,8 +493,10 @@ void Scene::QtOpenGLinitialize()
     m_screen_program->link();
 
     m_lighting_program = new QOpenGLShaderProgram();
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/phong.vert");
-    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/phong.frag");
+//    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/phong.vert");
+//    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/phong.frag");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shader/phongCalcNormals.vert");
+    m_lighting_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shader/phongCalcNormals.frag");
     m_lighting_program->link();
 
     m_flat_program = new QOpenGLShaderProgram();
@@ -516,20 +518,20 @@ void Scene::QtOpenGLinitialize()
     QOpenGLShader geoShader(QOpenGLShader::Geometry);
     QOpenGLShader fragShader(QOpenGLShader::Fragment);
 
-    bool success1 = vertshader.compileSourceFile(":/shader/geometry.vert");
-    bool success2 = geoShader.compileSourceFile(":/shader/geometry.geom");
-    bool success3 = fragShader.compileSourceFile(":/shader/geometry.frag");
+    bool success1 = vertshader.compileSourceFile(":/shader/WireframeG.vert");
+    bool success2 = geoShader.compileSourceFile(":/shader/WireframeG.geom");
+    bool success3 = fragShader.compileSourceFile(":/shader/WireframeG.frag");
 
-    m_geometry_program = new QOpenGLShaderProgram();
-    m_geometry_program->addShader(&vertshader);
-    m_geometry_program->addShader(&geoShader);
-    m_geometry_program->addShader(&fragShader);
-    bool success4 = m_geometry_program->link();
+    m_wireframe_program = new QOpenGLShaderProgram();
+    m_wireframe_program->addShader(&vertshader);
+    m_wireframe_program->addShader(&geoShader);
+    m_wireframe_program->addShader(&fragShader);
+    bool success4 = m_wireframe_program->link();
 
     if(!success1 || !success2 || !success3 || !success4)
     {
         qDebug()<<"---------------SHADER DID NOT COMPILE"<<"VS: "<<success1<<"GS: "<<success2<<"FS: "<<success3<<"Link: "<<success4;
-        qDebug()<<m_geometry_program->log();
+        qDebug()<<m_wireframe_program->log();
     }
 
     //----prepare a QuadPlane
@@ -565,15 +567,15 @@ void Scene::QtOpenGLinitialize()
     pointsVBO.bind();
     pointsVBO.allocate(somePoints.data(), somePoints.size() * sizeof (QVector3D));
 
-    m_geometry_program->enableAttributeArray("Position");
-    m_geometry_program->setAttributeBuffer("Position",
+    m_wireframe_program->enableAttributeArray("Position");
+    m_wireframe_program->setAttributeBuffer("Position",
                                            GL_FLOAT,                    // type
                                            0,                           // offset = start
                                            3,                           // tuplesize num of components per vert
 //                                           3 * sizeof(GLfloat));        //stride num of bytes between verts. 0 = densly packed
                                            sizeof(Vertex));
-    m_geometry_program->enableAttributeArray("Normal");
-    m_geometry_program->setAttributeBuffer("Normal",
+    m_wireframe_program->enableAttributeArray("Normal");
+    m_wireframe_program->setAttributeBuffer("Normal",
                                            GL_FLOAT,                    // type
                                            offsetof(Vertex, Normal),                           // offset = start
                                            3,                           // tuplesize num of components per vert
@@ -641,8 +643,6 @@ void Scene::resize(int width, int height)
 
 void Scene::paint()
 {
-
-
     QVector4D null = QVector4D(0,0,0,1);
     QMatrix4x4 model;
     model.setToIdentity();
@@ -699,6 +699,10 @@ void Scene::paint()
                         {
                             continue;
                         }
+                        if(m_SceneObjects[i]->model() == getModelFromPool("teapot"))
+                        {
+//                            continue;
+                        }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
                         m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
@@ -753,12 +757,14 @@ void Scene::paint()
 //         drawLines();
 
          // -------------------------Geometry Shader-----------------------------------------------------------
-//         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//          m_geometry_program->bind();
-//          m_geometry_program->setUniformValue("projection", m_projection_matrix);
-//          m_geometry_program->setUniformValue("view", m_arcCamera.toMatrix());
-//          m_geometry_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
-//          m_SceneObjects[1]->drawPoints();
+         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+          m_wireframe_program->bind();
+          m_wireframe_program->setUniformValue("projection", m_projection_matrix);
+          m_wireframe_program->setUniformValue("view", m_arcCamera.toMatrix());
+          m_wireframe_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
+//          m_SceneObjects[1]->draw();
+//          m_geometry_program->setUniformValue("model",  m_SceneObjects[2]->getMatrix());
+//          m_SceneObjects[2]->drawPoints();
 
          glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
@@ -861,22 +867,31 @@ void Scene::setupScene()
 
 
 
+
     //    MAKE MODEL TO RENDER
         addModel(this, "grid", "/Users/enno/Dev/Grid100.obj");
        addModel(this, "grid1", "/Users/enno/Dev/Cube10.obj");
 
+       addModel(this, "teapot", "/Users/enno/Dev/teapot.obj");
+
 
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_3x3.obj");
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_1681points.obj");
-//       addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
 
-       addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
-       addModel(this, "cloth2", "/Users/enno/Dev/Grid_441points_scaled.obj");
+//       addModel(this, "cloth", "/Users/enno/Dev/Grid_441points.obj");
+       //Grid_441points_tri.obj Quad_497_remeshed.obj
+//       addModel(this, "cloth", "/Users/enno/Dev/Grid_225_tri.obj");
+       addModel(this, "cloth", "/Users/enno/Dev/Quad_497_remeshed.obj");
+       addModel(this, "cloth2", "/Users/enno/Dev/Grid_441points.obj");
 
 //       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
        addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
 //       addModel(this, "cube", "/Users/enno/Dev/Cube_8.obj");
-       addModel(this, "quad", "/Users/enno/Dev/Quad_1.obj");
+//       addModel(this, "quad", "/Users/enno/Dev/Quad_1_tri.obj");
+
+//       addModel(this, "quad", "/Users/enno/Dev/Quad_4.obj");
+//       addModel(this, "quad_tri", "/Users/enno/Dev/Quad_4_tri.obj");
+//       addModel(this, "quad_moutain", "/Users/enno/Dev/Quad_4_moutain.obj");
 
        addModel(this, "sphere", "/Users/enno/Dev/Icosahedronf4.obj");
 
@@ -893,7 +908,33 @@ void Scene::setupScene()
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
-       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 40, 20));
+       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(35, 20, 0));
+
+
+       float s = 1;
+       auto sceneObject2 = addSceneObjectFromModel("cloth", 0, QVector3D(0,5.0,0), rot2);
+       sceneObject2->setScale(QVector3D(s,s,s));
+       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
+
+//       auto sceneObject1 = addSceneObjectFromModel("quad_tri", 0, QVector3D(-2,0,0), rot);
+//       sceneObject1->setScale(QVector3D(s,s,s));
+//       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
+
+//       auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(5,-0.5,0), rot);
+//       float d = 5;
+//       sceneObject1->setScale(QVector3D(d,d,d));
+//       m_DynamicsWorld->addDynamicObjectAsNonUniformParticle(sceneObject1, d/2);
+
+
+
+//       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-4, 4.5, 0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sceneObject2);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sceneObject3);
+
+//       auto sceneObject1 = addSceneObjectFromModel("bunny", 0, QVector3D(0, 5, 0), rot);
+//        m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObject1);
+
+
 
 /// Rigid Body Bunnies
 //       for(int i=0; i < 5; i++)
@@ -976,14 +1017,14 @@ void Scene::setupScene()
 //       }
 
 //// cloth
-//        auto sceneObject3 = addSceneObjectFromModel("quad", 1, QVector3D(0, 20.0, 0), rot);
-//        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject3);
+//        auto sceneObjectC1 = addSceneObjectFromModel("quad", 1, QVector3D(0, 20.0, 0), rot);
+//        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectC1);
 
-//        auto sceneObject2 = addSceneObjectFromModel("cloth", 1, QVector3D(0, 15, 0), rot2);
-//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2, 0.5);
+//        auto sceneObjectC2 = addSceneObjectFromModel("cloth", 1, QVector3D(0, 15, 0), rot2);
+//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObjectC2, 0.5);
 
-//        auto sceneObject3 = addSceneObjectFromModel("cloth2", 0, QVector3D(5, 20.5, 0), rot2);
-//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject3, 2.5);
+//        auto sceneObjectC3 = addSceneObjectFromModel("cloth2", 0, QVector3D(5, 20.5, 0), rot2);
+//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObjectC3, 2.5);
 
 
 

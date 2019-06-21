@@ -22,16 +22,19 @@ Model::Model(Scene *_scene, QOpenGLShaderProgram *_shaderProgram)
 
 void Model::loadModel(std::string _path)
 {
+    if(_path == "/Users/enno/Dev/Quad_1.obj")
+        mlog<<"HALT";
     Assimp::Importer importer;
     // bitwise And flags: aiProcess_FlipWindingOrder |  aiProcess_GenSmoothNormals |
     const aiScene* scene = importer.ReadFile(_path,
                                              aiProcess_Triangulate |
-                                             aiProcess_JoinIdenticalVertices |
-                                             aiProcess_FlipUVs |
-                                             aiProcess_CalcTangentSpace |                                             
-                                             aiProcess_GenNormals |
+//                                             aiProcess_JoinIdenticalVertices |
+//                                             aiProcess_FlipUVs |
+//                                             aiProcess_CalcTangentSpace |
+                                             aiProcess_GenNormals
 //                                             aiProcess_GenSmoothNormals |
-                                             aiProcess_FixInfacingNormals);
+//                                             aiProcess_FixInfacingNormals
+                                             );
 
 ////------------------- exporter test
 //    Assimp::Exporter exporter;
@@ -53,20 +56,29 @@ void Model::loadModel(std::string _path)
 
     std::cout<<_path<<std::endl;
 
-    processNode(scene->mRootNode, scene);
-
-
+    processNode(scene->mRootNode, scene, _path);
 }
 
-void Model::processNode(aiNode *node, const aiScene *scene)
+void Model::processNode(aiNode *node, const aiScene *scene, std::string _path)
 {
+
     for(unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         // the node object only contains indices to index the actual objects in the scene.
         // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-        ShapePtr ptrShape = processMesh(mesh, scene);
+        std::vector<QVector3D> cacheNormals;
+        for(int i=0; i < mesh->mNumVertices; i++)
+        {
+//            QVector3D v = QVector3D(0,0,0);
+//            v.setX(mesh->mNormals[i].x);
+//            v.setY(mesh->mNormals[i].y);
+//            v.setZ(mesh->mNormals[i].z);
+//            cacheNormals.push_back(v);
+        }
+
+        ShapePtr ptrShape = processMesh(mesh, scene, _path);
 
         if(ptrShape->data() != nullptr)
         {
@@ -74,15 +86,19 @@ void Model::processNode(aiNode *node, const aiScene *scene)
             meshes.push_back(ptrShape);
         }
     }
+
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
     for(unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        processNode(node->mChildren[i], scene);
+        processNode(node->mChildren[i], scene, _path);
     }
 }
 
-ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
+ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene,  std::string _path)
 {
+
+
+
     // data to fill
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -90,10 +106,10 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
     std::map<int, std::list<int>> pointsToVerts;
 
-
     // cache vertex attributes
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
+
         Vertex vertex;
         QVector3D vector;
         vector.setX(mesh->mVertices[i].x);
@@ -104,7 +120,6 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
         vector.setY(mesh->mNormals[i].y);
         vector.setZ(mesh->mNormals[i].z);
         vertex.Normal = vector;
-
         // Barycentric depends ebo.
         vertex.Barycentric = QVector3D(0,0,0);
         vertices.push_back(vertex);
@@ -123,24 +138,40 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
         }
     }
 
+
     // cache vert indices
     int maxIndex = -1;
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
+
+//        QString path = _path.data();
+//        mlog<<face.mNumIndices<<" : "<<path;
+//        if(face.mNumIndices > 3)
+//        {
+//            mlog<<"HALT";
+//        }
+
         // retrieve all indices of the face and store them in the indices vector
         for(unsigned int j = 0; j < face.mNumIndices; j++)
         {
           indices.push_back(face.mIndices[j]);
           QVector3D _barycentric = QVector3D(0, 0, 0);
           int _mod = j % 3;
-          _barycentric[_mod] = 1;
           vertices[face.mIndices[j]].Barycentric = _barycentric;
         }
     }
 
-//    mlog<<"logging MAXINDEX "<<maxIndex;
+    if(_path == "/Users/enno/Dev/Quad_4.obj")
+    {
+        mlog<<"Normals Length: ";
+    }
+    if(_path == "/Users/enno/Dev/Quad_4_tri.obj")
+    {
+        mlog<<"Normals Length: ";
+    }
 
+//    mlog<<"logging MAXINDEX "<<maxIndex;
 //    for(unsigned int i=0; i< mesh->)
 
 //    Shape *ptrNewShape = new Shape(vertices, indices, pScene, pShader);
@@ -152,6 +183,9 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
 void Model::draw()
 {
+    if(hidden)
+        return;
+
     for(unsigned int i = 0; i < meshes.size(); i++)
     {
         meshes[i]->draw();
@@ -182,6 +216,11 @@ void Model::clone(const ModelPtr &_model)
                                                  mesh->getVertsMap());
         meshes.push_back(shape);
     }
+}
+
+void Model::setHidden(bool _hidden)
+{
+    hidden = true;
 }
 
 std::vector<ShapePtr> Model::getMeshes()

@@ -2,7 +2,7 @@
 
 Particle::Particle()
 {
-
+//    x = QVector3D(0, 0, 0);
 }
 
 //Particle::Particle(float _x, float _y, float _z, int _ID)
@@ -13,13 +13,15 @@ Particle::Particle()
 Particle::Particle(float _x, float _y, float _z, int _ID)
 {
     r = 0.5;
-    m = 1.0;
+//    m = 1.0;
+    m = 0.5;
     x = QVector3D(_x, _y, _z);
+    p = x;
     v = QVector3D(0, 0, 0);
-    w = 1.0/m;
+    w = 1.0 / m;
     if(isinf(w) || w < 0)
         w = 0;
-    mlog<<w;
+//    mlog<<w;
 }
 
 void Particle::setRadius(float _radius)
@@ -29,10 +31,13 @@ void Particle::setRadius(float _radius)
 
 void Particle::setMass(float _mass)
 {
-//    if(_mass <= 0)
-//        w = 0; m = 0; return;
-//    m = _mass;
-//    w = 1/_mass;
+    if(_mass <= 0){
+        w = 0;
+        m = 0;
+        return;
+    }
+    m = _mass;
+    w = 1/_mass;
 }
 
 void Particle::setCell(int _i, int _j, int _k)

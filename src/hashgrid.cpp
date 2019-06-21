@@ -18,6 +18,16 @@ void HashGrid::clear()
     m_buckets.clear();
 }
 
+void HashGrid::setGridSize(float _size)
+{
+    cellSize = _size;
+}
+
+float HashGrid::getGridSize()
+{
+    return cellSize;
+}
+
 bool HashGrid::insert(size_t _hashV, ParticlePtr _p)
 {
 
@@ -70,35 +80,44 @@ int3 HashGrid::pointToCell(float _x, float _y, float _z)
     int3 cell;
     // rounding to full integer - coversion
     // optionally use: auto a = boost::math::iround<float>(_x);
-    cell.i = int(_x / cellSize);
-    cell.j = int(_y / cellSize);
-    cell.k = int(_z / cellSize);
+//    cell.i = int(_x * (1 / cellSize));
+//    cell.j = int(_y * (1 / cellSize));
+//    cell.k = int(_z * (1 / cellSize));
+    cell.i = int(_x * ( cellSize));
+    cell.j = int(_y * ( cellSize));
+    cell.k = int(_z * ( cellSize));
+//    cell.i = int((_x + 0.1) * (1 / cellSize));
+//    cell.j = int((_y + 0.1) * (1 / cellSize));
+//    cell.k = int((_z + 0.1) * (1 / cellSize));
+//    mlog<<cell.i<<" , "<<cell.j<<" , "<<cell.k<<" cellSize: "<<cellSize<<" - "<<_x<<" , "<<_y<<" , "<<_z;
     return cell;
 }
 
-std::list<ParticlePtr> HashGrid::query(size_t _hash)
+std::list<ParticlePtr> HashGrid:: query(size_t _hash)
 {
     std::list<ParticlePtr> cellList;
-    if(!cellExists(_hash))
+//    if(!cellExists(_hash))
+//    {
+//        return cellList;
+//    }
+//    else
     {
-        return cellList;
-    }
-    else
-    {
-        auto test = m_buckets[_hash];
+//        auto test = m_buckets[_hash];
         return m_buckets[_hash];
     }
 }
 
 std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
 {
+    std::list<ParticlePtr> neighbourParticles_empty;
+
     std::list<ParticlePtr> neighbourParticles;
-    std::list<int3> neighbourCells;
-    size_t middleHash = hashFunction(_cell);
+//    std::list<int3> neighbourCells;
+//    size_t middleHash = hashFunction(_cell);
 
     int level = 1;
-    int length = level + 2;
-    int size = std::pow(length, 3);
+//    int length = level + 2;
+//    int size = std::pow(length, 3);
     int n = 0;
 
     for(int y = -1 ; y <= level ; y++)
@@ -112,7 +131,7 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
                 nCell.j = _cell.j + y;
                 nCell.k = _cell.k + z;
 
-                neighbourCells.push_back(nCell);
+//                neighbourCells.push_back(nCell);
 
                 // query for std::list<ParticlePtr>
                 // and if possible merge
@@ -122,11 +141,17 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
                 if(cellExists(hash))
                 {
 //                    qDebug()<<"Found a hash: "<<x<<y<<z;
-                    std::list<ParticlePtr> currentCellList = query(hash);
-                    std::list<ParticlePtr>::const_iterator itr = neighbourParticles.end();
-                    std::list<ParticlePtr>::const_iterator itrNCellStart = currentCellList.begin();
-                    std::list<ParticlePtr>::const_iterator itrNCellEnd = currentCellList.end();
-                    neighbourParticles.insert(itr, itrNCellStart, itrNCellEnd);
+//                    std::list<ParticlePtr> currentCellList = query(hash);
+                    std::list<ParticlePtr> currentCellList = m_buckets[hash];
+                    auto test = m_buckets.find(hash);
+                    for(auto n : test->second)
+                    {
+                        float p = n->position().x();
+                    }
+//                    std::list<ParticlePtr>::const_iterator itr = neighbourParticles.end();
+//                    std::list<ParticlePtr>::const_iterator itrNCellStart = currentCellList.begin();
+//                    std::list<ParticlePtr>::const_iterator itrNCellEnd = currentCellList.end();
+//                    neighbourParticles.insert(itr, itrNCellStart, itrNCellEnd);
                 };
 //                qDebug()<<"N: "<<n;
                 n++;
@@ -135,7 +160,8 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
     }
 
 //    qDebug()<<&neighbourParticles;
-    return neighbourParticles;
+//    return neighbourParticles;
+    return neighbourParticles_empty;
 }
 
 

@@ -206,16 +206,9 @@ uint SceneObject::getID()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+void SceneObject::setScale(const QVector3D &_s)
+{
+    m_Transform.scale(_s);
+    m_IsDirty=true;
+    m_ModelMatrix.scale(_s);
+}

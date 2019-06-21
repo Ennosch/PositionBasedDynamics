@@ -70,7 +70,7 @@ void DynamicsWorld::update()
     }
 
     // damp Velocities (6)
-    pbdDamping();
+//    pbdDamping();
 
     for( ParticlePtr p : m_Particles)
     {
@@ -199,6 +199,17 @@ void DynamicsWorld::update()
     //        p->x = p->x + QVector3D(0, -0.01, 0);
     }
 
+    for( ParticlePtr p : m_NonUniformParticles)
+    {
+        for(auto c : p->m_Constraints)
+        {
+            if(auto constraint = c.lock())
+                constraint->project();
+        }
+        p->x = p->p;
+    }
+
+
     //     modify velocity (16)
     //    for( ParticlePtr p : m_Particles)
     //    {
@@ -248,7 +259,7 @@ void DynamicsWorld::pbdDamping()
         i++;
         QVector3D xcm, vcm, ri, L, w;
         QMatrix3x3 I;
-        int totalMass = 0;
+        float totalMass = 0;
 
         if(dObject->getParticles().size() < 1)
             continue;
@@ -262,8 +273,10 @@ void DynamicsWorld::pbdDamping()
                 totalMass += particle->m;
             }
         }
+
         xcm /= totalMass;
         vcm /= totalMass;
+
 
 //        mlog<<xcm<<vcm;
 //        continue;
@@ -278,7 +291,6 @@ void DynamicsWorld::pbdDamping()
                 rt(0,0) =            0 ; rt(0,1) =       -ri[2] ; rt(0,2) =        ri[1] ;
                 rt(1,0) =         ri[2]; rt(1,1) =            0 ; rt(1,2) =       -ri[0] ;
                 rt(2,0) =        -ri[1]; rt(2,1) =        ri[0] ; rt(2,2) =            0 ;
-                rt *= particle->m;
 
                 Eigen::Matrix3f rtMat = QMatrix3toEigen(rt);
                 Eigen::Matrix3f IMat = rtMat * rtMat.transpose() * particle->m;
@@ -296,10 +308,7 @@ void DynamicsWorld::pbdDamping()
                 ri = particle->x - xcm;
                 QVector3D dv = vcm + (QVector3D::crossProduct(w, ri)) - particle->v;
                 i++;
-                if(i == 1){
-//                    mlog<<"  v: "<< particle->v<< "ri "<<ri<< "vcm: "<<vcm<<"xcm:"<<xcm<<"dv: "<<dv<<" w x ri: "<<QVector3D::crossProduct(w, ri);
-                }
-                particle->v +=  (0.0 * dv);
+                particle->v +=  (0.01 * dv);
             }
         }
     }
@@ -345,6 +354,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     if(!_sceneObject->model())
         return nullptr;
 
+    // clones it's own model object with all data. (cause model will me deformed)
     auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
     ModelPtr model = nRB->getModel();
     _sceneObject->setModel(nRB->getModel());
@@ -377,6 +387,102 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     return nRB;
 }
 
+void DynamicsWorld::addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject)
+{
+    return;
+//    if(!_sceneObject->model())
+//        return nullptr;
+
+    // clones it's own model object with all data. (cause model will me deformed)
+    auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
+    ModelPtr model = nRB->getModel();
+    _sceneObject->setModel(nRB->getModel());
+
+
+
+    for(unsigned int i = 0; i < model->getNumShapes(); i++)
+    {
+        ShapePtr shape = model->getShape(i);
+        QMatrix4x4 mat4 = _sceneObject->getMatrix();
+        HashGrid grid;
+//        grid.setGridSize(0.5);
+        std::map<size_t, std::list<int>> map;
+        std::vector<int3> cells;
+        std::vector<QVector3D> points;
+
+        QVector3D cog;
+        for(auto p : shape->getPoints())
+        {
+            cog  += mat4 * p;
+            points.push_back(mat4 * p);
+        }
+        cog /= shape->getPoints().size();
+
+        for(auto p : points){
+
+        }
+
+
+        for(int i=0; i <  shape->getPoints().size(); i++)
+        {
+            QVector3D point = shape->getPoints()[i];
+//            point.setX(point.x() + i);
+            QVector3D pos = mat4 * point;
+            int3 pCell = grid.pointToCell(pos.x(), pos.y(), pos.z());
+            size_t hash = grid.hashFunction(pCell);
+            map[hash].push_back(i);
+//            if (std::find(cells.begin(), cells.end(), pCell) != cells.end())
+//            {
+//              // Element in vector.
+//                mlog<<"FOUND SOMETHING "<< i;
+//            }
+
+            if(std::find_if(cells.begin(),
+                         cells.end(),
+                         [&c = pCell]
+                         (const int3& cell){ return (c.i == cell.i && c.j == cell.j && c.k == cell.k); }) == cells.end())
+            {
+                cells.push_back(pCell);
+                float gridSize = grid.getGridSize();
+//                QVector3D particlePos = QVector3D(pCell.i + 0.5 * gridSize,
+//                                                  pCell.j + 0.5 * gridSize,
+//                                                  pCell.k + 0.5 * gridSize);
+
+                QVector3D particlePos = QVector3D(pCell.i ,
+                                                  pCell.j ,
+                                                  pCell.k );
+                pCount++;
+                auto nParticle = std::make_shared<Particle>(particlePos.x(), particlePos.y(), particlePos.z(), 33);
+                nParticle->ID = pCount;
+                m_Particles.push_back(nParticle);
+                std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
+                m_scene->addSceneObjectFromParticle(pDynamicObject, nParticle, 0);
+            };
+//            mlog<<"pos: "<<pos<<" cell: "<<pCell.i<<" , "<<pCell.j<<" , "<<pCell.k<<"hashL"<<hash;
+            if(i == shape->getPoints().size()-1)
+            {
+                mlog<<"finish";
+//                int3 pCell = grid.pointToCell(pos.x(), pos.y(), pos.z());
+            }
+        }
+
+    }
+}
+
+void DynamicsWorld::addDynamicObjectAsNonUniformParticle(pSceneOb _sceneObject, float radius)
+{
+    pCount++;
+    auto nParticle = std::make_shared<Particle>(_sceneObject->getPos().x(), _sceneObject->getPos().y(), _sceneObject->getPos().z(), 33);
+    nParticle->setRadius(radius);
+    nParticle->setMass(0);
+    nParticle->p = _sceneObject->getPos();
+    nParticle->x = _sceneObject->getPos();
+    m_NonUniformParticles.push_back(nParticle);
+    std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
+    _sceneObject->makeDynamic(pDynamicObject);
+}
+
+
 DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject, float _mass)
 {
     if(!_sceneObject->model())
@@ -394,7 +500,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
              QVector3D pos = _sceneObject->getMatrix() * point;
              pCount++;
              auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
-             nParticle->setMass(100);
+//             nParticle->setMass(1);
              nParticle->ID = pCount;
              m_Particles.push_back(nParticle);
              nSB->addParticle(point, nParticle);
@@ -431,7 +537,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
      {
          if(ParticlePtr particle = p.lock())
          {
-             if(particle->x.y() > 21.0)
+             if(particle->x.y() > 7.0)
              {
                  QVector3D pos = particle->x;
                  auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
@@ -447,8 +553,9 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
      nSB->updateModelBuffers();
      _sceneObject->makeDynamic(nSB);
      return nSB;
-//    auto nRB = std::make_shared<SoftBody>(_sceneObject->model());
+     //    auto nRB = std::make_shared<SoftBody>(_sceneObject->model());
 }
+
 
 ParticlePtr DynamicsWorld::addParticle(float _x, float _y, float _z)
 {
@@ -477,9 +584,6 @@ void DynamicsWorld::collisionCheckAll()
 
 void DynamicsWorld::collisionCheck(ParticlePtr p)
 {
-//    checkSpherePlane(p, m_Planes[0]);
-//    return;
-    {
         int3 pCell = m_hashGrid.pointToCell(
                     p->position().x(),
                     p->position().y(),
@@ -490,30 +594,35 @@ void DynamicsWorld::collisionCheck(ParticlePtr p)
         m_hashGrid.insert(pHash, p);
 //        // get all neightbouring particles
         std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
-        for(ParticlePtr n : neighbourParticles)
+
+//        for(ParticlePtr n : neighbourParticles)
 //        for( ParticlePtr n : m_Particles)
         {
 //            continue;
 //            bool isNonCollide = std::includes
-            bool isNonCollider = false;
-            for(auto ntest : p->m_NonCollisionParticles)
-            {
-//                if(ntest.lock() == n)
-                if(ntest == n)
-                {
-                    isNonCollider =true;
-                }
-            }
-            if(isNonCollider)
-                continue;
+//            bool isNonCollider = false;
+//            for(auto ntest : p->m_NonCollisionParticles)
+//            {
+////                if(ntest.lock() == n)
+////                if(ntest == n)
+////                {
+////                    isNonCollider =true;
+////                }
+//            }
+//            if(isNonCollider)
+//                continue;
 
-            if(n != p)
-                // check predicted postion for particle particle collisions
-                checkSphereSphere(p,n);
+//            if(n != p)
+//                // check predicted postion for particle particle collisions
+//                checkSphereSphere(p,n);
         }
 
         checkSpherePlane(p, m_Planes[0]);
-    }
+
+//        if( m_NonUniformParticles[0] != nullptr)
+//        {
+//            checkSphereSphere(p, m_NonUniformParticles[0]);
+//        }
 }
 
 void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2)

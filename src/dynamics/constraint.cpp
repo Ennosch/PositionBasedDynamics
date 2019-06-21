@@ -126,9 +126,10 @@ void ParticleParticlePreConditionConstraint::project()
         return;
 
     QVector3D n = (pptr2->x - pptr1->x).normalized();
+    float totalWeight = pptr2->w + pptr1->w;
 
-    QVector3D correctionA = (d/2) * n;
-    QVector3D correctionB = (d/2) * -n;
+    QVector3D correctionA = (pptr1->w / totalWeight) * (d/2) * n;
+    QVector3D correctionB = (pptr2->w / totalWeight) * (d/2) * -n;
 
     pptr1->x += correctionA;
     pptr2->x += correctionB;
@@ -164,11 +165,11 @@ void ParticleParticleConstraint::project()
         return;
 
     QVector3D n = (pptr2->p - pptr1->p).normalized();
-
+    float totalWeight = pptr2->w + pptr1->w;
     d = constraintFunction();
 
-    pptr1->p += (d/2) * n;
-    pptr2->p += (d/2) * -n;
+    pptr1->p += (pptr1->w / totalWeight) * (d/2) * n;
+    pptr2->p += (pptr2->w / totalWeight) * (d/2) * -n;
 
     m_dirty = false;
 }
@@ -198,6 +199,8 @@ DistanceEqualityConstraint::DistanceEqualityConstraint(const ParticlePtr _p1, co
 float DistanceEqualityConstraint::constraintFunction()
 {
 //    return ((p1.p - p2.p).length() - d);
+    auto length = (pptr1->p - pptr2->p).length();
+    float dis = d;
     return ((pptr1->p - pptr2->p).length() - d);
 }
 
@@ -222,10 +225,8 @@ void DistanceEqualityConstraint::project()
     w1 = pptr1->w;
     w2 = pptr2->w;
 
-    float massCo = w1/(w1 + w2);
-
-    dp1 =  (-w1/(w1 + w2)) * c1 * ((p1 - p2) / (p1-p2).length());
-    dp2 =  (+w2/(w1 + w2)) * c1 * ((p1 - p2) / (p1-p2).length());
+    dp1 =  -(w1/(w1 + w2)) * c1 * ((p1 - p2) / (p1-p2).length());
+    dp2 =  +(w2/(w1 + w2)) * c1 * ((p1 - p2) / (p1-p2).length());
 
 
 //    qDebug()<<"w1: "<<w1<<"w2: "<<w2<<massCo;
@@ -478,7 +479,7 @@ void FrictionConstraint::project()
     if(!m_dirty)
         return;
 
-    return;
+//    return;
 
     QVector3D td, xj;
     td = (pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x) - constraintFunction() * m_collisionNormal;

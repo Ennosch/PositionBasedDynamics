@@ -26,19 +26,21 @@ public:
     Model(std::vector<ShapePtr> _meshes);
     Model(Scene *_scene, QOpenGLShaderProgram *_shaderProgram);
     void loadModel(std::string _path);
-    void processNode(aiNode *node, const aiScene *scene);
+    void processNode(aiNode *node, const aiScene *scene, std::string _path);
     void draw();
     void drawPoints();
     void bind();
     void clone(const ModelPtr &_model);
+    void setHidden(bool _hidden);
     int getNumShapes();
     std::vector<ShapePtr> getMeshes();
 
     ShapePtr getShape(unsigned int _index);
-    ShapePtr processMesh(aiMesh *mesh, const aiScene *scene);
+    ShapePtr processMesh(aiMesh *mesh, const aiScene *scene, std::string _path);
 
 
 private:
+    bool hidden = false;
     std::string directory;
     // could be to pointer of Shape (that's what's discussed to save resources)
     //    std::vector<Shape *> meshes;

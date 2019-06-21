@@ -3,14 +3,19 @@
 
 SingleParticle::SingleParticle(ParticlePtr _p) : m_particle(_p)
 {
-
+    m_radius = _p->radius();
 }
 
 const QMatrix4x4 SingleParticle::getTransfrom()
 {
     QMatrix4x4 t;
     t.setToIdentity();
+//    t.scale(2 * m_radius * QVector3D(1,1,1));
+//    t.scale(QVector3D(2,2,2));
+//    mlog<<" ----------------------- r: "<<m_radius;
+
     t.translate(m_particle->x);
+    t.scale((2 * m_radius) * QVector3D(1,1,1));
     return  t;
 }
 

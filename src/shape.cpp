@@ -119,6 +119,7 @@ void Shape::recomputeNormals()
 {
     for(int i=0; i < m_indices.size(); i++)
     {
+        // for each group of three (0,1,2)
         if(!((i+1) % 3))
         {
             QVector3D vertA = m_vertices[m_indices[i-2]].Position;

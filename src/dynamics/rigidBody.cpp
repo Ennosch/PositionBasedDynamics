@@ -12,6 +12,7 @@ RigidBody::RigidBody(ModelPtr _model)
     // deep copy model instead of
     m_model = std::make_shared<Model>();
     m_model->clone(_model);
+    m_model->setHidden(true);
 }
 
 void RigidBody::addParticle(const QVector3D &_localPos, const ParticleWeakPtr _particle)

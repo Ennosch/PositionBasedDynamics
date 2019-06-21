@@ -1,8 +1,13 @@
 <RCC>
     <qresource prefix="/shader">
-        <file alias="geometry.vert">resources/shaders/geometry.vert</file>
-        <file alias="geometry.geom">resources/shaders/geometry.geom</file>
-        <file alias="geometry.frag">resources/shaders/geometry.frag</file>
+        <file alias="VisNormalsG.vert">resources/shaders/VisNormalsG.vert</file>
+        <file alias="VisNormalsG.geom">resources/shaders/VisNormalsG.geom</file>
+        <file alias="VisNormalsG.frag">resources/shaders/VisNormalsG.frag</file>
+
+        <file alias="WireframeG.vert">resources/shaders/WireframeG.vert</file>
+        <file alias="WireframeG.geom">resources/shaders/WireframeG.geom</file>
+        <file alias="WireframeG.frag">resources/shaders/WireframeG.frag</file>
+
         <file alias="simple.frag">resources/shaders/simple.frag</file>
         <file alias="simple.vert">resources/shaders/simple.vert</file>
         <file alias="screen.vert">resources/shaders/screen.vert</file>
@@ -15,10 +20,16 @@
         <file alias="flat.frag">resources/shaders/flat.frag</file>
         <file alias="picking.frag">resources/shaders/picking.frag</file>
         <file alias="picking.vert">resources/shaders/picking.vert</file>
+
         <file alias="phongWireframe.frag">resources/shaders/phongWireframe.frag</file>
         <file alias="phongWireframe.vert">resources/shaders/phongWireframe.vert</file>
+
+        <file alias="phongCalcNormals.frag">resources/shaders/phongCalcNormals.frag</file>
+        <file alias="phongCalcNormals.vert">resources/shaders/phongCalcNormals.vert</file>
+
         <file alias="phong.frag">resources/shaders/phong.frag</file>
         <file alias="phong.vert">resources/shaders/phong.vert</file>
+
     </qresource>
     <qresource prefix="/"/>
 </RCC>

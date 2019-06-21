@@ -16,6 +16,8 @@ public:
     HashGrid(float _cellSize = 1.0);
 
     void clear();
+    void setGridSize(float _size);
+    float getGridSize();
 
     bool insert(size_t _hashV, ParticlePtr _p);
     bool cellExists(size_t _hashV);

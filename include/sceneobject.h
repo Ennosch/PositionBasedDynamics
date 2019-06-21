@@ -97,7 +97,7 @@ inline void SceneObject::setTranslation(const QVector3D &_dt){m_Transform.setTra
 inline void SceneObject::setRotation(const QVector3D &_dt){m_Transform.setRotation(_dt); m_IsDirty=true;};
 inline void SceneObject::translate(const QVector3D &_dt){m_Transform.translate(_dt); m_IsDirty=true;};
 inline void SceneObject::rotate(const QQuaternion &_rot){m_Transform.rotate(_rot); m_IsDirty=true;};
-inline void SceneObject::setScale(const QVector3D &_s){m_Transform.scale(_s); m_IsDirty=true;};
+;
 inline const Transform SceneObject::getTransform(){return m_Transform;};
 
 inline void SceneObject::drawOld(){ pShape->drawOld(); };

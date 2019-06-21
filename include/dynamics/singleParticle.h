@@ -16,8 +16,9 @@ public:
     virtual void endPinToPosition();
     ParticlePtr pointer(Particle *ptr);
 
+private:
     ParticlePtr m_particle;
-
+    float m_radius;
 };
 
 #endif // SINGLEPARTICLE_H
