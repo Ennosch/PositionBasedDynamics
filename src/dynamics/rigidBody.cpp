@@ -109,6 +109,11 @@ std::vector<ParticleWeakPtr> &RigidBody::getParticles()
     return m_particles;
 }
 
+int RigidBody::numParticles()
+{
+    return m_particles.size();
+}
+
 //std::shared_ptr<RigidBody> RigidBody::getPointer()
 //{
 //    return shared_from_this();

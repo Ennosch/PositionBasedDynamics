@@ -38,3 +38,15 @@ ParticlePtr SingleParticle::pointer(Particle *ptr)
 {
     return m_particle;
 }
+
+std::vector<ParticleWeakPtr> &SingleParticle::getParticles()
+{
+    std::vector<ParticleWeakPtr> vec;
+    vec.empty();
+    return vec;
+}
+
+int SingleParticle::numParticles()
+{
+    return 0;
+}

@@ -24,6 +24,7 @@ public:
     const QVector3D getTranslation();
 
     std::vector<ParticleWeakPtr>& getParticles();
+    int numParticles();
 
 
 private:

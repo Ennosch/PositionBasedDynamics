@@ -106,3 +106,8 @@ std::vector<ParticleWeakPtr> &SoftBody::getParticles()
     return m_particles;
 }
 
+int SoftBody::numParticles()
+{
+    return m_particles.size();
+}
+

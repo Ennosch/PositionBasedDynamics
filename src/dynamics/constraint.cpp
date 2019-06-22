@@ -225,11 +225,11 @@ void DistanceEqualityConstraint::project()
     w1 = pptr1->w;
     w2 = pptr2->w;
 
-    dp1 =  -(w1/(w1 + w2)) * c1 * ((p1 - p2) / (p1-p2).length());
-    dp2 =  +(w2/(w1 + w2)) * c1 * ((p1 - p2) / (p1-p2).length());
+    QVector3D changeDir = (p1 - p2) / (p1-p2).length();
 
+    dp1 =  -(w1/(w1 + w2)) * c1 * changeDir;
+    dp2 =  +(w2/(w1 + w2)) * c1 * changeDir;
 
-//    qDebug()<<"w1: "<<w1<<"w2: "<<w2<<massCo;
 
     pptr1->p += (dp1 * 1.0);
     pptr2->p += (dp2 * 1.0);

@@ -27,11 +27,21 @@ public:
     std::list<ParticlePtr> query(size_t _hash);
     std::list<ParticlePtr> cellNeighbours(int3 _cell);
 
+    template< typename FUNC>
+    void for_each_neighbor(const FUNC& f)
+    {
+
+    }
+
+//    int cellNeighboursFunc(int3 _cell, void FUNC);
+
 //  query
 
-private:
+//private:
     float cellSize = 1.0;
     std::unordered_map< size_t , std::list< ParticlePtr >> m_buckets;
+
+    std::list<ParticlePtr>::iterator tmpList;
 
 };
 

@@ -697,7 +697,7 @@ void Scene::paint()
                         }
                         if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
                         {
-                            continue;
+//                            continue;
                         }
                         if(m_SceneObjects[i]->model() == getModelFromPool("teapot"))
                         {
@@ -911,10 +911,10 @@ void Scene::setupScene()
        QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(35, 20, 0));
 
 
-       float s = 1;
-       auto sceneObject2 = addSceneObjectFromModel("cloth", 0, QVector3D(0,5.0,0), rot2);
-       sceneObject2->setScale(QVector3D(s,s,s));
-       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
+//       float s = 1;
+//       auto sceneObject2 = addSceneObjectFromModel("cloth", 0, QVector3D(0,5.0,0), rot2);
+//       sceneObject2->setScale(QVector3D(s,s,s));
+//       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
 
 //       auto sceneObject1 = addSceneObjectFromModel("quad_tri", 0, QVector3D(-2,0,0), rot);
 //       sceneObject1->setScale(QVector3D(s,s,s));
@@ -925,11 +925,15 @@ void Scene::setupScene()
 //       sceneObject1->setScale(QVector3D(d,d,d));
 //       m_DynamicsWorld->addDynamicObjectAsNonUniformParticle(sceneObject1, d/2);
 
+        for(int i=0; i < 10; i++)
+        {
+            QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(35, 20, 0));
+            auto sceneObject_cloth = addSceneObjectFromModel("cloth",(i%3), QVector3D(i*5, 5 , i*5), rotx);
+     //       m_DynamicsWorld->addDynamicObjectAsParticle(sceneObject2);
+            m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
+        }
 
 
-//       auto sceneObject3 = addSceneObjectFromModel("sphere", 1, QVector3D(-4, 4.5, 0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsParticle(sceneObject2);
-//       m_DynamicsWorld->addDynamicObjectAsParticle(sceneObject3);
 
 //       auto sceneObject1 = addSceneObjectFromModel("bunny", 0, QVector3D(0, 5, 0), rot);
 //        m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObject1);

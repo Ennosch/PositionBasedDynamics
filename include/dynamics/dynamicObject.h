@@ -29,6 +29,8 @@ public:
     virtual const QMatrix4x4 getTransfrom();
     virtual const QVector3D getTranslation();
     virtual std::vector<ParticleWeakPtr>& getParticles(){ std::vector<ParticleWeakPtr> vec; return vec; }
+    virtual int numParticles(){};
+
 
 //    std::vector<ConstraintWeakPtr> m_Constraints;
 

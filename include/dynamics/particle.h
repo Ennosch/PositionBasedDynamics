@@ -22,6 +22,7 @@ public:
     void setCell(int _i, int _j, int _k);
     void setHash(size_t _hashv);
     int ID = 0;
+    int bodyID = 0;
 
     QVector3D position();
     float radius();

@@ -70,7 +70,7 @@ void DynamicsWorld::update()
     }
 
     // damp Velocities (6)
-//    pbdDamping();
+    pbdDamping();
 
     for( ParticlePtr p : m_Particles)
     {
@@ -261,7 +261,7 @@ void DynamicsWorld::pbdDamping()
         QMatrix3x3 I;
         float totalMass = 0;
 
-        if(dObject->getParticles().size() < 1)
+        if(dObject->numParticles() < 1)
             continue;
 
         for(auto p : dObject->getParticles())
@@ -312,6 +312,11 @@ void DynamicsWorld::pbdDamping()
             }
         }
     }
+}
+
+void DynamicsWorld::compare(ParticlePtr _a)
+{
+    mlog<<"compare";
 }
 
 /*
@@ -489,6 +494,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
         return nullptr;
 
      auto nSB = std::make_shared<SoftBody>(_sceneObject->model());
+     objectCount++;
      ModelPtr model = nSB->getModel();
       _sceneObject->setModel(nSB->getModel());
 
@@ -502,6 +508,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
              auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
 //             nParticle->setMass(1);
              nParticle->ID = pCount;
+             nParticle->bodyID = objectCount;
              m_Particles.push_back(nParticle);
              nSB->addParticle(point, nParticle);
 
@@ -592,8 +599,44 @@ void DynamicsWorld::collisionCheck(ParticlePtr p)
         size_t pHash = m_hashGrid.hashFunction(pCell);
            p->setHash(pHash);
         m_hashGrid.insert(pHash, p);
+
+
 //        // get all neightbouring particles
-        std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
+//        std::list<ParticlePtr> neighbourParticles = m_hashGrid.cellNeighbours(pCell);
+
+        int level = 1;
+        for(int y = -1 ; y <= level ; y++)
+        {
+            for(int x = -1 ; x <= level ; x++)
+            {
+                for(int z = -1 ; z <= level ; z++)
+                {
+                    int3 nCell;
+                    nCell.i = pCell.i + x;
+                    nCell.j = pCell.j + y;
+                    nCell.k = pCell.k + z;
+                    size_t hash = m_hashGrid.hashFunction(nCell);
+                    if(m_hashGrid.cellExists(hash))
+                    {
+                        std::unordered_map< size_t , std::list< ParticlePtr >>::iterator test = m_hashGrid.m_buckets.find(hash);
+                        for(auto np : test->second)
+                        {
+//                            auto it = std::find(p->m_NonCollisionParticles.begin(), p->m_NonCollisionParticles.end(), np);
+//                            if(it == p->m_NonCollisionParticles.end())
+//                                continue;
+//                            if(p->bodyID != np->bodyID && p->bodyID != 0)
+                            if(p->bodyID != np->bodyID)
+                                checkSphereSphere(p,np);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+//         m_hashGrid.cellNeighboursFunc(pCell, &DynamicsWorld::compare);
 
 //        for(ParticlePtr n : neighbourParticles)
 //        for( ParticlePtr n : m_Particles)

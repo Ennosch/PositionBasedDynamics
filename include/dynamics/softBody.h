@@ -19,8 +19,8 @@ public:
 
     ModelPtr getModel();
     const QMatrix4x4 getTransfrom();
-
     std::vector<ParticleWeakPtr>& getParticles();
+    int numParticles();
 
 private:
     ModelPtr m_model;

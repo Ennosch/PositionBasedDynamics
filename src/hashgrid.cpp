@@ -118,7 +118,7 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
     int level = 1;
 //    int length = level + 2;
 //    int size = std::pow(length, 3);
-    int n = 0;
+
 
     for(int y = -1 ; y <= level ; y++)
     {
@@ -142,11 +142,13 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
                 {
 //                    qDebug()<<"Found a hash: "<<x<<y<<z;
 //                    std::list<ParticlePtr> currentCellList = query(hash);
-                    std::list<ParticlePtr> currentCellList = m_buckets[hash];
-                    auto test = m_buckets.find(hash);
+//                    std::list<ParticlePtr> currentCellList = m_buckets[hash];
+                    std::unordered_map< size_t , std::list< ParticlePtr >>::iterator test = m_buckets.find(hash);
+//                    tmpList = m_buckets.find(hash);
                     for(auto n : test->second)
                     {
                         float p = n->position().x();
+//                        neighbourParticles_empty.push_back(n);
                     }
 //                    std::list<ParticlePtr>::const_iterator itr = neighbourParticles.end();
 //                    std::list<ParticlePtr>::const_iterator itrNCellStart = currentCellList.begin();
@@ -154,7 +156,6 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
 //                    neighbourParticles.insert(itr, itrNCellStart, itrNCellEnd);
                 };
 //                qDebug()<<"N: "<<n;
-                n++;
             }
         }
     }
@@ -165,6 +166,64 @@ std::list<ParticlePtr> HashGrid::cellNeighbours(int3 _cell)
 }
 
 
+//int HashGrid::cellNeighboursFunc(int3 _cell, void *func)
+//{
+//    return 1;
+//    std::list<ParticlePtr> neighbourParticles_empty;
+
+//    std::list<ParticlePtr> neighbourParticles;
+////    std::list<int3> neighbourCells;
+////    size_t middleHash = hashFunction(_cell);
+
+//    int level = 1;
+////    int length = level + 2;
+////    int size = std::pow(length, 3);
+//    int n = 0;
+
+//    for(int y = -1 ; y <= level ; y++)
+//    {
+//        for(int x = -1 ; x <= level ; x++)
+//        {
+//            for(int z = -1 ; z <= level ; z++)
+//            {
+//                int3 nCell;
+//                nCell.i = _cell.i + x;
+//                nCell.j = _cell.j + y;
+//                nCell.k = _cell.k + z;
+
+////                neighbourCells.push_back(nCell);
+
+//                // query for std::list<ParticlePtr>
+//                // and if possible merge
+//                size_t hash = hashFunction(nCell);
+////                if(hash == middleHash) continue;
+
+//                if(cellExists(hash))
+//                {
+////                    qDebug()<<"Found a hash: "<<x<<y<<z;
+////                    std::list<ParticlePtr> currentCellList = query(hash);
+////                    std::list<ParticlePtr> currentCellList = m_buckets[hash];
+//                    std::unordered_map< size_t , std::list< ParticlePtr >>::iterator test = m_buckets.find(hash);
+////                    tmpList = m_buckets.find(hash);
+//                    for(auto n : test->second)
+//                    {
+//                        float p = n->position().x();
+//                    }
+////                    std::list<ParticlePtr>::const_iterator itr = neighbourParticles.end();
+////                    std::list<ParticlePtr>::const_iterator itrNCellStart = currentCellList.begin();
+////                    std::list<ParticlePtr>::const_iterator itrNCellEnd = currentCellList.end();
+////                    neighbourParticles.insert(itr, itrNCellStart, itrNCellEnd);
+//                };
+////                qDebug()<<"N: "<<n;
+//                n++;
+//            }
+//        }
+//    }
+
+////    qDebug()<<&neighbourParticles;
+////    return neighbourParticles;
+//    return neighbourParticles_empty;
+//}
 
 
 

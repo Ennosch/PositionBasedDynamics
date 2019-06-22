@@ -43,6 +43,8 @@ class DynamicsWorld
 
         void pbdDamping();
 
+        void compare(ParticlePtr _a);
+
         void addDynamicObject(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject, int color=0);

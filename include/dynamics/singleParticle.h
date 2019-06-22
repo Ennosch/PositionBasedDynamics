@@ -15,6 +15,8 @@ public:
     virtual void pinToPosition(const QVector3D &_pos);
     virtual void endPinToPosition();
     ParticlePtr pointer(Particle *ptr);
+    std::vector<ParticleWeakPtr>& getParticles();
+    int numParticles();
 
 private:
     ParticlePtr m_particle;
