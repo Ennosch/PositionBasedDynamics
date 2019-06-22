@@ -65,7 +65,7 @@ void DynamicsWorld::update()
     for( ParticlePtr p : m_Particles)
     {
         // e.G. gravity 0, 1, 0
-        QVector3D forceExt = QVector3D(0, -10, 0);
+        QVector3D forceExt = QVector3D(0, -9.8, 0);
         p->v = p->v + dt * p->w*forceExt;
     }
 
@@ -361,6 +361,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
 
     // clones it's own model object with all data. (cause model will me deformed)
     auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
+    objectCount++;
     ModelPtr model = nRB->getModel();
     _sceneObject->setModel(nRB->getModel());
 
@@ -373,6 +374,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
             pCount++;
             auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
             nParticle->ID = pCount;
+            nParticle->bodyID = objectCount;
             nParticle->setRadius(_sceneObject->getRadius());
             m_Particles.push_back(nParticle);
             nRB->addParticle(point, nParticle);
@@ -544,7 +546,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
      {
          if(ParticlePtr particle = p.lock())
          {
-             if(particle->x.y() > 7.0)
+             if(particle->x.y() > 5.69)
              {
                  QVector3D pos = particle->x;
                  auto pinCstr = std::make_shared<PinConstraint>(particle, pos);

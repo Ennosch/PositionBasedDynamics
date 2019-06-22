@@ -10,7 +10,7 @@
 #include <QtGui/QOpenGLShaderProgram>
 
 #include "utils.h"
-
+#include "dynamics/dynamicUtils.h"
 
 
 class Scene;
@@ -58,6 +58,8 @@ public:
     void bind();
     void setupMesh();
     void recomputeNormals();
+    // WIP, to slow to use
+    void recomputeSmoothedNormals();
     void updateVertexBuffer();
     void draw();
     void drawPoints();

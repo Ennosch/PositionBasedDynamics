@@ -169,7 +169,6 @@ public:
     HalfSpaceFrictionConstraint(const ParticlePtr _p1, const QVector3D _o, const QVector3D _n);
 
     void project();
-    void debug(int _v){mlog<<" HS debug: "<<_v;}
 
     float constraintFunction();
 private:

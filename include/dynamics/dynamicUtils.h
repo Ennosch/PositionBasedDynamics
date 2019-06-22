@@ -25,6 +25,8 @@ typedef std::shared_ptr <AbstractConstraint>    ConstraintPtr;
 typedef std::weak_ptr <AbstractConstraint>      ConstraintWeakPtr;
 
 template<typename K, typename V>
+// confusing template and function name
+// assumes that V is a container of Ks
 K findKbyValueElement(std::map<K, V> map, K elementOfV)
 {
     typename std::map<K,V>::iterator it;

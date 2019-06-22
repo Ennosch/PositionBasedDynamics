@@ -27,12 +27,6 @@ public:
     std::list<ParticlePtr> query(size_t _hash);
     std::list<ParticlePtr> cellNeighbours(int3 _cell);
 
-    template< typename FUNC>
-    void for_each_neighbor(const FUNC& f)
-    {
-
-    }
-
 //    int cellNeighboursFunc(int3 _cell, void FUNC);
 
 //  query

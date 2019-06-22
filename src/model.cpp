@@ -28,12 +28,12 @@ void Model::loadModel(std::string _path)
     // bitwise And flags: aiProcess_FlipWindingOrder |  aiProcess_GenSmoothNormals |
     const aiScene* scene = importer.ReadFile(_path,
                                              aiProcess_Triangulate |
-//                                             aiProcess_JoinIdenticalVertices |
+                                             aiProcess_JoinIdenticalVertices |
 //                                             aiProcess_FlipUVs |
 //                                             aiProcess_CalcTangentSpace |
-                                             aiProcess_GenNormals
+                                             aiProcess_GenNormals |
 //                                             aiProcess_GenSmoothNormals |
-//                                             aiProcess_FixInfacingNormals
+                                             aiProcess_FixInfacingNormals
                                              );
 
 ////------------------- exporter test
@@ -68,16 +68,6 @@ void Model::processNode(aiNode *node, const aiScene *scene, std::string _path)
         // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-        std::vector<QVector3D> cacheNormals;
-        for(int i=0; i < mesh->mNumVertices; i++)
-        {
-//            QVector3D v = QVector3D(0,0,0);
-//            v.setX(mesh->mNormals[i].x);
-//            v.setY(mesh->mNormals[i].y);
-//            v.setZ(mesh->mNormals[i].z);
-//            cacheNormals.push_back(v);
-        }
-
         ShapePtr ptrShape = processMesh(mesh, scene, _path);
 
         if(ptrShape->data() != nullptr)
@@ -96,9 +86,6 @@ void Model::processNode(aiNode *node, const aiScene *scene, std::string _path)
 
 ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene,  std::string _path)
 {
-
-
-
     // data to fill
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -158,6 +145,7 @@ ShapePtr Model::processMesh(aiMesh *mesh, const aiScene *scene,  std::string _pa
           indices.push_back(face.mIndices[j]);
           QVector3D _barycentric = QVector3D(0, 0, 0);
           int _mod = j % 3;
+          _barycentric[_mod] = 1;
           vertices[face.mIndices[j]].Barycentric = _barycentric;
         }
     }
@@ -220,7 +208,7 @@ void Model::clone(const ModelPtr &_model)
 
 void Model::setHidden(bool _hidden)
 {
-    hidden = true;
+    hidden = _hidden;
 }
 
 std::vector<ShapePtr> Model::getMeshes()

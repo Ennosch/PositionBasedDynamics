@@ -527,8 +527,8 @@ void HalfSpaceFrictionConstraint::project()
     td = (pptr1->p - pptr1->x)   - constraintFunction() * m_collisionNormal;
     float tdLength = td.length();
 
-    float usd = 0.2;
-    float ukd = 0.1;
+    float usd = 0.5;
+    float ukd = 0.5;
 
     if(tdLength < usd)
     {

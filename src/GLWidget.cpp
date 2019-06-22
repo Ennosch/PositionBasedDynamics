@@ -82,11 +82,11 @@ void GLWidget::loop()
         simFrameCounter++;
 //        mlog<<"lag:"<<lag;
 
-//        timer.start();
-//        scene()->updateSceneObjects();
-//        scene()->dynamicsWorld()->update();
-//        msDynamics = timer.elapsed();
-//        timer.restart();
+        timer.start();
+        scene()->updateSceneObjects();
+        scene()->dynamicsWorld()->update();
+        msDynamics = timer.elapsed();
+        timer.restart();
 
         lag -= timeStepSize;
     }
@@ -96,11 +96,11 @@ void GLWidget::loop()
 //    QThread::msleep(16);
 
     //// play every sim frame
-    timer.start();
-    scene()->updateSceneObjects();
-    scene()->dynamicsWorld()->update();
-    msDynamics = timer.elapsed();
-    timer.restart();
+//    timer.start();
+//    scene()->updateSceneObjects();
+//    scene()->dynamicsWorld()->update();
+//    msDynamics = timer.elapsed();
+//    timer.restart();
 
 
 //    mlog<<"physics step2: "<<timer.elapsed();

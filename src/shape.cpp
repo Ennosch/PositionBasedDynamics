@@ -2,7 +2,7 @@
 #include <iostream>
 #include <QDebug>
 
-
+#include "dynamics/dynamicUtils.h"
 
 Shape::Shape()
 {
@@ -115,32 +115,131 @@ void Shape::setupMesh()
                           (void*)offsetof(Vertex, Barycentric));
 }
 
-void Shape::recomputeNormals()
+void Shape::recomputeSmoothedNormals()
 {
+    std::pair<int, std::list<int>> pointToVerts;
+//    std::map< std::pair<int, std::list<int>>, QVector3D > pointToVertsToNormals;
+    std::map<int , std::pair<std::list<int> , QVector3D>> pointToVertsToNormals;
+
+
+    mlog<<"rc N  ----start";
     for(int i=0; i < m_indices.size(); i++)
     {
         // for each group of three (0,1,2)
         if(!((i+1) % 3))
         {
-            QVector3D vertA = m_vertices[m_indices[i-2]].Position;
-            QVector3D vertB = m_vertices[m_indices[i-1]].Position;
-            QVector3D vertC = m_vertices[m_indices[i  ]].Position;
+
+            int vertIdxA = m_indices[i-2];
+            int vertIdxB = m_indices[i-1];
+            int vertIdxC = m_indices[i-0];
+
+
+            QVector3D vertA = m_vertices[vertIdxA].Position;
+            QVector3D vertB = m_vertices[vertIdxB].Position;
+            QVector3D vertC = m_vertices[vertIdxC].Position;
 
             QVector3D AB, AC, CB, normal;
             AB  = vertB -vertA;
             AC  = vertC -vertA;
             normal = QVector3D::crossProduct(AB, AC).normalized();
 
-            m_vertices[m_indices[i-2]].Normal = normal;
-            m_vertices[m_indices[i-1]].Normal = normal;
-            m_vertices[m_indices[i  ]].Normal = normal;
+//            fooThis();
+//            int poitIdxA = findKbyValueElement;
+            int poitIdxA = findKbyValueElement(getVertsMap(), vertIdxA);
+            int poitIdxB = findKbyValueElement(getVertsMap(), vertIdxB);
+            int poitIdxC = findKbyValueElement(getVertsMap(), vertIdxC);
+
+            if(pointToVertsToNormals.find(poitIdxA) != pointToVertsToNormals.end())
+            {
+                QVector3D n = pointToVertsToNormals[poitIdxA].second;
+                n += normal;
+//                n.normalize();
+                pointToVertsToNormals[poitIdxA].first.push_back(vertIdxA);
+                pointToVertsToNormals[poitIdxA].second = n;
+            }
+            else {
+                pointToVertsToNormals[poitIdxA].first.push_back(vertIdxA);
+                pointToVertsToNormals[poitIdxA].second = normal;
+            }
+
+            if(pointToVertsToNormals.find(poitIdxB) != pointToVertsToNormals.end())
+            {
+                QVector3D n = pointToVertsToNormals[poitIdxB].second;
+                n += normal;
+//                n.normalize();
+                pointToVertsToNormals[poitIdxB].first.push_back(vertIdxB);
+                pointToVertsToNormals[poitIdxB].second = n;
+            }
+            else {
+                pointToVertsToNormals[poitIdxB].first.push_back(vertIdxB);
+                pointToVertsToNormals[poitIdxB].second = normal;
+            }
+
+            if(pointToVertsToNormals.find(poitIdxC) != pointToVertsToNormals.end())
+            {
+                QVector3D n = pointToVertsToNormals[poitIdxC].second;
+                n += normal;
+//                n.normalize();
+                pointToVertsToNormals[poitIdxC].first.push_back(vertIdxC);
+                pointToVertsToNormals[poitIdxC].second = n;
+
+            }
+            else {
+                pointToVertsToNormals[poitIdxC].first.push_back(vertIdxC);
+                pointToVertsToNormals[poitIdxC].second = normal;
+            }
+//            m_vertices[vertIdxA].Normal = normal;
+//            m_vertices[vertIdxA].Normal = normal;
+//            m_vertices[vertIdxA].Normal = normal;
         }
     }
+
+//    mlog<<"stop";
+
+    for(int i=0; i < m_indices.size(); i++)
+    {
+        // for each group of three (0,1,2)
+//        if(!((i+1) % 3))
+        {
+            int vertIdx = m_indices[i];
+            int pointIdx = findKbyValueElement(getVertsMap(), vertIdx);
+            QVector3D smoothNormal = pointToVertsToNormals[pointIdx].second;
+            m_vertices[vertIdx].Normal = smoothNormal.normalized();
+        }
+    }
+
+    mlog<<"rc N  ----end";
+}
+
+void Shape::recomputeNormals()
+{
+    mlog<<"recompute";
+    for(int i=0; i < m_indices.size(); i++)
+        {
+            // for each group of three (0,1,2)
+            if(!((i+1) % 3))
+            {
+                QVector3D vertA = m_vertices[m_indices[i-2]].Position;
+                QVector3D vertB = m_vertices[m_indices[i-1]].Position;
+                QVector3D vertC = m_vertices[m_indices[i  ]].Position;
+
+                QVector3D AB, AC, CB, normal;
+                AB  = vertB -vertA;
+                AC  = vertC -vertA;
+                normal = QVector3D::crossProduct(AB, AC).normalized();
+
+                m_vertices[m_indices[i-2]].Normal = normal;
+                m_vertices[m_indices[i-1]].Normal = normal;
+                m_vertices[m_indices[i  ]].Normal = normal;
+            }
+        }
 }
 
 void Shape::updateVertexBuffer()
 {
     recomputeNormals();
+
+//    recomputeSmoothedNormals();
 
     m_pVao->bind();
     m_vvbo.create();
