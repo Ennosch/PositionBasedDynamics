@@ -28,12 +28,12 @@ void Model::loadModel(std::string _path)
     // bitwise And flags: aiProcess_FlipWindingOrder |  aiProcess_GenSmoothNormals |
     const aiScene* scene = importer.ReadFile(_path,
                                              aiProcess_Triangulate |
-                                             aiProcess_JoinIdenticalVertices |
+//                                             aiProcess_JoinIdenticalVertices |
 //                                             aiProcess_FlipUVs |
 //                                             aiProcess_CalcTangentSpace |
-                                             aiProcess_GenNormals |
+                                             aiProcess_GenNormals
 //                                             aiProcess_GenSmoothNormals |
-                                             aiProcess_FixInfacingNormals
+//                                             aiProcess_FixInfacingNormals
                                              );
 
 ////------------------- exporter test

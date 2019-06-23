@@ -213,7 +213,6 @@ void Shape::recomputeSmoothedNormals()
 
 void Shape::recomputeNormals()
 {
-    mlog<<"recompute";
     for(int i=0; i < m_indices.size(); i++)
         {
             // for each group of three (0,1,2)

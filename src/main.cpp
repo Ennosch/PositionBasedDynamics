@@ -28,6 +28,7 @@
 
 #include "ControlWidget.h"
 #include "MainWindow.h"
+#include "parameters.h"
 
 QSurfaceFormat createGLFormat()
 {
@@ -45,6 +46,7 @@ QSurfaceFormat createGLFormat()
 
 int main(int argc, char *argv[])
 {
+
   QApplication app(argc, argv);
 
   MainWindow mainWindow;

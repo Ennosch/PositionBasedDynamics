@@ -207,7 +207,6 @@ Tool GLWidget::tool()
 
 void GLWidget::processInput()
 {
-
     // update() registers keys, add/remove from inputManager containers
     m_tool = MANIPULATOR_TR;
     switch (m_tool) {
@@ -218,7 +217,6 @@ void GLWidget::processInput()
             }
             break;
     }
-
     // convert Mouse window coordinates to have origin (0,0) at center of image
     QPoint _localMousePos = this->mapFromGlobal(QCursor::pos());
     _localMousePos.setX(_localMousePos.x() - (this->width()/2));
@@ -230,12 +228,17 @@ void GLWidget::processInput()
         QPointF toPick = getMouseNDCCoords();
         if(scene()->mainpulator->currentState == NONE)
         {
-
             auto picked = scene()->pickObject(toPick.x(), toPick.y());
             if(picked)
             {
                 picked->update();
                 scene()->mainpulator->currentState = TRANSLATE_VIEWPLANE;
+//                activeObject()->setState(ActiveObject::SELECTED);
+                activeObject()->select();
+            }
+            else
+            {
+                activeObject()->deselect();
             }
         }
         m_inputManger.setMouseTriggeredPosition();
@@ -243,8 +246,9 @@ void GLWidget::processInput()
 //        scene()->mainpulator->setState(TRANSLATE_VIEWPLANE);
 
 //        if notDragging:
-
         scene()->mainpulator->startDrag();
+
+
     }
 
     if(inputManager::buttonPressed(Qt::LeftButton) && inputManager::keyPressed(Qt::Key_Alt ))
@@ -267,7 +271,6 @@ void GLWidget::processInput()
     {
 
     }
-
     if(inputManager::buttonTriggered(Qt::RightButton) )
     {
         scene()->m_arcCamera.trackStart(m_inputManger.mousePosition());
@@ -284,6 +287,24 @@ void GLWidget::processInput()
     {
         scene()->m_arcCamera.track(m_inputManger.mousePosition());
     }
+    if(inputManager::keyTriggered(Qt::Key_P))
+    {
+//        mlog<<"activeObject()->currentObject()->isDynamic() "<<activeObject()->currentObject()->isDynamic();
+//        if(activeObject()->isActive() && activeObject()->currentObject()->isDynamic())
+
+           activeObject()->processInput(ActiveObject::B_P_PRESSED);
+    }
+    if(inputManager::keyTriggered(Qt::Key_T))
+    {
+           activeObject()->processInput(ActiveObject::B_T_PRESSED);
+    }
+    if(inputManager::keyTriggered(Qt::Key_D))
+    {
+           activeObject()->processInput(ActiveObject::B_D_PRESSED);
+    }
+
+
+
 }
 
 void GLWidget::uiTransformChange(const QVector3D _t, const QVector3D _r, const QVector3D _s)
@@ -326,9 +347,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
         }
         else
         {
-    //      qDebug()<<event;
           inputManager::registerKeyPress(event->key());
-          //inputManager::foo();
         }
 
         if (event->isAutoRepeat())

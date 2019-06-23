@@ -153,6 +153,26 @@ void SceneObject::isDynamic(bool _isDynamic)
     m_IsDynamic = _isDynamic;
 }
 
+bool SceneObject::isPinned()
+{
+    return m_IsPinned;
+}
+
+void SceneObject::isPinned(bool _pinned)
+{
+    m_IsPinned = _pinned;
+}
+
+bool SceneObject::isHidden()
+{
+    return m_IsHidden;
+}
+
+void SceneObject::isHidden(bool _isHidden)
+{
+    m_IsHidden = _isHidden;
+}
+
 void SceneObject::setRotation(const QQuaternion &_rt)
 {
     m_Transform.setRotation(_rt);
@@ -162,6 +182,11 @@ void SceneObject::setRotation(const QQuaternion &_rt)
 void SceneObject::setActiveObject(ActiveObject *_activeObject)
 {
     activeObject = _activeObject;
+}
+
+void SceneObject::setPinConstraint(std::shared_ptr<PinConstraint> _pinConstraint)
+{
+    m_pinConstraint = _pinConstraint;
 }
 
 void SceneObject::setModel(ModelPtr _model)
@@ -193,6 +218,20 @@ DynamicObjectPtr SceneObject::dynamicObject()
 const QMatrix4x4 SceneObject::getMatrix()
 {
     return m_ModelMatrix;
+}
+
+std::shared_ptr<PinConstraint> SceneObject::getPinConstraint()
+{
+    return m_pinConstraint;
+}
+
+int SceneObject::getNumConstraints()
+{
+    if(!pDynamicObject) return 0;
+
+    Particle *ptr = nullptr;
+    auto particleSmartPointer = dynamicObject()->pointer(ptr);
+    return particleSmartPointer->m_Constraints.size();
 }
 
 ModelPtr SceneObject::model()

@@ -317,7 +317,10 @@ void Manipulator::updateGlobalScale()
 void Manipulator::startDrag()
 {
     isDraging = true;
-    m_activeObject->onClicked();
+//    m_activeObject->onClicked();
+
+    m_activeObject->processInput(ActiveObject::LM_CLICKED);
+
 
     // A ray from a click on the screen into the scene. For Translation and Rotation operations
     QPointF currentMouseNDC = m_window->getMouseNDCCoords();
@@ -354,14 +357,13 @@ void Manipulator::startDrag()
         m_dragStartRotVec = PointRotPlane - m_Transform.translation();
         m_dragStartRot = m_Transform.rotation();
     }
-
-
 }
 
 void Manipulator::endDrag()
 {
     isDraging = false;    
-    m_activeObject->onReleased();
+//    m_activeObject->onReleased();
+    m_activeObject->processInput(ActiveObject::LM_RELEASED);
 }
 
 void Manipulator::drag()
@@ -391,7 +393,8 @@ void Manipulator::drag()
     if(m_activeObject)
     {
         m_activeObject->notify(m_Transform);
-        m_activeObject->onPressed();
+//        m_activeObject->onPressed();
+        m_activeObject->processInput(ActiveObject::LM_PRESSED);
     }
 }
 

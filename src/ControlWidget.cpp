@@ -1,9 +1,85 @@
+#include <cmath>
+#include <QDebug>
 #include "include/ControlWidget.h"
 #include "ui_ControlWidget.h"
-#include <QDebug>
+
+
+
 
 // for Ui file constructor,
 //    ui(new Ui::ControlWidget)
+
+DoubleSpinBox::DoubleSpinBox(uint _row, uint _column, QWidget *parent)  :
+    row(_row),
+    column(_column),
+    QDoubleSpinBox(parent)
+
+{
+    this->setRange(-1000,1000);
+//    connect(this, SIGNAL(valueChanged(double)), this, SLOT(emitValueChangedRowColum(double)));
+}
+
+
+void DoubleSpinBox::emitValueChangedRowColum(double _v)
+{
+//    emit valueChangedRowColum(_v, row, column);
+}
+
+
+ValueSliderF::ValueSliderF(float defaultV, QWidget *parent, float _min, float _max, int decimalPlace) :
+    m_conversion(pow(10,decimalPlace)),
+    mParent(parent)
+{
+    m_min = _min * m_conversion;
+    m_max = _max * m_conversion;
+    m_default = defaultV * m_conversion;
+
+    if(m_default < m_min) m_min = m_default;
+    if(m_default > m_max) m_max = m_default;
+
+    setupUi();
+}
+
+void ValueSliderF::setupUi()
+{
+//    layout = new QHBoxLayout();
+//    layout = new QVBoxLayout();
+    layout = new QGridLayout();
+    m_slider = new QSlider(Qt::Horizontal);
+    m_label = new QLabel();
+    m_label->setNum(m_default / m_conversion);
+
+    m_slider->setMaximum(m_max);
+    m_slider->setMinimum(m_min);
+    m_slider->setSliderPosition(m_default);
+
+    auto s = m_slider->size();
+
+//    layout->setHorizontalSpacing(200);
+
+    QSize size(80,20);
+    m_slider->setFixedSize(size);
+
+    layout->addWidget(m_slider,0,0);
+    layout->addWidget(m_label,0,1);
+
+//    layout->setGeometry(QRect(QPoint(0,0),QPoint(200,100)));
+    layout->setSpacing(0);
+
+//    this->setMaximumHeight(30);
+    this->setLayout(layout);
+
+    // connect internal Signals
+    connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(emitValueChanged(int)));
+
+}
+
+void ValueSliderF::emitValueChanged(int _v)
+{
+    float v  = float(_v) / m_conversion;
+    m_label->setNum(v);
+    emit valueChanged(v);
+}
 
 TransformUiWidget::TransformUiWidget(QWidget *parent) :
     QWidget(parent)
@@ -72,6 +148,8 @@ void TransformUiWidget::setupUi()
 
 void TransformUiWidget::connectWidgets()
 {
+    connect(transform00Edit, SIGNAL(valueChanged(double)), this, SLOT(fooB()));
+
     connect(transform00Edit, SIGNAL(valueChanged(double)), this, SLOT(emitTransformChange()));
     connect(transform01Edit, SIGNAL(valueChanged(double)), this, SLOT(emitTransformChange()));
     connect(transform02Edit, SIGNAL(valueChanged(double)), this, SLOT(emitTransformChange()));
@@ -120,7 +198,6 @@ void TransformUiWidget::setTransform(const QMatrix4x4 _mat4, const QVector3D _t,
 
 void TransformUiWidget::emitTransformChange()
 {
-//    qDebug()<<"register value change";
     // prepare data to send back to scene
     QVector3D translation, rotation, scale;
     QMatrix4x4 trs;
@@ -184,29 +261,13 @@ void TransformUiWidget::createQObjects()
      mat33Edit = new DoubleSpinBox(0,0);
 }
 
-DoubleSpinBox::DoubleSpinBox(uint _row, uint _column, QWidget *parent)  :
-    row(_row),
-    column(_column),
-    QDoubleSpinBox(parent)
 
-{
-    this->setRange(-1000,1000);
-//    connect(this, SIGNAL(valueChanged(double)), this, SLOT(emitValueChangedRowColum(double)));
-}
-
-void DoubleSpinBox::emitValueChangedRowColum(double _v)
-{
-//    emit valueChangedRowColum(_v, row, column);
-}
 
 ControlWidget::ControlWidget(QWidget *parent) :
         QWidget(parent),
         ui(new Ui::ControlWidget)
 {
-//        ui->setupUi(this);
-//        transformWidget = new TransformUiWidget;
     setupUi();
-
 }
 
 void ControlWidget::setupUi()
@@ -215,11 +276,11 @@ void ControlWidget::setupUi()
     layout = new QVBoxLayout;
     transformWidget = new TransformUiWidget(this);
     dynamicsWidget =  new DynamicsUiWidget;
-//    spacer = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
     layout->addWidget(transformWidget);
     layout->addWidget(dynamicsWidget);
     layout->addStretch(1);
-//    layout->addSpacerItem(spacer);
+
     this->setLayout(layout);
 }
 
@@ -235,17 +296,117 @@ void DynamicsUiWidget::setupUi()
     resetSim = new QPushButton("reset");
 
     stepSizeLabel = new QLabel("step size");
-    stepSizeEdit = new DoubleSpinBox(0,0);
-    stepSizeEdit->setValue(0.05);
+    stepSizeEdit = new ValueSliderF(timeStepSize,this, 0.001, 1, 3);
 
+    gravityLabel = new QLabel("gravity (f) ");
+//    gravityLabelEditX = new ValueSliderF(0, this, -10 , 10);
+    gravityLabelEditY = new ValueSliderF(gravityDir.y(), this, -10 , 10);
+//    gravityLabelEditZ = new ValueSliderF(0, this, -10 , 10);
+
+    particleMassLabel = new QLabel("particle m ");
+    particleMassEdit = new ValueSliderF(particleMass, this, 0.01, 5);
+
+    preConditionsIterLabel = new QLabel("pre iter:");
+    preConditionsIterEdit = new ValueSliderI(preConditionIterations, this, 0, 20);
+    constraintIterLabel = new QLabel("constraint iter");
+    constraintIterEdit = new ValueSliderI(constraintIterations, this, 0, 50);
+
+    pbdDampingLabel = new QLabel("PBD Damping");
+    pbdDampingEdit = new ValueSliderF(pbd_Damping, this, 0, 1);
+
+    constraintHeadline = new QLabel("Constraints:");
+
+//    distanceConstraintStretchLabel = new QLabel("Stretch:");
+//    distanceConstraintStretchEdit = new ValueSliderF(distanceConstraintStrechR, this, 0, 1);
+
+//    distanceConstraintCompressLabel = new QLabel("Compress:");
+//    distanceConstraintCompressEdit = new ValueSliderF(distanceConstraintCompressR, this, 0, 1);
+
+//    shapeMatchingConstraintAttractLabel = new QLabel("SM Attract:");
+//    shapeMatchingConstraintAttractEdit = new ValueSliderF(shapeMatchingGoalAttract, this, 0, 1);
+
+
+    layout.setVerticalSpacing(0);
+    layout.setHorizontalSpacing(10);
 //    spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
     layout.addWidget(startSim,0,0);
     layout.addWidget(stepSim,0,1);
     layout.addWidget(resetSim,0,2);
-    layout.addWidget(stepSizeLabel,1,0);
-    layout.addWidget(stepSizeEdit,1,1);
-//    layout.addItem(spacer,1,0);
 
-    this->setLayout(&layout);
+    layout.addWidget(stepSizeLabel,1,0);
+    layout.addWidget(stepSizeEdit,1,1,1,6);
+
+    layout.addWidget(gravityLabel,2,0);
+//    layout.addWidget(gravityLabelEditX,2,1);
+    layout.addWidget(gravityLabelEditY,2,1,1,6);
+
+    layout.addWidget(particleMassLabel,3,0);
+    layout.addWidget(particleMassEdit,3,1,1,3);
+
+    layout.addWidget(constraintIterLabel,5,0);
+    layout.addWidget(constraintIterEdit,5,1,1,3);
+
+    layout.addWidget(preConditionsIterLabel,6,0);
+    layout.addWidget(preConditionsIterEdit,6,1,1,3);
+
+    layout.addWidget(pbdDampingLabel,7,0);
+    layout.addWidget(pbdDampingEdit,7,1,1,3);
+
+//    layout.addWidget(constraintHeadline,8,0);
+
+//    layout.addWidget(distanceConstraintStretchLabel,9,0);
+//    layout.addWidget(distanceConstraintStretchEdit,9,1,1,3);
+
+//    layout.addWidget(distanceConstraintCompressLabel,10,0);
+//    layout.addWidget(distanceConstraintCompressEdit,10,1,1,3);
+
+//    layout.addWidget(shapeMatchingConstraintAttractLabel,11,0);
+//    layout.addWidget(shapeMatchingConstraintAttractEdit,11,1,1,3);
+
+      this->setLayout(&layout);
+}
+
+
+ValueSliderI::ValueSliderI(int defaultV, QWidget *parent, int _min, int _max):
+    mParent(parent),
+    m_min(_min ),
+    m_max(_max ),
+    m_default(defaultV)
+{
+    if(m_default < m_min) m_min = m_default;
+    if(m_default > m_max) m_max = m_default;
+    setupUi();
+}
+
+void ValueSliderI::setupUi()
+{
+    layout = new QHBoxLayout();
+    m_slider = new QSlider(Qt::Horizontal);
+    m_label = new QLabel();
+    m_label->setNum(m_default);
+
+    m_slider->setMaximum(m_max);
+    m_slider->setMinimum(m_min);
+    m_slider->setSliderPosition(m_default);
+
+    QSize size(80,20);
+    m_slider->setFixedSize(size);
+
+    layout->addWidget(m_slider);
+    layout->addWidget(m_label);
+
+    layout->setSpacing(0);
+
+    this->setLayout(layout);
+
+    // connect internal Signals
+    connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(emitValueChanged(int)));
+
+}
+
+void ValueSliderI::emitValueChanged(int _v)
+{
+    m_label->setNum(_v);
+    emit valueChanged(_v);
 }

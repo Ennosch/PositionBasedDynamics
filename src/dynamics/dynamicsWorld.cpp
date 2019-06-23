@@ -7,6 +7,8 @@
 
 #include <omp.h>
 
+#include "parameters.h"
+
 Eigen::Matrix3f QMatrix3toEigen(const QMatrix3x3 &_qMat);
 QMatrix3x3 EigenMatrix3toQt(const Eigen::Matrix3f &_eMat);
 
@@ -16,11 +18,16 @@ DynamicsWorld::DynamicsWorld()
 {
     qDebug()<<"DynaicsWorld ctor";
     m_simulate = false;
-    m_dt = 0.02;
+    m_dt = timeStepSize;
 //      m_dt = 0.01;
 //    m_dt = 0.1;
     m_frameCount = 0;
     m_DynamicsWorldController = new DynamicsWorldController(this);
+    m_gravity = QVector3D(gravityDir.x(), gravityDir.y(), gravityDir.z());
+
+    m_preConditionIteration = preConditionIterations;
+    m_constraintIteration = constraintIterations;
+    m_pbdDamping = pbd_Damping;
 }
 
 void DynamicsWorld::initialize()
@@ -37,7 +44,6 @@ void DynamicsWorld::initialize()
     addPlane(groundPlane);
 
 //    auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
-
     for( ParticlePtr p : m_Particles)
     {
         p->pp = QVector3D(0,0,0);
@@ -60,12 +66,11 @@ void DynamicsWorld::update()
 
     // PBD Loop start
     // explicit Euler integration step (5)
-
-
     for( ParticlePtr p : m_Particles)
     {
         // e.G. gravity 0, 1, 0
-        QVector3D forceExt = QVector3D(0, -9.8, 0);
+//        QVector3D forceExt = QVector3D(0, -9.8, 0);
+        QVector3D forceExt  = m_gravity;
         p->v = p->v + dt * p->w*forceExt;
     }
 
@@ -80,20 +85,17 @@ void DynamicsWorld::update()
     collisionCheckAll();
 
     // Constraint dirty to do something
-        for( ParticlePtr p : m_Particles)
-        {
-
-            for( ConstraintWeakPtr c : p->m_Constraints)
-            {
-                if(auto constraint = c.lock()){
-                    constraint->setDirty(true);
-                }
+    for( ParticlePtr p : m_Particles)
+    {
+        for( ConstraintWeakPtr c : p->m_Constraints){
+            if(auto constraint = c.lock()){
+                constraint->setDirty(true);
             }
         }
+    }
 
     // Preconditioning (solve particle plane cstrs once)
-    int PreConditionIterations = 2;
-    for(int i=0; i < PreConditionIterations; i++)
+    for(int i=0; i < m_preConditionIteration; i++)
     {
         for( ParticlePtr p : m_Particles)
         {
@@ -112,15 +114,11 @@ void DynamicsWorld::update()
     }
     m_frameCount++;
 
-
     // Solver Iteration (9)
-    int numIterations = 5;
-
     int nthreads, tid, test;
-
-    for(int i=0; i<numIterations; i++)
+    for(int i=0; i<m_constraintIteration; i++)
     {
-    //    #pragma omp parallel for
+//        #pragma omp parallel for
         for(int j=0; j < m_Particles.size(); j++)
         {
     //        for( ConstraintWeakPtr c : p->m_Constraints)
@@ -144,6 +142,7 @@ void DynamicsWorld::update()
 //            }
         }
 
+
         for( ParticlePtr p : m_Particles)
         {
             for( ConstraintWeakPtr c : p->m_Constraints)
@@ -165,7 +164,6 @@ void DynamicsWorld::update()
     //            if(c->constraintFunction() < 0)
                 c->project();
             }
-
     //        p->m_CollisionConstraints_B.clear();
         }
     }
@@ -238,6 +236,24 @@ void DynamicsWorld::setSimulate(bool _isSimulating)
     m_simulate = _isSimulating;
 }
 
+void DynamicsWorld::setAllParticlesMass(float _m)
+{
+    for(auto p : m_Particles)
+    {
+        p->setMass(_m);
+    }
+}
+
+void DynamicsWorld::setAllDistanceConstraintStretch(float _globalStretch)
+{
+//    for(auto c : m_Constraints)
+}
+
+void DynamicsWorld::setAllDistanceConstraintCompress(float _globalCompress)
+{
+
+}
+
 void DynamicsWorld::step()
 {
     m_simulate = true;
@@ -253,7 +269,6 @@ int DynamicsWorld::getTimeStepSizeMS()
 void DynamicsWorld::pbdDamping()
 {
     int i = 0;
-
     for(auto dObject : m_DynamicObjects)
     {
         i++;
@@ -276,10 +291,6 @@ void DynamicsWorld::pbdDamping()
 
         xcm /= totalMass;
         vcm /= totalMass;
-
-
-//        mlog<<xcm<<vcm;
-//        continue;
 
         for(auto p : dObject->getParticles())
         {
@@ -308,7 +319,7 @@ void DynamicsWorld::pbdDamping()
                 ri = particle->x - xcm;
                 QVector3D dv = vcm + (QVector3D::crossProduct(w, ri)) - particle->v;
                 i++;
-                particle->v +=  (0.01 * dv);
+                particle->v +=  (m_pbdDamping * dv);
             }
         }
     }
@@ -536,9 +547,9 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
          ParticlePtr p1 = nSB->getParticles()[A].lock();
          ParticlePtr p2 = nSB->getParticles()[B].lock();
 
-         float restLength = ((p1->x)-(p2->x)).length();
+//         float restLength = ((p1->x)-(p2->x)).length();
          std::shared_ptr<DistanceEqualityConstraint> nCstrPtr = addDistanceEqualityConstraint(p1, p2);
-         nCstrPtr->setRestLength(restLength);
+//         nCstrPtr->setRestLength(restLength);
 
      };
      // pin rows !
@@ -546,7 +557,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
      {
          if(ParticlePtr particle = p.lock())
          {
-             if(particle->x.y() > 5.69)
+             if(particle->x.y() > 23.4)
              {
                  QVector3D pos = particle->x;
                  auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
@@ -563,6 +574,38 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
      _sceneObject->makeDynamic(nSB);
      return nSB;
      //    auto nRB = std::make_shared<SoftBody>(_sceneObject->model());
+}
+
+void DynamicsWorld::addRope(const QVector3D &_start, const QVector3D &_end, int _numParticles)
+{
+        QVector3D line = _start - _end;
+        QVector3D n  = line.normalized();
+        float length = line.length();
+        float step = length / _numParticles;
+        objectCount++;
+
+        ParticlePtr prevP = nullptr;
+
+        for(int i=0; i < _numParticles; i++)
+        {
+            QVector3D pos = _start + (i * step * n);
+            pCount++;
+            auto nParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), 33);
+            nParticle->ID = pCount;
+            nParticle->bodyID = objectCount;
+            m_Particles.push_back(nParticle);
+
+            if(!prevP)
+            {
+                prevP = nParticle;
+                continue;
+            }
+//            std::shared_ptr<DistanceEqualityConstraint>
+            addDistanceEqualityConstraint(prevP, nParticle);
+            std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
+            m_scene->addSceneObjectFromParticle(pDynamicObject, nParticle);
+            prevP = nParticle;
+        }
 }
 
 
@@ -584,11 +627,18 @@ void DynamicsWorld::addPlane(const Plane &_plane)
 void DynamicsWorld::collisionCheckAll()
 {
     m_hashGrid.clear();
+
     for( ParticlePtr p : m_Particles)
     {
         collisionCheck( p);
     }
-//    mlog<<"stop the block ";
+
+//    #pragma omp parallel for
+//    for(int i=0; i < m_Particles.size(); i++)
+//    {
+//        ParticlePtr p = m_Particles[i];
+//        collisionCheck(p);
+//    }
 }
 
 void DynamicsWorld::collisionCheck(ParticlePtr p)
@@ -664,10 +714,10 @@ void DynamicsWorld::collisionCheck(ParticlePtr p)
 
         checkSpherePlane(p, m_Planes[0]);
 
-//        if( m_NonUniformParticles[0] != nullptr)
-//        {
-//            checkSphereSphere(p, m_NonUniformParticles[0]);
-//        }
+        if( m_NonUniformParticles[0] != nullptr)
+        {
+            checkSphereSphere(p, m_NonUniformParticles[0]);
+        }
 }
 
 void DynamicsWorld::checkSphereSphere(const ParticlePtr p1, const ParticlePtr p2)
@@ -748,7 +798,8 @@ void DynamicsWorld::checkSpherePlane(const ParticlePtr p1, const Plane &_plane)
 std::shared_ptr<DistanceEqualityConstraint> DynamicsWorld::addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
 {
     auto nSpring = std::make_shared<DistanceEqualityConstraint>(_p1, _p2);
-    nSpring->setRestLength(2.0);
+    float d = (_p1->x - _p2->x).length();
+    nSpring->setRestLength(d);
     m_Constraints.push_back(nSpring);
     _p1->m_Constraints.push_back(nSpring);
     _p2->m_Constraints.push_back(nSpring);
@@ -757,6 +808,17 @@ std::shared_ptr<DistanceEqualityConstraint> DynamicsWorld::addDistanceEqualityCo
     m_debugLines.push_back(&_p2->x);
 
     return nSpring;
+}
+
+std::shared_ptr<PinTogetherConstraint> DynamicsWorld::addPinTogetherConstraint(std::vector<ParticlePtr> &_vec)
+{
+    std::shared_ptr<PinTogetherConstraint> ptCstr = std::make_shared<PinTogetherConstraint>(_vec);
+    for(auto p : _vec)
+    {
+        p->m_Constraints.push_back(ptCstr);
+    }
+    m_Constraints.push_back(ptCstr);
+    return  ptCstr;
 }
 
 void DynamicsWorld::addParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
@@ -798,6 +860,11 @@ void DynamicsWorld::addHalfSpacePreConditionConstraint(const ParticlePtr _p1, co
 
 void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
 {
+    if(_constraint->type() == AbstractConstraint::PINTOGETHER)
+    {
+        mlog<<"delteing PinTogether ";
+    }
+
     for(auto p : _constraint->m_Particles)
     {
         if(auto particle = p.lock())
@@ -814,6 +881,11 @@ void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
         }
     }
 
+    if(_constraint->type() == AbstractConstraint::PINTOGETHER)
+    {
+        mlog<<"delteing PinTogether LOG2 ";
+    }
+
     m_Constraints.erase(
                 std::remove_if(
                     m_Constraints.begin(),
@@ -821,6 +893,11 @@ void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
                     [&](const ConstraintPtr c){return c == _constraint;}),
                 m_Constraints.end()
                 );
+
+    if(_constraint->type() == AbstractConstraint::PINTOGETHER)
+    {
+        mlog<<"delteing PinTogether LOG3 ";
+    }
 
 }
 

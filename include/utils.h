@@ -233,9 +233,35 @@ static const QVector3D CubeWithNormals[] = {
       VERTEX_BBR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_BTR, QVector3D(1.0f, 0.0f, 0.0f), VERTEX_FTR, QVector3D(1.0f, 0.0f, 0.0f)
 };
 
-// define in Vertex format wip
-static const Vertex CubeWithNormalsDash[] = {
-//    Vertex()
-};
+/*
+ *             33305 GL_FRAMEBUFFER_UNDEFINED<<
+               36054 GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT<<
+               36055GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT<<
+               36059GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER<<
+               36061GL_FRAMEBUFFER_UNSUPPORTED<<
+               36182GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE;
+ */
+/*
+ *      ---Constraints--------------
+ *      Distance StrechR
+ *      Distance StrechC
+ *      ShapeMatching Goal
+ *      Friction Dynamic
+ *      Friction Static
+ *      Gravity
+ *      PBD-Damping
+ *
+ *      ---PBD Parameters------------
+ *      Precondition Iterations
+ *      Constraint Iterations
+ *      timeStep size
+ *      particle Mass
+ *
+ *      ---Render-----------------
+ *      Real time - sim every frame
+ *      show particles
+ *
+ *
+ */
 
 #endif // UTILS_H

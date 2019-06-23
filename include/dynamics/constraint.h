@@ -82,6 +82,19 @@ private:
     ParticlePtr particle;
 };
 
+class PinTogetherConstraint : public AbstractConstraint
+{
+public:
+    PinTogetherConstraint( std::vector<ParticlePtr> &_particleVec);
+    void project();
+    float constraintFunction();
+//    void setAvgPosition(const QVector3D &_pos);
+//    QVector3D deltaP();
+private:
+    std::vector< ParticlePtr>       m_particles;
+    QVector3D m_avrgPos;
+};
+
 class ParticleParticleConstraint : public AbstractConstraint
 {
 public:
@@ -169,7 +182,6 @@ public:
     HalfSpaceFrictionConstraint(const ParticlePtr _p1, const QVector3D _o, const QVector3D _n);
 
     void project();
-
     float constraintFunction();
 private:
     ParticlePtr pptr1, pptr2;

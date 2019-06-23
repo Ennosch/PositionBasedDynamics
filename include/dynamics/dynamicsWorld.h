@@ -37,6 +37,9 @@ class DynamicsWorld
         void info();
         DynamicsWorldController* controller();
         void setSimulate(bool _isSimulating);
+        void setAllParticlesMass(float _m);
+        void setAllDistanceConstraintStretch(float _globalStretch);
+        void setAllDistanceConstraintCompress(float _globalCompress);
         void reset();
         void step();
         int getTimeStepSizeMS();
@@ -49,6 +52,7 @@ class DynamicsWorld
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject, int color=0);
         DynamicObjectPtr addDynamicObjectAsSoftBody(pSceneOb _sceneObject, float _mass = 1);
+        void addRope(const QVector3D &_start, const QVector3D &_end, int _numParticles);
         void addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject);
         void addDynamicObjectAsNonUniformParticle(pSceneOb _sceneObject, float radius);
 
@@ -62,6 +66,7 @@ class DynamicsWorld
         void checkSpherePlane(const ParticlePtr p1, const Plane &_plane);
 
         std::shared_ptr<DistanceEqualityConstraint> addDistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
+        std::shared_ptr<PinTogetherConstraint>      addPinTogetherConstraint(std::vector<ParticlePtr> &_vec);
         void addParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void addParticleParticlePreConditionConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
         void addFrictionConstraint(const ParticlePtr _p1, const ParticlePtr _p2);
@@ -82,7 +87,13 @@ class DynamicsWorld
         bool m_simulate;
         int m_ID = 0;
         int m_frameCount;
-        float m_dt;
+        int m_preConditionIteration;
+        int m_constraintIteration;
+        float m_dt, m_pbdDamping;
+        float m_frictionConstraintStatic, m_frictionConstraintDynamic, m_shapeMatchAttract,
+              m_distanceConstraintCompress, m_DistanceConstraintStretch;
+
+        QVector3D m_gravity;
         DynamicsWorldController         *m_DynamicsWorldController;
         std::vector <DynamicObjectPtr>  m_DynamicObjects;
         std::vector <ParticlePtr>       m_Particles;

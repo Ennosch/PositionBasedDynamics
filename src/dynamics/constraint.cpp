@@ -2,6 +2,8 @@
 #include "dynamics/rigidBody.h"
 
 
+#include "parameters.h"
+
 //AbstractConstraint::AbstractConstraint()
 //{
 
@@ -18,6 +20,7 @@ HalfSpaceConstraint::HalfSpaceConstraint(
     p(_p),
     qc(_qc)
 {
+    m_type = HALFSPACE;
     //            qDebug()<<"INit Halfspace Constraint";
 }
 
@@ -26,6 +29,7 @@ HalfSpaceConstraint::HalfSpaceConstraint(const ParticlePtr _p, const QVector3D &
         n(_n),
         qc(_qc)
 {
+    m_type = HALFSPACE;
     p = pptr->p;
 }
 
@@ -61,7 +65,7 @@ HalfSpacePreConditionConstraint::HalfSpacePreConditionConstraint(const ParticleP
     n(_n),
     qc(_qc)
 {
-
+    m_type = HALFSPACE_PRE;
 }
 
 void HalfSpacePreConditionConstraint::project()
@@ -84,6 +88,7 @@ PinConstraint::PinConstraint(const ParticlePtr _particle, const QVector3D &_pos)
     particle(_particle)
 {
     m_Particles.push_back(_particle);
+    m_type = PIN;
 }
 
 void PinConstraint::project()
@@ -111,6 +116,42 @@ ParticleParticleConstraint::ParticleParticleConstraint(const ParticlePtr _p1, co
     pptr2(_p2)
 {
     d = (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());
+    m_type = PARTICLEPARTICLE;
+}
+
+ParticleParticleConstraint::ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2, float _d) :
+    pptr1(_p1),
+    pptr2(_p2),
+    d(_d)
+{
+    m_type = PARTICLEPARTICLE;
+}
+
+void ParticleParticleConstraint::project()
+{
+    if(!m_dirty)
+        return;
+
+    QVector3D n = (pptr2->p - pptr1->p).normalized();
+    float totalWeight = pptr2->w + pptr1->w;
+    d = constraintFunction();
+
+    pptr1->p += (pptr1->w / totalWeight) * (d/2) * n;
+    pptr2->p += (pptr2->w / totalWeight) * (d/2) * -n;
+
+    m_dirty = false;
+}
+
+
+float ParticleParticleConstraint::constraintFunction()
+{
+    return  (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());;
+//    return 0.0;
+}
+
+QVector3D ParticleParticleConstraint::deltaP()
+{
+    return QVector3D(0,0,0);
 }
 
 ParticleParticlePreConditionConstraint::ParticleParticlePreConditionConstraint(const ParticlePtr _p1, const ParticlePtr _p2) :
@@ -118,6 +159,7 @@ ParticleParticlePreConditionConstraint::ParticleParticlePreConditionConstraint(c
     pptr2(_p2)
 {
     d = (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());
+    m_type = PARTICLEPARTICLE_PRE;
 }
 
 void ParticleParticlePreConditionConstraint::project()
@@ -151,40 +193,7 @@ QVector3D ParticleParticlePreConditionConstraint::deltaP()
 }
 
 
-ParticleParticleConstraint::ParticleParticleConstraint(const ParticlePtr _p1, const ParticlePtr _p2, float _d) :
-    pptr1(_p1),
-    pptr2(_p2),
-    d(_d)
-{
 
-}
-
-void ParticleParticleConstraint::project()
-{
-    if(!m_dirty)
-        return;
-
-    QVector3D n = (pptr2->p - pptr1->p).normalized();
-    float totalWeight = pptr2->w + pptr1->w;
-    d = constraintFunction();
-
-    pptr1->p += (pptr1->w / totalWeight) * (d/2) * n;
-    pptr2->p += (pptr2->w / totalWeight) * (d/2) * -n;
-
-    m_dirty = false;
-}
-
-
-float ParticleParticleConstraint::constraintFunction()
-{
-    return  (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());;
-//    return 0.0;
-}
-
-QVector3D ParticleParticleConstraint::deltaP()
-{
-    return QVector3D(0,0,0);
-}
 
 DistanceEqualityConstraint::DistanceEqualityConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
     :
@@ -193,6 +202,7 @@ DistanceEqualityConstraint::DistanceEqualityConstraint(const ParticlePtr _p1, co
 {
     m_Particles.push_back(_p1);
     m_Particles.push_back(_p2);
+    m_type = DISTANCE;
 }
 
 
@@ -222,8 +232,8 @@ void DistanceEqualityConstraint::project()
     float c1 = constraintFunction();
 
 
-    float compressR = 0.5;
-    float strechR = 0.8;
+    float compressR = distanceConstraintCompressR;
+    float strechR = distanceConstraintStrechR;
     float resistance;
 
     if(springLength > d)
@@ -238,8 +248,8 @@ void DistanceEqualityConstraint::project()
 
     QVector3D changeDir = springDir / springLength;
 
-    dp1 =  -(w1/(w1 + w2)) * c1 * changeDir;
-    dp2 =  +(w2/(w1 + w2)) * c1 * changeDir;
+    dp1 =  -(w1/(w1 + w2)) * c1 * changeDir * resistance;
+    dp2 =  +(w2/(w1 + w2)) * c1 * changeDir * resistance;
 
 
     pptr1->p += (dp1 * 1.0);
@@ -264,11 +274,13 @@ float DistanceEqualityConstraint::getRestLength()
 
 ShapeMatchingConstraint::ShapeMatchingConstraint()
 {
-
+    m_type = SHAPEMATCH;
 }
 
 ShapeMatchingConstraint::ShapeMatchingConstraint(RigidBody *_rigidbody)
 {
+    m_type = SHAPEMATCH;
+
     q = Eigen::Quaternionf(Eigen::AngleAxisf(0, Eigen::Vector3f(0, 0, 0)));
     qPrev = q;
 
@@ -497,8 +509,8 @@ void FrictionConstraint::project()
     float tdLength = td.length();
     float totalWeight = pptr1->w + pptr2->w;
 
-    float usd = 0.01;
-    float ukd = 0.01;
+    float usd = 0.5;
+    float ukd = 0.5;
 
 //    return;
     if(tdLength < usd)
@@ -559,5 +571,36 @@ float HalfSpaceFrictionConstraint::constraintFunction()
     return QVector3D::dotProduct((pptr1->p - pptr1->x) , m_collisionNormal);
 }
 
+PinTogetherConstraint::PinTogetherConstraint(std::vector<ParticlePtr> &_particleVec)
+{
+    m_particles = _particleVec;
+    mlog<<"PinConstraint size"<<m_particles.size();
+    m_type = PINTOGETHER;
 
+    for(auto p : m_particles)
+    {
+        m_Particles.push_back(p);
+    }
+}
+
+void PinTogetherConstraint::project()
+{
+    m_avrgPos = QVector3D(0,0,0);
+
+    for(auto p : m_particles)
+    {
+        m_avrgPos += p->p;
+    }
+    m_avrgPos = m_avrgPos / m_particles.size();
+
+    for(auto p : m_particles)
+    {
+        p->p = m_avrgPos;
+    }
+}
+
+float PinTogetherConstraint::constraintFunction()
+{
+    return 1.0;
+}
 

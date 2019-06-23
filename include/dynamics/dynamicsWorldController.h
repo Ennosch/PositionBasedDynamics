@@ -17,10 +17,16 @@ public:
 protected slots:
     void startStopSim();
     void stepSim();
-    void setStepSize();
     void resetSim();
-
-
+    void setParticleMass(float _mass);
+    void setGravityY(float _y);
+    void setTimeStepSize(float _ts);
+    void setPreConditionIteration(int _pciter);
+    void setConstraintIteration(int _citer);
+    void setPBDDamping(float _damp);
+    void setDistanceConstraintStretch(float _stretch);
+    void setDistanceConstraintCompress(float _compress);
+    void setShapeMatchingConstraintAttract(float _attract);
 private:
     bool m_simulating;
     DynamicsWorld *m_dynamicsWorld;

@@ -27,6 +27,8 @@ public:
     void setupUi(GLWidget *_glw);
     void setupUi();
 
+protected slots:
+    void foo(double ){ mlog<<"FUCK this ";}
 
 private:
     QWidget *mainWidget;

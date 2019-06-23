@@ -14,6 +14,10 @@
 #include <QMatrix3x3>
 #include <QVector3D>
 
+#include <QSlider>
+
+#include "parameters.h"
+
 class MainWindow;
 
 namespace Ui {
@@ -39,6 +43,55 @@ private:
 };
 
 
+class ValueSliderF : public QWidget
+{
+    Q_OBJECT
+    public:
+        ValueSliderF(float defaultV, QWidget *parent = nullptr, float _min=0, float _max=100, int decimalPlace = 2);
+        void setupUi();
+
+    signals:
+        void valueChanged(float _v);
+    protected slots:
+        void emitValueChanged(int _v);
+
+    private:
+        QWidget *mParent = nullptr;
+//        QHBoxLayout *layout;
+//        QVBoxLayout *layout;
+        QGridLayout *layout;
+        QSlider* m_slider;
+        QLabel* m_label;
+
+        float m_min;
+        float m_max;
+        float m_default;
+        float   m_conversion;
+};
+
+class ValueSliderI : public QWidget
+{
+    Q_OBJECT
+    public:
+        ValueSliderI(int defaultV, QWidget *parent = nullptr, int _min=0, int _max=100);
+        void setupUi();
+
+    signals:
+        void valueChanged(int _v);
+    protected slots:
+        void emitValueChanged(int _v);
+
+    private:
+        QWidget *mParent = nullptr;
+        QHBoxLayout *layout;
+        QSlider* m_slider;
+        QLabel* m_label;
+
+        int m_min;
+        int m_max;
+        int m_default;
+};
+
 class TransformUiWidget : public QWidget
 {
     Q_OBJECT
@@ -59,6 +112,7 @@ protected slots:
     {
         qDebug()<<_v<<"VALUE---------------------";
     }
+    void fooB(){qDebug()<<"TransformUiWidget vwtfoo";}
 
 protected:
     void createQObjects();
@@ -113,6 +167,10 @@ Q_OBJECT
 public:
     explicit DynamicsUiWidget(QWidget *parent = nullptr);
     void setupUi();
+
+protected slots:
+    void wtfoo(){ qDebug()<<"DynamicsUiWidget WTF foo ";}
+
 private:
     friend MainWindow;
     QGridLayout layout;
@@ -120,8 +178,38 @@ private:
     QPushButton *startSim;
     QPushButton *stepSim;
     QPushButton *resetSim;
+
     QLabel *stepSizeLabel;
-    DoubleSpinBox *stepSizeEdit;
+    ValueSliderF *stepSizeEdit;
+
+    QLabel *gravityLabel;
+    ValueSliderF *gravityLabelEditX;
+    ValueSliderF *gravityLabelEditY;
+    ValueSliderF *gravityLabelEditZ;
+
+    QLabel *particleMassLabel;
+    ValueSliderF *particleMassEdit;
+
+    QLabel *preConditionsIterLabel;
+    ValueSliderI *preConditionsIterEdit;
+    QLabel *constraintIterLabel;
+    ValueSliderI *constraintIterEdit;
+
+    QLabel *pbdDampingLabel;
+    ValueSliderF *pbdDampingEdit;
+
+    QLabel *constraintHeadline;
+
+    QLabel *distanceConstraintStretchLabel;
+    ValueSliderF *distanceConstraintStretchEdit;
+
+    QLabel *distanceConstraintCompressLabel;
+    ValueSliderF *distanceConstraintCompressEdit;
+
+    QLabel *shapeMatchingConstraintAttractLabel;
+    ValueSliderF *shapeMatchingConstraintAttractEdit;
+
+
 };
 
 class ControlWidget : public QWidget
@@ -137,6 +225,8 @@ private:
     QVBoxLayout* layout;
     TransformUiWidget *transformWidget;
     DynamicsUiWidget *dynamicsWidget;
+
+
 //    QSpacerItem *spacer;
 };
 

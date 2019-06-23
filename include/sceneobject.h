@@ -10,6 +10,8 @@
 #include "model.h"
 #include "utils.h"
 #include "dynamics/dynamicObject.h"
+#include "dynamics/constraint.h"
+
 //#include "activeobject.h"
 
 class Scene;
@@ -46,7 +48,13 @@ public:
     void makeDynamic(DynamicObjectPtr _dynamicObject);
     bool isDynamic();
     void isDynamic(bool _isDynamic);
+    bool isPinned();
+    void isPinned(bool _pinned);
+    bool isHidden();
+    void isHidden(bool _isHidden);
+
     void setActiveObject(ActiveObject *_activeObject);
+    void setPinConstraint(std::shared_ptr<PinConstraint> _pinConstraint);
     void setModel(ModelPtr _model);
     void setID(uint _id);
     void notify();
@@ -57,6 +65,8 @@ public:
     const QVector3D getPos();
     const Transform getTransform();
     uint getMaterialID();
+    std::shared_ptr<PinConstraint> getPinConstraint();
+    int getNumConstraints();
     ShapePtr shape();
     ModelPtr model();
     uint getID();
@@ -64,10 +74,11 @@ public:
     bool m_IsDirty = true;
 
 private:
-
     float m_radius = 0.5;
 
     bool m_IsActive = false;
+    bool m_IsPinned = false;
+    bool m_IsHidden = false;
     bool m_IsDirty = true;
     bool m_IsDynamic = false;
 
@@ -80,7 +91,9 @@ private:
     MaterialPtr pMaterial;
     Transform m_Transform;
     Scene *pScene;
+
     DynamicObjectPtr pDynamicObject = nullptr;
+    std::shared_ptr<PinConstraint>  m_pinConstraint = nullptr;
     ActiveObject *activeObject;
 
 };

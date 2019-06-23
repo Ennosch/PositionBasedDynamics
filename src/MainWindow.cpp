@@ -41,6 +41,23 @@ void MainWindow::setDynamicsController(DynamicsWorldController *_dwc)
             dwc,
             SLOT(stepSim()));
 
+      connect(controlWidget->dynamicsWidget->gravityLabelEditY, SIGNAL(valueChanged(float)), dwc, SLOT(setGravityY(float)));
+
+      connect(controlWidget->dynamicsWidget->stepSizeEdit, SIGNAL(valueChanged(float)), dwc, SLOT(setTimeStepSize(float)));
+
+      connect(controlWidget->dynamicsWidget->preConditionsIterEdit, SIGNAL(valueChanged(int)), dwc, SLOT(setPreConditionIteration(int)));
+
+      connect(controlWidget->dynamicsWidget->constraintIterEdit, SIGNAL(valueChanged(int)), dwc, SLOT(setConstraintIteration(int)));
+
+      connect(controlWidget->dynamicsWidget->particleMassEdit, SIGNAL(valueChanged(float)), dwc, SLOT(setParticleMass(float)));
+
+      connect(controlWidget->dynamicsWidget->pbdDampingEdit, SIGNAL(valueChanged(float)), dwc, SLOT(setPBDDamping(float)));
+
+      connect(controlWidget->dynamicsWidget->distanceConstraintStretchEdit, SIGNAL(valueChanged(float)), dwc, SLOT(setDistanceConstraintStretch(float)));
+
+      connect(controlWidget->dynamicsWidget->distanceConstraintCompressEdit, SIGNAL(valueChanged(float)), dwc, SLOT(setDistanceConstraintCompress(float)));
+
+      connect(controlWidget->dynamicsWidget->shapeMatchingConstraintAttractEdit, SIGNAL(valueChanged(float)), dwc, SLOT(setShapeMatchingConstraintAttract(float)));
 }
 
 MainWindow::MainWindow(GLWidget *_glw)
@@ -72,8 +89,8 @@ void MainWindow::setupUi(GLWidget *_glw)
 
     mainWidget->setLayout(&layout);
 
-//    mainWidget->s
-    setCentralWidget(mainWidget);
+    setCentralWidget(glw);
+//    setCentralWidget(mainWidget);
     glw->setFocus(Qt::ActiveWindowFocusReason);
 
 //    glw->setParent(mainWidget);

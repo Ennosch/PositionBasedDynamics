@@ -118,6 +118,7 @@ pSceneOb Scene::addSceneObjectFromParticle(const DynamicObjectPtr _particle, Par
     pSO->setID(numCreation);
     m_SceneObjects.push_back(pSO);
     pSO->makeDynamic(_particle);
+    pSO->isHidden(false);
 
 //    mlog<<"added PARTICLE AS OBEJCT"<<_particle->getTranslation();
     return pSO;
@@ -314,9 +315,12 @@ pSceneOb Scene::pickObject(float ndcX, float ndcY)
             }
         }
     }
-    if(index == 0)
+
+    if(index <= 0)
     {
-        widget()->activeObject()->notify(nullptr);
+        pSceneOb empty;
+        empty.reset();
+        widget()->activeObject()->notify(empty);
         return nullptr;
     }
     return m_SceneObjects[index];
@@ -696,14 +700,16 @@ void Scene::paint()
                         {
                             continue;
                         }
-                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
-                        {
+                        if(m_SceneObjects[i]->isHidden())
                             continue;
-                        }
-                        if(m_SceneObjects[i]->model() == getModelFromPool("teapot"))
-                        {
-//                            continue;
-                        }
+//                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
+//                        {
+////                            continue;
+//                        }
+//                        if(m_SceneObjects[i]->model() == getModelFromPool("teapot"))
+//                        {
+////                            continue;
+//                        }
                         uint matID = m_SceneObjects[i]->getMaterialID();
                         m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
                         m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
@@ -755,7 +761,7 @@ void Scene::paint()
                   m_SceneObjects[0]->draw();
               }
 
-//         drawLines();
+         drawLines();
 
          // -------------------------Geometry Shader-----------------------------------------------------------
          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -882,6 +888,7 @@ void Scene::setupScene()
        //Grid_441points_tri.obj Quad_497_remeshed.obj
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_225_tri.obj");
        addModel(this, "cloth", "/Users/enno/Dev/Quad_497_remeshed.obj");
+//       addModel(this, "cloth", "/Users/enno/Dev/Quad_1907_remeshed.obj");
        addModel(this, "cloth2", "/Users/enno/Dev/Grid_441points.obj");
 
 //       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
@@ -911,31 +918,34 @@ void Scene::setupScene()
        QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 30, 0));
 
 
-//       float s = 1;
-//       auto sceneObject2 = addSceneObjectFromModel("bunny", 0, QVector3D(0,0,0), rot);
-//       sceneObject2->setScale(QVector3D(s,s,s));
-//       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
-//       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject2);
-
-//       auto sceneObject1 = addSceneObjectFromModel("quad_tri", 0, QVector3D(-2,0,0), rot);
-//       sceneObject1->setScale(QVector3D(s,s,s));
-//       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject1);
-
-//       auto sceneObject1 = addSceneObjectFromModel("sphere", 0, QVector3D(5,-0.5,0), rot);
-//       float d = 5;
-//       sceneObject1->setScale(QVector3D(d,d,d));
-//       m_DynamicsWorld->addDynamicObjectAsNonUniformParticle(sceneObject1, d/2);
+       float s = 4;
+//       auto sceneObject1 = addSceneObjectFromModel("sphere", 1, QVector3D(3,0,0), rot);
+//       sceneObject1->isHidden(false);
+       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(-20,0,0), rot);
+       sceneObject2->setScale(QVector3D(s,s,s));
+       m_DynamicsWorld->addDynamicObjectAsNonUniformParticle(sceneObject2, 4);
 
 
-//       auto sceneObject1 = addSceneObjectFromModel("bunny", 0, QVector3D(0, 5, 0), rot);
-//        m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObject1);
+//       auto P1 = std::make_shared<Particle>();
+
+//      auto P2 = std::make_shared<Particle>();
+//      std::vector<ParticlePtr> mVec;
+//      mVec.push_back(P1);
+//      mVec.push_back(P2);
+
+//      std::shared_ptr<PinTogetherConstraint> mPinT = std::make_shared<PinTogetherConstraint>(mVec);
+
+
+
+       m_DynamicsWorld->addRope(QVector3D(3,0,0), QVector3D(-12,0,0), 6);
+       m_DynamicsWorld->addRope(QVector3D(3,5,0), QVector3D(-12,5,0), 6);
 
 
 //// cloth mass
 //        for(int i=0; i < 1; i++)
 //        {
 //            QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(35, 20, 0));
-//            auto sceneObject_cloth = addSceneObjectFromModel("cloth",(i%3), QVector3D(i*5, 5 , i*5), rotx);
+//            auto sceneObject_cloth = addSceneObjectFromModel("cloth",(i%3), QVector3D(i*5, 12 , i*5), rotx);
 //            m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
 //        }
 
@@ -947,10 +957,9 @@ void Scene::setupScene()
 //           y= randfinRange(2,30);
 //           z= randfinRange(-5,5);
 //           QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(rand() % 90,rand() % 90,rand() % 90));
-//       auto sceneObject1 = addSceneObjectFromModel("cube", (i%3), QVector3D(x, y, z), rotX);
+//       auto sceneObject1 = addSceneObjectFromModel("bunny", (i%3), QVector3D(x, y, z), rotX);
 //        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
 //       }
-
 
 //// RigidBody Rain
 //        for(int i=0; i < 10; i++)
@@ -970,7 +979,7 @@ void Scene::setupScene()
 //            m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX, (i%3));
 //        }
 
-//// Two Particle pairs
+//// Two Particle pairs for friction
 //       auto sphere2 = addSceneObjectFromModel("sphere", 1, QVector3D(0.4, 1.5, 0), rot);
 //       m_DynamicsWorld->addDynamicObjectAsParticle(sphere2);
 
