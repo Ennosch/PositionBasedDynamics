@@ -122,8 +122,8 @@ public:
     float getRestLength();
 
 private:
-    float d;
-    QVector3D Vp1, Vp2;
+    float d, springLength;
+    QVector3D Vp1, Vp2, springDir;
     ParticlePtr pptr1, pptr2;
     int stretchK, compressK;
 };

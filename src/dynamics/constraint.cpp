@@ -199,9 +199,10 @@ DistanceEqualityConstraint::DistanceEqualityConstraint(const ParticlePtr _p1, co
 float DistanceEqualityConstraint::constraintFunction()
 {
 //    return ((p1.p - p2.p).length() - d);
-    auto length = (pptr1->p - pptr2->p).length();
-    float dis = d;
-    return ((pptr1->p - pptr2->p).length() - d);
+    springDir = (pptr1->p - pptr2->p);
+    springLength = springDir.length();
+
+    return (springLength - d);
 }
 
 QVector3D DistanceEqualityConstraint::deltaP()
@@ -220,12 +221,22 @@ void DistanceEqualityConstraint::project()
 
     float c1 = constraintFunction();
 
+
+    float compressR = 0.5;
+    float strechR = 0.8;
+    float resistance;
+
+    if(springLength > d)
+        resistance = strechR;
+    else
+        resistance = compressR;
+
     p1 = pptr1->p;
     p2 = pptr2->p;
     w1 = pptr1->w;
     w2 = pptr2->w;
 
-    QVector3D changeDir = (p1 - p2) / (p1-p2).length();
+    QVector3D changeDir = springDir / springLength;
 
     dp1 =  -(w1/(w1 + w2)) * c1 * changeDir;
     dp2 =  +(w2/(w1 + w2)) * c1 * changeDir;

@@ -875,7 +875,6 @@ void Scene::setupScene()
 
        addModel(this, "teapot", "/Users/enno/Dev/teapot.obj");
 
-
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_3x3.obj");
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_1681points.obj");
 
@@ -913,7 +912,7 @@ void Scene::setupScene()
 
 
 //       float s = 1;
-       auto sceneObject2 = addSceneObjectFromModel("bunny", 0, QVector3D(0,0,0), rot);
+//       auto sceneObject2 = addSceneObjectFromModel("bunny", 0, QVector3D(0,0,0), rot);
 //       sceneObject2->setScale(QVector3D(s,s,s));
 //       m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject2);
 //       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject2);
@@ -933,7 +932,7 @@ void Scene::setupScene()
 
 
 //// cloth mass
-//        for(int i=0; i < 10; i++)
+//        for(int i=0; i < 1; i++)
 //        {
 //            QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(35, 20, 0));
 //            auto sceneObject_cloth = addSceneObjectFromModel("cloth",(i%3), QVector3D(i*5, 5 , i*5), rotx);
