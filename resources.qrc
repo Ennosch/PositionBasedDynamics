@@ -8,6 +8,10 @@
         <file alias="WireframeG.geom">resources/shaders/WireframeG.geom</file>
         <file alias="WireframeG.frag">resources/shaders/WireframeG.frag</file>
 
+        <file alias="WireframeLinesG.vert">resources/shaders/WireframeLinesG.vert</file>
+        <file alias="WireframeLinesG.geom">resources/shaders/WireframeLinesG.geom</file>
+        <file alias="WireframeLinesG.frag">resources/shaders/WireframeLinesG.frag</file>
+
         <file alias="simple.frag">resources/shaders/simple.frag</file>
         <file alias="simple.vert">resources/shaders/simple.vert</file>
         <file alias="screen.vert">resources/shaders/screen.vert</file>

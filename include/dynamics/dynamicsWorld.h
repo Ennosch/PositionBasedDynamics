@@ -17,6 +17,7 @@
 #include "dynamics/dynamicObject.h"
 #include "dynamics/particle.h"
 #include "dynamics/rigidBody.h"
+#include "dynamics/rigidBodyGrid.h"
 #include "dynamics/softBody.h"
 #include "dynamics/singleParticle.h"
 #include "dynamics/collisiondetection.h"
@@ -52,8 +53,9 @@ class DynamicsWorld
         DynamicObjectPtr addDynamicObjectAsParticle(pSceneOb _sceneObject);
         DynamicObjectPtr addDynamicObjectAsRigidBody(pSceneOb _sceneObject, int color=0);
         DynamicObjectPtr addDynamicObjectAsSoftBody(pSceneOb _sceneObject, float _mass = 1);
+
         void addRope(const QVector3D &_start, const QVector3D &_end, int _numParticles);
-        void addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject);
+        void addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject, std::string _path);
         void addDynamicObjectAsNonUniformParticle(pSceneOb _sceneObject, float radius);
 
         ParticlePtr getParticlePtrFromRawPtr (Particle *_ptr);

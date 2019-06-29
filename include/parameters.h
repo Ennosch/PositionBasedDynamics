@@ -17,7 +17,7 @@ static float pbd_Damping                            = 0.03;
 static int preConditionIterations                  = 2;
 static int constraintIterations                    = 10;
 static float timeStepSize                          = 0.02;
-static float particleMass                          = .8;
+static float particleMass                          = 1.0;
 
 static bool showParticles;
 

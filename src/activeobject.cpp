@@ -78,6 +78,7 @@ void ActiveObject::pinConstraintActive()
 {
     Particle *ptr = nullptr;
     auto particleSmartPointer = activeSceneObject->dynamicObject()->pointer(ptr);
+    mlog<<" Pinning : "<<particleSmartPointer->ID;
     auto pinConstraint = std::make_shared<PinConstraint>(particleSmartPointer, activeSceneObject->getPos());
     activeSceneObject->setPinConstraint(pinConstraint);
     particleSmartPointer->m_Constraints.push_back(pinConstraint);
@@ -123,8 +124,8 @@ void ActiveObject::processInput(ActiveObject::AOInput _input)
                         Particle* empty = nullptr;
                         ParticlePtr myP = activeSceneObject->dynamicObject()->pointer(empty);
                         addParticleToSelection(myP);
-
                     }
+
                     pinConstraintActive();
 //                    if(activeSceneObject)
                     bool was = activeSceneObject->isHidden();
@@ -148,19 +149,22 @@ void ActiveObject::processInput(ActiveObject::AOInput _input)
             break;
 
         case LM_RELEASED:
-                 if(m_state == PINNED){
-                     bool was = activeSceneObject->isHidden();
-                     activeSceneObject->isDynamic(true);
-                     activeSceneObject->isPinned(true);
-                     activeSceneObject->isHidden(false);
-//                    mlog<<" set pined isHidden: "<<activeSceneObject->isHidden()<< " was: "<<was;
-                 }
+                if(m_state == PINNED){
+                 bool was = activeSceneObject->isHidden();
+                 activeSceneObject->isDynamic(true);
+                 activeSceneObject->isPinned(true);
+                 activeSceneObject->isHidden(false);
+                //                    mlog<<" set pined isHidden: "<<activeSceneObject->isHidden()<< " was: "<<was;
+                }
 
                 if(m_state == PICKED){
                     unpinConstraintActive();
-                    bool was = activeSceneObject->isHidden();
                     activeSceneObject->isPinned(false);
-                    activeSceneObject->isHidden(true);
+//                    activeSceneObject->isHidden(true);
+
+                    if(activeSceneObject->getID() == 2)
+                        activeSceneObject->isHidden(false);
+
                     activeSceneObject->isDynamic(true);
                     m_state = SELECTED;
 //                    mlog<<" set unppined isHidden: "<<activeSceneObject->isHidden()<< " was: "<<was;
@@ -168,11 +172,8 @@ void ActiveObject::processInput(ActiveObject::AOInput _input)
             break;
 
         case B_P_PRESSED:
-//                mlog<<"P pressed"<<m_state;
-
                 if(m_state == PINNED){
                     unpinConstraintActive();
-                    bool was = activeSceneObject->isHidden();
                     activeSceneObject->isPinned(false);
                     activeSceneObject->isHidden(true);
                     activeSceneObject->isDynamic(true);
@@ -199,7 +200,6 @@ void ActiveObject::processInput(ActiveObject::AOInput _input)
                 break;
 
         case B_D_PRESSED:
-                mlog<<"D pressed";
                 deletePinTogetherConstraintFromSelection();
                 break;
     }
@@ -221,29 +221,23 @@ void ActiveObject::addPinTogetherConstraintToSelection()
 {
 //    std::shared_ptr<PinTogetherConstraint> ptCstr = std::make_shared<PinTogetherConstraint>(m_selection);
     m_GLWidget->scene()->dynamicsWorld()->addPinTogetherConstraint(m_selection);
+    m_selection.clear();
 }
 
 void ActiveObject::deletePinTogetherConstraintFromSelection()
 {
-    mlog<<"D pressed fuync";
     if(m_state == SELECTED && activeSceneObject->isDynamic()){
         Particle *ptr = nullptr;
         ParticlePtr p = activeSceneObject->dynamicObject()->pointer(ptr);
-        int i = 0;
-        mlog<<"PRe loop";
         for(auto c : p->m_Constraints)
         {
-            i++;
-//            mlog<<" constraint"<<i<<" type:"<<c.lock()->type()<<" "<<AbstractConstraint::PINTOGETHER;
             if(c.lock()->type() == AbstractConstraint::PINTOGETHER)
             {
-                mlog<<" constraint"<<i<<" type:"<<c.lock()->type()<<" is PINT CONSTR delete";
                 m_GLWidget->scene()->dynamicsWorld()->deleteConstraint(c.lock());
             }
 
         }
     }
-    mlog<<"LOG4";
 }
 
 pSceneOb ActiveObject::currentObject()
@@ -258,8 +252,6 @@ bool ActiveObject::isActive()
 
 void ActiveObject::select()
 {
-//    if(m_state == NONE_SELECTED )
-
     if(activeSceneObject->isPinned()){
         m_state = PINNED;
         return;

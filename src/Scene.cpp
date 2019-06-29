@@ -343,18 +343,12 @@ void Scene::updateLinesVBO()
     for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
     {
         QVector3D vec = *_vec;
-//        m_LinesB.push_back(QVector3D(0,0,0));
-//        m_LinesB.push_back(QVector3D(2,2,2));
         m_LinesB.push_back(vec);
     }
 
     m_lines_vao->bind();
     m_lines_vbo.create();
     m_lines_vbo.bind();
-
-//    QVector3D** ptr = m_DynamicsWorld->m_debugLines.data();
-//    QVector3D* ptr2 = *ptr;
-//    QVector3D result = *ptr2;
 
     m_lines_vbo.allocate(m_LinesB.data(),  m_LinesB.size() * sizeof(QVector3D));
 
@@ -526,6 +520,8 @@ void Scene::QtOpenGLinitialize()
 //    bool success2 = geoShader.compileSourceFile(":/shader/VisNormalsG.geom");
 //    bool success3 = fragShader.compileSourceFile(":/shader/VisNormalsG.frag");
 
+//    m_wireframe_lines_program
+
     bool success1 = vertshader.compileSourceFile(":/shader/WireframeG.vert");
     bool success2 = geoShader.compileSourceFile(":/shader/WireframeG.geom");
     bool success3 = fragShader.compileSourceFile(":/shader/WireframeG.frag");
@@ -539,6 +535,26 @@ void Scene::QtOpenGLinitialize()
     if(!success1 || !success2 || !success3 || !success4)
     {
         qDebug()<<"---------------SHADER DID NOT COMPILE"<<"VS: "<<success1<<"GS: "<<success2<<"FS: "<<success3<<"Link: "<<success4;
+        qDebug()<<m_wireframe_program->log();
+    }
+
+    QOpenGLShader vertshaderLines(QOpenGLShader::Vertex);
+    QOpenGLShader geoShaderLines(QOpenGLShader::Geometry);
+    QOpenGLShader fragShaderLines(QOpenGLShader::Fragment);
+
+    bool successLines1 = vertshaderLines.compileSourceFile(":/shader/WireframeLinesG.vert");
+    bool successLines2 = geoShaderLines.compileSourceFile(":/shader/WireframeLinesG.geom");
+    bool successLines3 = fragShaderLines.compileSourceFile(":/shader/WireframeLinesG.frag");
+
+    m_wireframe_lines_program = new QOpenGLShaderProgram();
+    m_wireframe_lines_program->addShader(&vertshaderLines);
+    m_wireframe_lines_program->addShader(&geoShaderLines);
+    m_wireframe_lines_program->addShader(&fragShaderLines);
+    bool successLines4 = m_wireframe_program->link();
+
+    if(!success1 || !success2 || !success3 || !success4)
+    {
+        qDebug()<<"---------------SHADER 2 DID NOT COMPILE"<<"VS: "<<success1<<"GS: "<<success2<<"FS: "<<success3<<"Link: "<<success4;
         qDebug()<<m_wireframe_program->log();
     }
 
@@ -694,14 +710,14 @@ void Scene::paint()
 
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                 // draw all SceneObjects
-                    for(uint i = 1; i < m_SceneObjects.size(); i++)
+                for(uint i = 1; i < m_SceneObjects.size(); i++)
+                {
+                    if(m_pickedObject == m_SceneObjects[i])
                     {
-                        if(m_pickedObject == m_SceneObjects[i])
-                        {
-                            continue;
-                        }
-                        if(m_SceneObjects[i]->isHidden())
-                            continue;
+                        continue;
+                    }
+                    if(m_SceneObjects[i]->isHidden())
+                        continue;
 //                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
 //                        {
 ////                            continue;
@@ -710,14 +726,14 @@ void Scene::paint()
 //                        {
 ////                            continue;
 //                        }
-                        uint matID = m_SceneObjects[i]->getMaterialID();
-                        m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
-                        m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
-                        m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
-                        m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
-                        m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
-                        m_SceneObjects[i]->draw();
-                    }
+                    uint matID = m_SceneObjects[i]->getMaterialID();
+                    m_lighting_program->setUniformValue("mMaterial.ambient", m_Materials[matID]->ambient );
+                    m_lighting_program->setUniformValue("mMaterial.diffuse", m_Materials[matID]->diffuse );
+                    m_lighting_program->setUniformValue("mMaterial.specular", m_Materials[matID]->specular );
+                    m_lighting_program->setUniformValue("mMaterial.shininess", m_Materials[matID]->shininess );
+                    m_lighting_program->setUniformValue("ModelMatrix",  m_SceneObjects[i]->getMatrix());
+                    m_SceneObjects[i]->draw();
+                }
 
             //-------------------------Draw Active---------------------------------------------------------------------------
             if(m_pickedObject)
@@ -761,7 +777,44 @@ void Scene::paint()
                   m_SceneObjects[0]->draw();
               }
 
-         drawLines();
+//          drawLines();
+
+          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+          updateLinesVBO();
+
+//              m_LinesB.clear();
+//              for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
+//              {
+//                  QVector3D vec = *_vec;
+//                  m_LinesB.push_back(vec);
+//              }
+
+//              m_lines_vao->bind();
+//              m_lines_vbo.create();
+//              m_lines_vbo.bind();
+
+//              m_lines_vbo.allocate(m_LinesB.data(),  m_LinesB.size() * sizeof(QVector3D));
+
+//              glEnableVertexAttribArray(0);
+//              glVertexAttribPointer(0,                 // index
+//                                    3,                 // size of attr
+//                                    GL_FLOAT,          // datatype of each component
+//                                    GL_FALSE,          // normalized
+//                                    sizeof(QVector3D), //byte offset between consecutive generic vertex attributes
+//                                    nullptr);
+//              m_lines_vao->release();
+
+//          QMatrix4x4 tmp;
+//          tmp.setToIdentity();
+//          m_wireframe_lines_program->bind();
+//          m_wireframe_lines_program->setUniformValue("projection", m_projection_matrix);
+//          m_wireframe_lines_program->setUniformValue("view", m_arcCamera.toMatrix());
+//          m_wireframe_lines_program->setUniformValue("model", tmp);
+//          m_lines_vao->bind();
+//          glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
+////          glDrawArrays(GL_TRIANGLES, 0, m_LinesB.size() * 4);
+////          m_SceneObjects[1]->draw();
+//          m_lines_vao->release();
 
          // -------------------------Geometry Shader-----------------------------------------------------------
          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -769,7 +822,7 @@ void Scene::paint()
           m_wireframe_program->setUniformValue("projection", m_projection_matrix);
           m_wireframe_program->setUniformValue("view", m_arcCamera.toMatrix());
           m_wireframe_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
-//          m_SceneObjects[1]->draw();
+          m_SceneObjects[1]->draw();
 //          m_geometry_program->setUniformValue("model",  m_SceneObjects[2]->getMatrix());
 //          m_SceneObjects[1]->drawPoints();
 
@@ -848,7 +901,6 @@ void Scene::setupScene()
          addPointLight(QVector3D(10,25,0), QVector3D(0.6, 0.6, 1.0));
          addPointLight(QVector3D(0,15,10), QVector3D(0.8, 0.8, 0.8));
 
-
          // blue tone
         addMaterial(    QVector3D(0.01f , 0.04f ,0.1f),   // ambient
                         QVector3D(0.1f , 0.3f ,0.8f),    // diffuse
@@ -896,18 +948,16 @@ void Scene::setupScene()
        addModel(this, "cube", "/Users/enno/Dev/Cube_8.obj");
        addModel(this, "quad", "/Users/enno/Dev/Quad_1_tri.obj");
 
-//       addModel(this, "quad", "/Users/enno/Dev/Quad_4.obj");
-//       addModel(this, "quad_tri", "/Users/enno/Dev/Quad_4_tri.obj");
-//       addModel(this, "quad_moutain", "/Users/enno/Dev/Quad_4_moutain.obj");
-
        addModel(this, "sphere", "/Users/enno/Dev/Icosahedronf4.obj");
 
        addModel(this, "Vector", "/Users/enno/Dev/VectorShape.obj");
+       addModel(this, "triangle", "/Users/enno/Dev/triangle.obj");
        addModel(this, "torus", "/Users/enno/Dev/torus.obj");
        addModel(this, "Circle", "/Users/enno/Dev/TorusShape.obj");
        addModel(this, "Plane", "/Users/enno/Dev/PlaneShape.obj");
        addModel(this, "Axis", "/Users/enno/Dev/AxisShape.obj");
        addModel(this, "bunny", "/Users/enno/Dev/bunny_low.obj");
+       addModel(this, "rubberyoy", "/Users/enno/Dev/RubberToy.obj");
 
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
@@ -915,42 +965,47 @@ void Scene::setupScene()
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
-       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(45, 30, 0));
-
+       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(0, 0, 10));
 
        float s = 4;
-//       auto sceneObject1 = addSceneObjectFromModel("sphere", 1, QVector3D(3,0,0), rot);
-//       sceneObject1->isHidden(false);
-       auto sceneObject2 = addSceneObjectFromModel("sphere", 2, QVector3D(-20,0,0), rot);
-       sceneObject2->setScale(QVector3D(s,s,s));
-       m_DynamicsWorld->addDynamicObjectAsNonUniformParticle(sceneObject2, 4);
+       auto sceneObjectBallCollider = addSceneObjectFromModel("sphere", 2, QVector3D(-20,4.5,0), rot);
+       sceneObjectBallCollider->setScale(QVector3D(s,s,s));
+       m_DynamicsWorld->addDynamicObjectAsNonUniformParticle(sceneObjectBallCollider, s/2);
+       mlog<<"Ball Collider ID: "<<sceneObjectBallCollider->getID();
 
 
-//       auto P1 = std::make_shared<Particle>();
+//       auto sceneObjSphere = addSceneObjectFromModel("sphere", 2, QVector3D(3,4.5,0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsParticle(sceneObjSphere);
 
-//      auto P2 = std::make_shared<Particle>();
-//      std::vector<ParticlePtr> mVec;
-//      mVec.push_back(P1);
-//      mVec.push_back(P2);
+//       auto sceneObjCube = addSceneObjectFromModel("cube", 2, QVector3D(0,4.5,0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjCube);
 
-//      std::shared_ptr<PinTogetherConstraint> mPinT = std::make_shared<PinTogetherConstraint>(mVec);
+       auto sceneObjectRT = addSceneObjectFromModel("sphere", 2, QVector3D(-20,0.5,0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_343_volumeGrad.obj");
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_27_volumeGrad.obj");
 
+       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_147_volumeGrad.obj");
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/RubberToy_volumeGrad.obj");
 
-
-       m_DynamicsWorld->addRope(QVector3D(3,0,0), QVector3D(-12,0,0), 6);
-       m_DynamicsWorld->addRope(QVector3D(3,5,0), QVector3D(-12,5,0), 6);
-
+//        QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(0, 0, 0));
+//        auto sceneObject_cloth = addSceneObjectFromModel("cloth", 0 , QVector3D(0,30,0), rotx);
+//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
 
 //// cloth mass
-//        for(int i=0; i < 1; i++)
-//        {
-//            QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(35, 20, 0));
-//            auto sceneObject_cloth = addSceneObjectFromModel("cloth",(i%3), QVector3D(i*5, 12 , i*5), rotx);
-//            m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
-//        }
+        for(int i=0; i < 1; i++)
+        {
+            QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(35, 20, 0));
+            auto sceneObject_cloth = addSceneObjectFromModel("cloth",(i%3), QVector3D(i*5, 12 , i*5), rotx);
+            m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
+        }
+
+//// Ropes
+//       m_DynamicsWorld->addRope(QVector3D(3,0,0), QVector3D(-12,0,0), 6);
+//       m_DynamicsWorld->addRope(QVector3D(3,5,0), QVector3D(-12,5,0), 6);
+
 
 /// Rigid Body Bunnies
-//       for(int i=0; i < 5; i++)
+//       for(int i=0; i < 1; i++)
 //       {
 //           float x,y,z;
 //           x= randfinRange(-5,5);

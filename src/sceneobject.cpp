@@ -100,14 +100,11 @@ void SceneObject::release()
 
 void SceneObject::update()
 {
-    if(m_IsActive && m_IsDynamic)
-    {
-
-    }
     if(isDynamic())
     {
         m_ModelMatrix = pDynamicObject->getTransfrom();
         setTranslation(pDynamicObject->getTranslation());
+
         if(m_IsActive)
         {
             notify();

@@ -40,13 +40,11 @@ void DynamicsWorldController::resetSim()
 
 void DynamicsWorldController::setGravityY(float _y)
 {
-    mlog<<"set gravity"<<_y;
     m_dynamicsWorld->m_gravity.setY(_y);
 }
 
 void DynamicsWorldController::setTimeStepSize(float _ts)
 {
-    mlog<<"set time step size"<<_ts;
        m_dynamicsWorld->m_dt = _ts;
 }
 
@@ -63,7 +61,6 @@ void DynamicsWorldController::setConstraintIteration(int _citer)
 
 void DynamicsWorldController::setPBDDamping(float _damp)
 {
-    mlog<<"set damp iter"<<_damp;
     m_dynamicsWorld->m_pbdDamping = _damp;
 }
 

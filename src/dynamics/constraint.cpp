@@ -1,5 +1,6 @@
 #include "dynamics/constraint.h"
 #include "dynamics/rigidBody.h"
+#include "dynamics/rigidBodyGrid.h"
 
 
 #include "parameters.h"
@@ -136,8 +137,29 @@ void ParticleParticleConstraint::project()
     float totalWeight = pptr2->w + pptr1->w;
     d = constraintFunction();
 
-    pptr1->p += (pptr1->w / totalWeight) * (d/2) * n;
-    pptr2->p += (pptr2->w / totalWeight) * (d/2) * -n;
+    QVector3D collisionNormal = d * n;
+    float oldLength = collisionNormal.length();
+
+    if(pptr1->collisionVector != QVector3D(0,0,0))
+    {
+//        collisionNormal = pptr1->collisionVector * 1.0;
+//        collisionNormal = pptr2->collisionVector.normalized() * oldLength;
+//        mlog<<"p1 : "<<collisionNormal.length()<<" - "<<oldLength;
+    }
+    else if(pptr2->collisionVector != QVector3D(0,0,0))
+    {
+//        collisionNormal = pptr2->collisionVector * 1.0;
+
+        float gardLength = pptr2->collisionVector.length();
+//        collisionNormal = pptr2->collisionVector.normalized() * oldLength;
+        collisionNormal = -pptr2->collisionVector ;
+//        collisionNormal = -pptr2->collisionVector ;
+
+//        mlog<<"p2 : "<<pptr2->ID<<" collNormal l: "<<collisionNormal.length()<<" d: "<<oldLength<<" gradLength:"<< gardLength;
+    }
+
+    pptr1->p += (pptr1->w / totalWeight) * collisionNormal;
+    pptr2->p += (pptr2->w / totalWeight) * -collisionNormal;
 
     m_dirty = false;
 }
@@ -146,7 +168,6 @@ void ParticleParticleConstraint::project()
 float ParticleParticleConstraint::constraintFunction()
 {
     return  (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());;
-//    return 0.0;
 }
 
 QVector3D ParticleParticleConstraint::deltaP()
@@ -167,11 +188,24 @@ void ParticleParticlePreConditionConstraint::project()
     if(!m_dirty)
         return;
 
+    return;
+
     QVector3D n = (pptr2->x - pptr1->x).normalized();
     float totalWeight = pptr2->w + pptr1->w;
 
-    QVector3D correctionA = (pptr1->w / totalWeight) * (d/2) * n;
-    QVector3D correctionB = (pptr2->w / totalWeight) * (d/2) * -n;
+    QVector3D collisionNormal = d * n;
+
+//    if(pptr1->collisionVector != QVector3D(0,0,0))
+//    {
+//        collisionNormal = pptr1->collisionVector;
+//    }
+//    else if(pptr2->collisionVector != QVector3D(0,0,0))
+//    {
+//        collisionNormal = pptr2->collisionVector;
+//    }
+
+    QVector3D correctionA = (pptr1->w / totalWeight) *  collisionNormal;
+    QVector3D correctionB = (pptr2->w / totalWeight) * -collisionNormal;
 
     pptr1->x += correctionA;
     pptr2->x += correctionB;
@@ -251,15 +285,11 @@ void DistanceEqualityConstraint::project()
     dp1 =  -(w1/(w1 + w2)) * c1 * changeDir * resistance;
     dp2 =  +(w2/(w1 + w2)) * c1 * changeDir * resistance;
 
-
     pptr1->p += (dp1 * 1.0);
     pptr2->p += (dp2 * 1.0);
 
-//    pptr1->p += (dp1 * 0.5);
-//    pptr2->p += (dp2 * 0.5);
-
     m_dirty = false;
-//    qDebug()<<"projecting DistanceEqualityConstraint";
+
 }
 
 void DistanceEqualityConstraint::setRestLength(float _d)
@@ -280,57 +310,23 @@ ShapeMatchingConstraint::ShapeMatchingConstraint()
 ShapeMatchingConstraint::ShapeMatchingConstraint(RigidBody *_rigidbody)
 {
     m_type = SHAPEMATCH;
+    m_rb = _rigidbody;
+    m_rbg = nullptr;
+    preCompute(_rigidbody->m_particles.size(), _rigidbody->m_particles, _rigidbody->m_restShape);
+}
 
-    q = Eigen::Quaternionf(Eigen::AngleAxisf(0, Eigen::Vector3f(0, 0, 0)));
-    qPrev = q;
-
-    cmOrigin = Eigen::Vector3f(0,0,0);
-    cm = Eigen::Vector3f(0,0,0);
-    for(int i=0; i < _rigidbody->m_particles.size(); i++)
-    {
-        auto p = _rigidbody->m_particles[i];
-        if(auto particle = p.lock())
-        {
-            m_particles.push_back(particle);
-//            Eigen::Vector3f x0 = Eigen::Vector3f(particle->x.x(), particle->x.y(), particle->x.z());
-            Eigen::Vector3f x0 = Eigen::Vector3f(_rigidbody->m_restShape[i].x(), _rigidbody->m_restShape[i].y(), _rigidbody->m_restShape[i].z());
-            m_restPositions.push_back(x0);
-            cmOrigin += x0;
-        }
-    }
-    cmOrigin /= m_particles.size();
-
-//    Aqq.setZero();
-    Aqq.setIdentity();
-    for(int i=0; i < _rigidbody->m_particles.size(); i++)
-    {
-        Eigen::Vector3f x0 = Eigen::Vector3f(_rigidbody->m_restShape[i].x(), _rigidbody->m_restShape[i].y(), _rigidbody->m_restShape[i].z());
-        Eigen::Vector3f qi = x0 - cmOrigin;
-        Eigen::Matrix3f _dot = qi * qi.transpose();
-        Aqq += _dot;
-    }
-
-//    Eigen::Matrix3f _Aqq;
-//    _Aqq.setZero();
-//    for(int i=0; i < _rigidbody->m_particles.size(); i++)
-//    {
-//        Eigen::Vector3f x0 = Eigen::Vector3f(_rigidbody->m_restShape[i].x(), _rigidbody->m_restShape[i].y(), _rigidbody->m_restShape[i].z());
-//        Eigen::Vector3f qi = x0 - cmOrigin;
-//        _Aqq += qi * qi.transpose();
-//    }
-
-    std::cout<<"Aqq inerse: \n"<<Aqq<<std::endl;
-    std::cout<<"Aqq: \n"<<Aqq.inverse()<<std::endl;
-
-//    std::cout<<"_Aqq inerse: \n"<<_Aqq.inverse()<<std::endl;
-//    std::cout<<"_Aqq: \n"<<_Aqq.inverse()<<std::endl;
+ShapeMatchingConstraint::ShapeMatchingConstraint(RigidBodyGrid *_rigidbody)
+{
+    m_type = SHAPEMATCH_RIGID;
+    m_rb = nullptr;
+    m_rbg = _rigidbody;
+    preCompute(_rigidbody->m_particles.size(), _rigidbody->m_particles, _rigidbody->m_restShape);
 }
 
 void ShapeMatchingConstraint::project()
 {
     if(!m_dirty)
         return;
-
 
     cm.setZero();
     for(auto p : m_particles)
@@ -352,6 +348,14 @@ void ShapeMatchingConstraint::project()
 
     R = svd.matrixU() * svd.matrixV().transpose();
 
+    if(m_type == SHAPEMATCH_RIGID)
+    {
+        m_rbg->m_t.setToIdentity();
+//        QMatrix4x4 qtR =
+//        m_rbg->m_t.rotate(R);
+    }
+
+
     qPrev = q;
     q = R;
 
@@ -370,8 +374,6 @@ void ShapeMatchingConstraint::project()
         Eigen::Vector3f gi = (R * qi) + (cm);
         m_particles[i]->p = QVector3D(gi.x(), gi.y(), gi.z());
     }
-
-//    mlog<<"ShapeMatchingConstraint::project()";
     m_dirty = false;
 }
 
@@ -379,6 +381,39 @@ float ShapeMatchingConstraint::constraintFunction()
 {
     return 0.0;
 }
+
+
+void ShapeMatchingConstraint::preCompute(int numParticles, std::vector<ParticleWeakPtr> &_particles, std::vector<QVector3D> &_restShape)
+{
+    q = Eigen::Quaternionf(Eigen::AngleAxisf(0, Eigen::Vector3f(0, 0, 0)));
+    qPrev = q;
+
+    cmOrigin = Eigen::Vector3f(0,0,0);
+    cm = Eigen::Vector3f(0,0,0);
+    for(int i=0; i < _particles.size(); i++)
+    {
+        auto p = _particles[i];
+        if(auto particle = p.lock())
+        {
+            m_particles.push_back(particle);
+            Eigen::Vector3f x0 = Eigen::Vector3f(_restShape[i].x(), _restShape[i].y(), _restShape[i].z());
+            m_restPositions.push_back(x0);
+            cmOrigin += x0;
+        }
+    }
+    cmOrigin /= m_particles.size();
+
+//    Aqq.setZero();
+    Aqq.setIdentity();
+    for(int i=0; i < _particles.size(); i++)
+    {
+        Eigen::Vector3f x0 = Eigen::Vector3f(_restShape[i].x(), _restShape[i].y(), _restShape[i].z());
+        Eigen::Vector3f qi = x0 - cmOrigin;
+        Eigen::Matrix3f _dot = qi * qi.transpose();
+        Aqq += _dot;
+    }
+}
+
 
 void polarDecompositionStable(const Matrix3r &M, const double tolerance, Matrix3r &R)
 {
@@ -502,15 +537,13 @@ void FrictionConstraint::project()
     if(!m_dirty)
         return;
 
-//    return;
-
     QVector3D td, xj;
     td = (pptr1->p - pptr1->x)  -  (pptr2->p - pptr2->x) - constraintFunction() * m_collisionNormal;
     float tdLength = td.length();
     float totalWeight = pptr1->w + pptr2->w;
 
-    float usd = 0.5;
-    float ukd = 0.5;
+    float usd = frictionConstraintStaticF;
+    float ukd = frictionConstraintDynamicF;
 
 //    return;
     if(tdLength < usd)

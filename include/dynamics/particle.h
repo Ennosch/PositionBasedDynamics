@@ -46,6 +46,7 @@ public:
     float w, r, m;
     size_t hash;
     QVector3D p, pp, v, vt, x, xt, qc;
+    QVector3D collisionVector;
     int3 cell;
 
     std::vector<ParticleWeakPtr> m_particlesPlaceholder;

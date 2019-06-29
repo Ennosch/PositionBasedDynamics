@@ -47,7 +47,6 @@ private:
     std::vector<ShapePtr> meshes;
     Scene *pScene;
     QOpenGLShaderProgram *pShader;
-
 };
 
 inline int Model::getNumShapes(){ return meshes.size(); };

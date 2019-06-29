@@ -24,6 +24,7 @@ public:
        PARTICLEPARTICLE_PRE,
        DISTANCE,
        SHAPEMATCH,
+       SHAPEMATCH_RIGID,
        FRICTION,
        FRICTIONHALFSPACE
     };

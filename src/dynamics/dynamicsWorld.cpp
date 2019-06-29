@@ -1,4 +1,6 @@
 
+#include <stdio.h>
+
 #include "dynamics/dynamicsWorld.h"
 
 #include "Scene.h"
@@ -66,12 +68,19 @@ void DynamicsWorld::update()
 
     // PBD Loop start
     // explicit Euler integration step (5)
+
+
     for( ParticlePtr p : m_Particles)
     {
         // e.G. gravity 0, 1, 0
 //        QVector3D forceExt = QVector3D(0, -9.8, 0);
         QVector3D forceExt  = m_gravity;
-        p->v = p->v + dt * p->w*forceExt;
+        p->v = p->v + dt * p->w * forceExt;
+
+        if(isnan(p->v.x()) || isnan(p->v.y()) || isnan(p->v.z())){
+//            p->v = QVector3D(0,0,0);
+            mlog<<"stop";
+        }
     }
 
     // damp Velocities (6)
@@ -103,13 +112,6 @@ void DynamicsWorld::update()
             {
                 c->project();
             }
-
-
-//            for( ConstraintPtr c : p->m_CollisionConstraints)
-//            {
-//                c->project();
-//            }
-//            p->m_CollisionConstraints.clear();
         }
     }
     m_frameCount++;
@@ -142,7 +144,6 @@ void DynamicsWorld::update()
 //            }
         }
 
-
         for( ParticlePtr p : m_Particles)
         {
             for( ConstraintWeakPtr c : p->m_Constraints)
@@ -161,10 +162,9 @@ void DynamicsWorld::update()
 
             for( ConstraintPtr c : p->m_CollisionConstraints)
             {
-    //            if(c->constraintFunction() < 0)
                 c->project();
+//                c->setDirty(true);
             }
-    //        p->m_CollisionConstraints_B.clear();
         }
     }
 
@@ -289,6 +289,9 @@ void DynamicsWorld::pbdDamping()
             }
         }
 
+        if(totalMass <= 0.001)
+            return;
+
         xcm /= totalMass;
         vcm /= totalMass;
 
@@ -354,6 +357,10 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsParticle(pSceneOb _sceneObject
     auto pParticle = std::make_shared<Particle>(pos.x(), pos.y(), pos.z(), pCount);
     pParticle->ID = pCount;
     pParticle->setRadius(_sceneObject->getRadius());
+    pParticle->setMass(0);
+
+    mlog<<"New Particle: "<<pParticle->w<<" ID: "<<pParticle->ID ;
+
     m_Particles.push_back(pParticle);
 
 //    SingleParticle pDynamicObject(pParticle);
@@ -387,6 +394,9 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
             nParticle->ID = pCount;
             nParticle->bodyID = objectCount;
             nParticle->setRadius(_sceneObject->getRadius());
+
+            nParticle->setMass(0);
+
             m_Particles.push_back(nParticle);
             nRB->addParticle(point, nParticle);
 
@@ -405,86 +415,76 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     return nRB;
 }
 
-void DynamicsWorld::addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject)
+void DynamicsWorld::addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject, std::string _path)
 {
-    return;
-//    if(!_sceneObject->model())
-//        return nullptr;
-
-    // clones it's own model object with all data. (cause model will me deformed)
-    auto nRB = std::make_shared<RigidBody>(_sceneObject->model());
-    ModelPtr model = nRB->getModel();
-    _sceneObject->setModel(nRB->getModel());
-
-
-
-    for(unsigned int i = 0; i < model->getNumShapes(); i++)
-    {
-        ShapePtr shape = model->getShape(i);
-        QMatrix4x4 mat4 = _sceneObject->getMatrix();
-        HashGrid grid;
-//        grid.setGridSize(0.5);
-        std::map<size_t, std::list<int>> map;
-        std::vector<int3> cells;
-        std::vector<QVector3D> points;
-
-        QVector3D cog;
-        for(auto p : shape->getPoints())
-        {
-            cog  += mat4 * p;
-            points.push_back(mat4 * p);
-        }
-        cog /= shape->getPoints().size();
-
-        for(auto p : points){
-
-        }
-
-
-        for(int i=0; i <  shape->getPoints().size(); i++)
-        {
-            QVector3D point = shape->getPoints()[i];
-//            point.setX(point.x() + i);
-            QVector3D pos = mat4 * point;
-            int3 pCell = grid.pointToCell(pos.x(), pos.y(), pos.z());
-            size_t hash = grid.hashFunction(pCell);
-            map[hash].push_back(i);
-//            if (std::find(cells.begin(), cells.end(), pCell) != cells.end())
-//            {
-//              // Element in vector.
-//                mlog<<"FOUND SOMETHING "<< i;
-//            }
-
-            if(std::find_if(cells.begin(),
-                         cells.end(),
-                         [&c = pCell]
-                         (const int3& cell){ return (c.i == cell.i && c.j == cell.j && c.k == cell.k); }) == cells.end())
-            {
-                cells.push_back(pCell);
-                float gridSize = grid.getGridSize();
-//                QVector3D particlePos = QVector3D(pCell.i + 0.5 * gridSize,
-//                                                  pCell.j + 0.5 * gridSize,
-//                                                  pCell.k + 0.5 * gridSize);
-
-                QVector3D particlePos = QVector3D(pCell.i ,
-                                                  pCell.j ,
-                                                  pCell.k );
-                pCount++;
-                auto nParticle = std::make_shared<Particle>(particlePos.x(), particlePos.y(), particlePos.z(), 33);
-                nParticle->ID = pCount;
-                m_Particles.push_back(nParticle);
-                std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
-                m_scene->addSceneObjectFromParticle(pDynamicObject, nParticle, 0);
-            };
-//            mlog<<"pos: "<<pos<<" cell: "<<pCell.i<<" , "<<pCell.j<<" , "<<pCell.k<<"hashL"<<hash;
-            if(i == shape->getPoints().size()-1)
-            {
-                mlog<<"finish";
-//                int3 pCell = grid.pointToCell(pos.x(), pos.y(), pos.z());
-            }
-        }
-
+    FILE * file = std::fopen(_path.c_str(), "r");
+    if( file == nullptr ){
+        mlog<<"Impossible to open the file !\n";
+        return;
     }
+
+    std::vector<QVector3D> verts;
+    std::vector<QVector3D> normals;
+
+    while( 1 ){
+
+        char lineHeader[128];
+        // read the first word of the line
+        int res = fscanf(file, "%s", lineHeader);
+        if (res == EOF)
+            break; // EOF = End Of File. Quit the loop.
+
+
+        if ( std::strcmp( lineHeader, "v" ) == 0 ){
+            float x,y,z;
+            fscanf(file, "%f %f %f\n", &x, &y, &z );
+            verts.push_back(QVector3D(x,y,z));
+        // else : parse lineHeader
+        }
+
+        if ( std::strcmp( lineHeader, "vn" ) == 0 ){
+            float x,y,z;
+            fscanf(file, "%f %f %f\n", &x, &y, &z );
+            normals.push_back(QVector3D(x,y,z));
+        // else : parse lineHeader
+        }
+    }
+
+    if(normals.size() != verts.size())
+        mlog<<"warning -------verts are not normals";
+
+    // make rigid body instance
+    auto nRBG = std::make_shared<RigidBodyGrid>();
+    objectCount++;
+
+    int i = 0;
+    for(auto v : verts)
+    {
+         pCount++;
+         auto nParticle = std::make_shared<Particle>(v.x(), v.y(), v.z(), 33);
+         nParticle->ID = pCount;
+         nParticle->bodyID = objectCount;
+         nParticle->collisionVector = normals[i];
+
+//         mlog<<"collision normal : "<<pCount<< " = "<< normals[i].length();
+
+         nParticle->setMass(0);
+         m_Particles.push_back(nParticle);
+         nRBG->addParticle(v, nParticle);
+
+         std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
+         m_scene->addSceneObjectFromParticle(pDynamicObject, nParticle, 0);
+         i++;
+    }
+
+//    auto smCstr = nRBG->createConstraint();
+//    m_Constraints.push_back(smCstr);
+    m_DynamicObjects.push_back(nRBG);
+
+    _sceneObject->makeDynamic(nRBG);
+
+    objectCount++;
+
 }
 
 void DynamicsWorld::addDynamicObjectAsNonUniformParticle(pSceneOb _sceneObject, float radius)
@@ -498,6 +498,8 @@ void DynamicsWorld::addDynamicObjectAsNonUniformParticle(pSceneOb _sceneObject, 
     m_NonUniformParticles.push_back(nParticle);
     std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
     _sceneObject->makeDynamic(pDynamicObject);
+
+    nParticle->ID =  991;
 }
 
 
@@ -553,20 +555,20 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsSoftBody(pSceneOb _sceneObject
 
      };
      // pin rows !
-     for(auto p : nSB->getParticles())
-     {
-         if(ParticlePtr particle = p.lock())
-         {
-             if(particle->x.y() > 23.4)
-             {
-                 QVector3D pos = particle->x;
-                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
-                 pinCstr->setPositon(pos);
-                 m_Constraints.push_back(pinCstr);
-                 particle->m_Constraints.push_back(pinCstr);
-             }
-         }
-     }
+//     for(auto p : nSB->getParticles())
+//     {
+//         if(ParticlePtr particle = p.lock())
+//         {
+//             if(particle->x.y() > 23.4)
+//             {
+//                 QVector3D pos = particle->x;
+//                 auto pinCstr = std::make_shared<PinConstraint>(particle, pos);
+//                 pinCstr->setPositon(pos);
+//                 m_Constraints.push_back(pinCstr);
+//                 particle->m_Constraints.push_back(pinCstr);
+//             }
+//         }
+//     }
 
      m_DynamicObjects.push_back(nSB);
      nSB->turnOffSelfCollision();
@@ -826,7 +828,6 @@ void DynamicsWorld::addParticleParticleConstraint(const ParticlePtr _p1, const P
     auto ppCstr = std::make_shared<ParticleParticleConstraint>(_p1, _p2);
     _p1->m_CollisionConstraints.push_back(ppCstr);
     _p2->m_CollisionConstraints.push_back(ppCstr);
-
 }
 
 void DynamicsWorld::addParticleParticlePreConditionConstraint(const ParticlePtr _p1, const ParticlePtr _p2)
@@ -860,11 +861,6 @@ void DynamicsWorld::addHalfSpacePreConditionConstraint(const ParticlePtr _p1, co
 
 void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
 {
-    if(_constraint->type() == AbstractConstraint::PINTOGETHER)
-    {
-        mlog<<"delteing PinTogether ";
-    }
-
     for(auto p : _constraint->m_Particles)
     {
         if(auto particle = p.lock())
@@ -880,12 +876,6 @@ void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
             }
         }
     }
-
-    if(_constraint->type() == AbstractConstraint::PINTOGETHER)
-    {
-        mlog<<"delteing PinTogether LOG2 ";
-    }
-
     m_Constraints.erase(
                 std::remove_if(
                     m_Constraints.begin(),
@@ -893,11 +883,6 @@ void DynamicsWorld::deleteConstraint(const ConstraintPtr _constraint)
                     [&](const ConstraintPtr c){return c == _constraint;}),
                 m_Constraints.end()
                 );
-
-    if(_constraint->type() == AbstractConstraint::PINTOGETHER)
-    {
-        mlog<<"delteing PinTogether LOG3 ";
-    }
 
 }
 

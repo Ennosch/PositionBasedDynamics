@@ -17,6 +17,7 @@ class Particle;
 class AbstractConstraint;
 class DistanceEqualityConstraint;
 class RigidBody;
+class RigidBodyGrid;
 
 typedef std::shared_ptr <DynamicObject>         DynamicObjectPtr;
 typedef std::shared_ptr <Particle>              ParticlePtr;

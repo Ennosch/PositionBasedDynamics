@@ -141,14 +141,16 @@ private:
     int stretchK, compressK;
 };
 
-//class ShapeMatchingConstraint : public AbstractConstraint, public std::enable_shared_from_this<ShapeMatchingConstraint>
+
 class ShapeMatchingConstraint : public AbstractConstraint
 {
 public:
     ShapeMatchingConstraint();
     ShapeMatchingConstraint(RigidBody *_rigidbody);
+    ShapeMatchingConstraint(RigidBodyGrid *_rigidbody);
     void project();
     float constraintFunction();
+    void preCompute(int numParticles, std::vector<ParticleWeakPtr> &_particles, std::vector<QVector3D> &_restShape);
 
 private:
     std::vector< ParticlePtr>       m_particles;
@@ -157,6 +159,7 @@ private:
     Eigen::Vector3f cm, cmOrigin;
 
     RigidBody *m_rb;
+    RigidBodyGrid *m_rbg;
     Eigen::Matrix3f Apq, Aqq, R;
 
     Eigen::Quaternionf q, qPrev;
