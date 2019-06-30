@@ -138,25 +138,18 @@ void ParticleParticleConstraint::project()
     d = constraintFunction();
 
     QVector3D collisionNormal = d * n;
-    float oldLength = collisionNormal.length();
 
-    if(pptr1->collisionVector != QVector3D(0,0,0))
-    {
-//        collisionNormal = pptr1->collisionVector * 1.0;
-//        collisionNormal = pptr2->collisionVector.normalized() * oldLength;
-//        mlog<<"p1 : "<<collisionNormal.length()<<" - "<<oldLength;
+    if(pptr1->collisionGradLen >=  0.01){
+//        mlog<<"ptr1 col"<<pptr1->ID<<" p1"<<pptr2->ID<<" p2";
+        collisionNormal = pptr1->collisionVector *  pptr1->collisionGradLen;
     }
-    else if(pptr2->collisionVector != QVector3D(0,0,0))
-    {
-//        collisionNormal = pptr2->collisionVector * 1.0;
-
-        float gardLength = pptr2->collisionVector.length();
-//        collisionNormal = pptr2->collisionVector.normalized() * oldLength;
-        collisionNormal = -pptr2->collisionVector ;
-//        collisionNormal = -pptr2->collisionVector ;
-
-//        mlog<<"p2 : "<<pptr2->ID<<" collNormal l: "<<collisionNormal.length()<<" d: "<<oldLength<<" gradLength:"<< gardLength;
+    else if(pptr2->collisionGradLen >=  0.01){
+//        mlog<<"ptr2 col"<<pptr2->ID<<" p2"<<pptr1->ID<<" p1";
+    collisionNormal = pptr2->collisionVector *  pptr2->collisionGradLen;
     }
+    else{
+    }
+//    collisionNormal = collisionNormal.normalized() * d;
 
     pptr1->p += (pptr1->w / totalWeight) * collisionNormal;
     pptr2->p += (pptr2->w / totalWeight) * -collisionNormal;
@@ -167,7 +160,7 @@ void ParticleParticleConstraint::project()
 
 float ParticleParticleConstraint::constraintFunction()
 {
-    return  (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());;
+    return  (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());
 }
 
 QVector3D ParticleParticleConstraint::deltaP()
@@ -179,7 +172,7 @@ ParticleParticlePreConditionConstraint::ParticleParticlePreConditionConstraint(c
     pptr1(_p1),
     pptr2(_p2)
 {
-    d = (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());
+    d = constraintFunction();
     m_type = PARTICLEPARTICLE_PRE;
 }
 
@@ -187,22 +180,29 @@ void ParticleParticlePreConditionConstraint::project()
 {
     if(!m_dirty)
         return;
-
     return;
 
     QVector3D n = (pptr2->x - pptr1->x).normalized();
     float totalWeight = pptr2->w + pptr1->w;
+    d = constraintFunction();
 
     QVector3D collisionNormal = d * n;
 
-//    if(pptr1->collisionVector != QVector3D(0,0,0))
-//    {
-//        collisionNormal = pptr1->collisionVector;
-//    }
-//    else if(pptr2->collisionVector != QVector3D(0,0,0))
-//    {
-//        collisionNormal = pptr2->collisionVector;
-//    }
+    if(pptr1->collisionGradLen >=  0.01){
+        collisionNormal = pptr1->collisionVector *  pptr1->collisionGradLen;
+    }
+    else if(pptr2->collisionGradLen >=  0.01){
+    collisionNormal = pptr2->collisionVector *  pptr2->collisionGradLen;
+    }
+    else{
+    }
+
+    if(pptr1->collisionGradLen >=  0.01){
+        collisionNormal = pptr1->collisionVector *  pptr1->collisionGradLen;
+    }
+    else if(pptr2->collisionGradLen >=  0.01){
+    collisionNormal = pptr2->collisionVector *  pptr2->collisionGradLen;
+    }
 
     QVector3D correctionA = (pptr1->w / totalWeight) *  collisionNormal;
     QVector3D correctionB = (pptr2->w / totalWeight) * -collisionNormal;
@@ -218,7 +218,7 @@ void ParticleParticlePreConditionConstraint::project()
 
 float ParticleParticlePreConditionConstraint::constraintFunction()
 {
-
+    return  (pptr2->p - pptr1->p).length() - (pptr1->radius() + pptr2->radius());
 }
 
 QVector3D ParticleParticlePreConditionConstraint::deltaP()
@@ -350,27 +350,31 @@ void ShapeMatchingConstraint::project()
 
     if(m_type == SHAPEMATCH_RIGID)
     {
-        m_rbg->m_t.setToIdentity();
-//        QMatrix4x4 qtR =
-//        m_rbg->m_t.rotate(R);
-    }
 
+        m_rbg->m_t.setToIdentity();
+        QVector3D Pivot = QVector3D(cmOrigin.x(), cmOrigin.y(), cmOrigin.z());
+
+        m_rbg->m_t(0,0) = R(0,0);   m_rbg->m_t(0,1) = R(0,1);   m_rbg->m_t(0,2) = R(0,2);
+        m_rbg->m_t(1,0) = R(1,0);   m_rbg->m_t(1,1) = R(1,1);   m_rbg->m_t(1,2) = R(1,2);
+        m_rbg->m_t(2,0) = R(2,0);   m_rbg->m_t(2,1) = R(2,1);   m_rbg->m_t(2,2) = R(2,2);
+
+        float px = -Pivot.x() * R(0,0) - Pivot.y() * R(0,1) - Pivot.z() * R(0,2) + Pivot.x();
+        float py = -Pivot.x() * R(1,0) - Pivot.y() * R(1,1) - Pivot.z() * R(1,2) + Pivot.y();;
+        float pz = -Pivot.x() * R(2,0) - Pivot.y() * R(2,1) - Pivot.z() * R(2,2) + Pivot.z();;
+
+        m_rbg->m_t(0,3) = px + cm.x() - cmOrigin.x();
+        m_rbg->m_t(1,3) = py + cm.y() - cmOrigin.y();
+        m_rbg->m_t(2,3) = pz + cm.z() - cmOrigin.z();
+
+        m_rbg->m_t(3,3) = 1;
+    }
 
     qPrev = q;
     q = R;
 
-//    mlog<<m_particles.size();
-//    std::cout<<R<<std::endl;
-
-//    q = q.normalized();
-//    mlog<<"q: "<<q.x()<< q.y()<< q.z()<< q.w()<< "  qPrev"<<qPrev.x()<<qPrev.y()<<qPrev.z()<<qPrev.w();
-
-//    Eigen::Quaternion<float, Eigen::AutoAlign> quat(Eigen::MatrixX3f R);
-
     for(int i=0; i < m_particles.size(); i++)
     {
         Eigen::Vector3f qi =  m_restPositions[i] - cmOrigin;
-//        Eigen::Vector3f gi = (R * qi) + (cm - cmOrigin);
         Eigen::Vector3f gi = (R * qi) + (cm);
         m_particles[i]->p = QVector3D(gi.x(), gi.y(), gi.z());
     }

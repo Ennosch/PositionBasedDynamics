@@ -81,7 +81,6 @@ void GLWidget::loop()
     {
         simFrameCounter++;
 //        mlog<<"lag:"<<lag;
-
         timer.start();
         scene()->updateSceneObjects();
         scene()->dynamicsWorld()->update();
@@ -95,7 +94,7 @@ void GLWidget::loop()
 
 //    QThread::msleep(16);
 
-    //// play every sim frame
+//    //// play every sim frame
 //    timer.start();
 //    scene()->updateSceneObjects();
 //    scene()->dynamicsWorld()->update();

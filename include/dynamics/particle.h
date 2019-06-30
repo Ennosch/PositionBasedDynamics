@@ -44,6 +44,7 @@ public:
 //private:
     unsigned age;
     float w, r, m;
+    float collisionGradLen = 0;
     size_t hash;
     QVector3D p, pp, v, vt, x, xt, qc;
     QVector3D collisionVector;

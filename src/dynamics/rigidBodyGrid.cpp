@@ -63,6 +63,7 @@ void RigidBodyGrid::updateModelBuffers()
 
 const QMatrix4x4 RigidBodyGrid::getTransfrom()
 {
+
     return  m_t;
 }
 

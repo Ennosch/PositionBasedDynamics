@@ -720,7 +720,7 @@ void Scene::paint()
                         continue;
 //                        if(m_SceneObjects[i]->model() == getModelFromPool("sphere"))
 //                        {
-////                            continue;
+//                            continue;
 //                        }
 //                        if(m_SceneObjects[i]->model() == getModelFromPool("teapot"))
 //                        {
@@ -804,17 +804,17 @@ void Scene::paint()
 //                                    nullptr);
 //              m_lines_vao->release();
 
-//          QMatrix4x4 tmp;
-//          tmp.setToIdentity();
-//          m_wireframe_lines_program->bind();
-//          m_wireframe_lines_program->setUniformValue("projection", m_projection_matrix);
-//          m_wireframe_lines_program->setUniformValue("view", m_arcCamera.toMatrix());
-//          m_wireframe_lines_program->setUniformValue("model", tmp);
-//          m_lines_vao->bind();
-//          glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
-////          glDrawArrays(GL_TRIANGLES, 0, m_LinesB.size() * 4);
-////          m_SceneObjects[1]->draw();
-//          m_lines_vao->release();
+          QMatrix4x4 tmp;
+          tmp.setToIdentity();
+          m_wireframe_lines_program->bind();
+          m_wireframe_lines_program->setUniformValue("projection", m_projection_matrix);
+          m_wireframe_lines_program->setUniformValue("view", m_arcCamera.toMatrix());
+          m_wireframe_lines_program->setUniformValue("model", tmp);
+          m_lines_vao->bind();
+          glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
+//          glDrawArrays(GL_TRIANGLES, 0, m_LinesB.size() * 4);
+//          m_SceneObjects[1]->draw();
+          m_lines_vao->release();
 
          // -------------------------Geometry Shader-----------------------------------------------------------
          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -941,7 +941,7 @@ void Scene::setupScene()
 //       addModel(this, "cloth", "/Users/enno/Dev/Grid_225_tri.obj");
        addModel(this, "cloth", "/Users/enno/Dev/Quad_497_remeshed.obj");
 //       addModel(this, "cloth", "/Users/enno/Dev/Quad_1907_remeshed.obj");
-       addModel(this, "cloth2", "/Users/enno/Dev/Grid_441points.obj");
+       addModel(this, "cloth2", "/Users/enno/Dev/Quad_1935_big_remeshed.obj");
 
 //       addModel(this, "cube", "/Users/enno/Dev/Cube_98.obj");
 //       addModel(this, "cube", "/Users/enno/Dev/Cube_26.obj");
@@ -957,6 +957,7 @@ void Scene::setupScene()
        addModel(this, "Plane", "/Users/enno/Dev/PlaneShape.obj");
        addModel(this, "Axis", "/Users/enno/Dev/AxisShape.obj");
        addModel(this, "bunny", "/Users/enno/Dev/bunny_low.obj");
+       addModel(this, "bunny_high", "/Users/enno/Dev/Bunny_394.obj");
        addModel(this, "rubberyoy", "/Users/enno/Dev/RubberToy.obj");
 
 
@@ -980,32 +981,33 @@ void Scene::setupScene()
 //       auto sceneObjCube = addSceneObjectFromModel("cube", 2, QVector3D(0,4.5,0), rot);
 //       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjCube);
 
-       auto sceneObjectRT = addSceneObjectFromModel("sphere", 2, QVector3D(-20,0.5,0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_343_volumeGrad.obj");
-//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_27_volumeGrad.obj");
+       auto sceneObjectRT = addSceneObjectFromModel("bunny_high", 2, QVector3D(-20,0.5,0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_100_volumeGrad.obj");
+       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Bunny_394_volumeGrad.obj");
 
-       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_147_volumeGrad.obj");
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_147_volumeGrad.obj");
 //       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/RubberToy_volumeGrad.obj");
+//         m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/RubberToy_dense_volumeGrad.obj");
 
 //        QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(0, 0, 0));
 //        auto sceneObject_cloth = addSceneObjectFromModel("cloth", 0 , QVector3D(0,30,0), rotx);
 //        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
 
 //// cloth mass
-        for(int i=0; i < 1; i++)
-        {
-            QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(35, 20, 0));
-            auto sceneObject_cloth = addSceneObjectFromModel("cloth",(i%3), QVector3D(i*5, 12 , i*5), rotx);
-            m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
-        }
+//        for(int i=0; i < 1; i++)
+//        {
+//            QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(0, 0, 0));
+//            auto sceneObject_cloth = addSceneObjectFromModel("cloth",2, QVector3D(i*5, 12 , i*5), rotx);
+//            m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
+//        }
 
 //// Ropes
-//       m_DynamicsWorld->addRope(QVector3D(3,0,0), QVector3D(-12,0,0), 6);
+//       m_DynamicsWorld->addRope(QVector3D(3,0,0), QVector3D(-12,0,0), 26);
 //       m_DynamicsWorld->addRope(QVector3D(3,5,0), QVector3D(-12,5,0), 6);
 
 
 /// Rigid Body Bunnies
-//       for(int i=0; i < 1; i++)
+//       for(int i=0; i < 5; i++)
 //       {
 //           float x,y,z;
 //           x= randfinRange(-5,5);
@@ -1091,7 +1093,6 @@ void Scene::setupScene()
 
 //        auto sceneObjectC3 = addSceneObjectFromModel("cloth2", 0, QVector3D(5, 20.5, 0), rot2);
 //        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObjectC3, 2.5);
-
 
 
        ModelPtr _vectorShape = getModelFromPool("Vector");
