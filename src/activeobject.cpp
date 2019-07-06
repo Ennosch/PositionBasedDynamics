@@ -78,7 +78,6 @@ void ActiveObject::pinConstraintActive()
 {
     Particle *ptr = nullptr;
     auto particleSmartPointer = activeSceneObject->dynamicObject()->pointer(ptr);
-    mlog<<" Pinning : "<<particleSmartPointer->ID;
     auto pinConstraint = std::make_shared<PinConstraint>(particleSmartPointer, activeSceneObject->getPos());
     activeSceneObject->setPinConstraint(pinConstraint);
     particleSmartPointer->m_Constraints.push_back(pinConstraint);
@@ -111,6 +110,10 @@ void ActiveObject::processInput(ActiveObject::AOInput _input)
     switch(_input)
     {
         case LM_CLICKED:
+//                if(activeSceneObject)
+//                if(activeSceneObject->isDynamic())
+//                    mlog<<"active T:"<<activeSceneObject->getTransform();
+
 //                if(inputManager::keyPressed(Qt::Key_Shift))
                 if(inputManager::keyPressed(Qt::Key_Shift) && activeSceneObject->isDynamic()){
                     Particle* empty = nullptr;

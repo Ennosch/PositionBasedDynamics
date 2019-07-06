@@ -6,8 +6,6 @@ include_directories(include)
 
 #set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/Users/enno/Qt/5.10.1/clang_64")
 
-
-
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Gui CONFIG REQUIRED)
@@ -16,7 +14,6 @@ find_package(OpenGL)
 find_package(assimp)
 find_package(eigen3)
 find_package(OpenMP)
-
 
 set(CMAKE_AUTOMOC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(CMAKE_AUTORCC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -35,6 +32,7 @@ file(GLOB DYNAMIC_SOURCES "src/dynamics/*.cpp")
 file(GLOB DYNAMIC_INCLUDES "include/dynamics/*.h")
 
 #message("DYNAMIC SRC:          " ${DYNAMIC_SOURCES})
+message("DYNAMIC SRC:          " ${STB_IMAGE_FOUND})
 
 set(SOURCES "${SOURCES}" "resources/Forms/ControlWidget.ui")
 set(SOURCES "${SOURCES}" "src/ui/DynamicsUiWidget.cpp")

@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
   mainWindow.setGLController(&glw);
 //  mainWindow.setDynamicsController(dynamics.controller());
   mainWindow.setupUi();
+  mainWindow.resize(1280*1.5, 720*1.5);
   mainWindow.show();
 
   return app.exec();

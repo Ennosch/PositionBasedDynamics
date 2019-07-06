@@ -10,8 +10,8 @@ static float gravityLength                         = 9.8;
 static float distanceConstraintStrechR             = 1.0;
 static float distanceConstraintCompressR           = 1.0;
 static float shapeMatchingGoalAttract              = 1.0;
-static float frictionConstraintDynamicF            = 0.85;
-static float frictionConstraintStaticF             = 0.85;
+static float frictionConstraintDynamicF            = 2.75;
+static float frictionConstraintStaticF             = 2.75;
 static float pbd_Damping                            = 0.03;
 
 static int preConditionIterations                  = 2;

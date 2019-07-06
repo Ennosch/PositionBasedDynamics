@@ -26,7 +26,6 @@ public:
     std::vector<ParticleWeakPtr>& getParticles();
     int numParticles();
 
-
 private:
     friend ShapeMatchingConstraint;
     int id;

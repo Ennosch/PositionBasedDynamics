@@ -59,6 +59,8 @@ public:
     void draw();
     void drawPickingBuffer();
 
+    void debugDraw();
+
     Transform getTransform();
     void setTransform(const Transform &_transform);
     void setRotation(const QQuaternion &_rot);

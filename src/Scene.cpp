@@ -6,12 +6,7 @@
 
 #include <iostream>
 
-
-
-
 int Scene::numCreation = 0;
-
-
 
 Scene::Scene(Window *_window) : AbstractScene(_window)
 {
@@ -81,7 +76,7 @@ ModelPtr Scene::addModel(Scene *_scene, std::string _name, std::string _path)
     return pModel;
 }
 
-pSceneOb Scene::addSceneObjectFromModel(std::string _name, const uint _materialID,  const QVector3D &_pos, const QQuaternion &_rot)
+pSceneOb Scene::addSceneObjectFromModel(std::string _name,  uint _materialID,  const QVector3D &_pos, const QQuaternion &_rot)
 {
     auto pModel = getModelFromPool(_name);
     if(pModel == nullptr)
@@ -648,6 +643,13 @@ void Scene::resize(int width, int height)
         SCR_HEIGHT = 720;
     }
 
+    if(mainpulator->m_framebuffer)
+    {
+        mlog<<"resizing fb";
+        mainpulator->m_framebuffer->resize(SCR_WIDTH, SCR_HEIGHT);
+//        mainpulator->m_framebuffer->init();
+    }
+
     m_projection_matrix.setToIdentity();
     m_projection_matrix.perspective(40.0f, width / float(height), 0.01f, 1000.0f);
 
@@ -686,9 +688,9 @@ void Scene::paint()
         glEnable(GL_MULTISAMPLE);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-          glEnable(GL_DEPTH_TEST);
-          glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
                   m_lighting_program->bind();
@@ -778,51 +780,36 @@ void Scene::paint()
               }
 
 //          drawLines();
+//              glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+//              skyboxShader.use();
+//              view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+//              skyboxShader.setMat4("view", view);
+//              skyboxShader.setMat4("projection", projection);
+
 
           glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
           updateLinesVBO();
 
-//              m_LinesB.clear();
-//              for(QVector3D* _vec : m_DynamicsWorld->m_debugLines)
-//              {
-//                  QVector3D vec = *_vec;
-//                  m_LinesB.push_back(vec);
-//              }
-
-//              m_lines_vao->bind();
-//              m_lines_vbo.create();
-//              m_lines_vbo.bind();
-
-//              m_lines_vbo.allocate(m_LinesB.data(),  m_LinesB.size() * sizeof(QVector3D));
-
-//              glEnableVertexAttribArray(0);
-//              glVertexAttribPointer(0,                 // index
-//                                    3,                 // size of attr
-//                                    GL_FLOAT,          // datatype of each component
-//                                    GL_FALSE,          // normalized
-//                                    sizeof(QVector3D), //byte offset between consecutive generic vertex attributes
-//                                    nullptr);
-//              m_lines_vao->release();
-
-          QMatrix4x4 tmp;
-          tmp.setToIdentity();
-          m_wireframe_lines_program->bind();
-          m_wireframe_lines_program->setUniformValue("projection", m_projection_matrix);
-          m_wireframe_lines_program->setUniformValue("view", m_arcCamera.toMatrix());
-          m_wireframe_lines_program->setUniformValue("model", tmp);
-          m_lines_vao->bind();
-          glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
-//          glDrawArrays(GL_TRIANGLES, 0, m_LinesB.size() * 4);
-//          m_SceneObjects[1]->draw();
-          m_lines_vao->release();
+//// ---------draw wireframe lines
+//          QMatrix4x4 tmp;
+//          tmp.setToIdentity();
+//          m_wireframe_lines_program->bind();
+//          m_wireframe_lines_program->setUniformValue("projection", m_projection_matrix);
+//          m_wireframe_lines_program->setUniformValue("view", m_arcCamera.toMatrix());
+//          m_wireframe_lines_program->setUniformValue("model", tmp);
+//          m_lines_vao->bind();
+//          glDrawArrays(GL_LINES, 0, m_LinesB.size() * 4);
+////          glDrawArrays(GL_TRIANGLES, 0, m_LinesB.size() * 4);
+////          m_SceneObjects[1]->draw();
+//          m_lines_vao->release();
 
          // -------------------------Geometry Shader-----------------------------------------------------------
-         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-          m_wireframe_program->bind();
-          m_wireframe_program->setUniformValue("projection", m_projection_matrix);
-          m_wireframe_program->setUniformValue("view", m_arcCamera.toMatrix());
-          m_wireframe_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
-          m_SceneObjects[1]->draw();
+//         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//          m_wireframe_program->bind();
+//          m_wireframe_program->setUniformValue("projection", m_projection_matrix);
+//          m_wireframe_program->setUniformValue("view", m_arcCamera.toMatrix());
+//          m_wireframe_program->setUniformValue("model",  m_SceneObjects[1]->getMatrix());
+//          m_SceneObjects[1]->draw();
 //          m_geometry_program->setUniformValue("model",  m_SceneObjects[2]->getMatrix());
 //          m_SceneObjects[1]->drawPoints();
 
@@ -850,11 +837,8 @@ void Scene::paint()
 
         if(mainpulator)
         {
-//            mainpulator->drawPickingBufferDebug();
-//            for(int i=0; i < 2000; i++)
-            {
+//                mainpulator->debugDraw();
                 mainpulator->draw();
-            }
         }
 }
 
@@ -907,24 +891,63 @@ void Scene::setupScene()
                         QVector3D(1.0f , 1.0f ,1.0f),    // specular
                         32.0 );                          // shininess
 
+
+        addMaterial(    QVector3D(0.01f , 0.02f ,0.1f),   // ambient
+                        QVector3D(0.1f , 0.0f ,0.3f),    // diffuse
+                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+                        32.0 );
+
+        addMaterial(    QVector3D(0.01f , 0.01f ,0.07f),   // ambient
+                        QVector3D(0.1f , 0.01f ,0.2f),    // diffuse
+                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+                        32.0 );
+
+        addMaterial(    QVector3D(0.01f , 0.01f ,0.07f),   // ambient
+                        QVector3D(0.2f , 0.21f ,0.8f),    // diffuse
+                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+                        32.0 );
+
+
         // organge tone
         addMaterial(    QVector3D(0.1f , 0.01f ,0.01f),   // ambient
                         QVector3D(0.5f , 0.2f ,0.07f),   // diffuse
                         QVector3D(1.0f , 1.0f ,1.0f),    // specular
                         20.0 );                          // shininess
 
-        // green tone
-        addMaterial(    QVector3D(0.0f , 0.0f ,0.0f),   // ambient
-                        QVector3D(0.2f , 0.3f ,0.05f),   // diffuse
-                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
-                        15.0 );
+//        addMaterial(    QVector3D(0.1f , 0.0f ,0.05f),   // ambient
+//                        QVector3D(0.5f , 0.0f ,0.3f),   // diffuse
+//                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+//                        20.0 );
 
-        addMaterial(    QVector3D(1.2f , 1.2f ,0.0f),   // ambient
-                        QVector3D(0.8f , 0.8f ,0.0f),   // diffuse
-                        QVector3D(0.0f , 0.0f ,0.0f),    // specular
-                        15.0 );
+//        // green tone
+//        addMaterial(    QVector3D(0.0f , 0.05f ,0.0f),   // ambient
+//                        QVector3D(0.2f , 0.5f ,0.05f),   // diffuse
+//                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+//                        15.0 );
+
+//        addMaterial(    QVector3D(0.0f , 0.05f ,0.0f),   // ambient
+//                        QVector3D(0.1f , 0.3f ,0.1f),   // diffuse
+//                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+//                        15.0 );
+
+//        // yellow
+//        addMaterial(    QVector3D(0.1f , 0.1f ,0.0f),   // ambient
+//                        QVector3D(0.6f , 0.4f ,0.1f),   // diffuse
+//                        QVector3D(1.0f , 1.0f ,1.0f),    // specular
+//                        15.0 );
 
 
+
+//         for(int i =0; i<10; i++)
+//         {
+//             QVector3D ambient = QVector3D(randfinRange(0.1*i,1), randfinRange(0.1*i,1)*0.1, randfinRange(0.1*i,1)*0.1);
+//             mlog<<"ambient"<< ambient;
+//             QVector3D diffuse = QVector3D(ambient.x() - 0.3, ambient.y()  -0.3, ambient.z() -0.3);
+//             addMaterial(    diffuse,   // ambient
+//                            ambient,    // diffuse
+//             QVector3D(1.0f , 1.0f ,1.0f),    // specular
+//             32.0 );
+//         }
 
 
     //    MAKE MODEL TO RENDER
@@ -961,50 +984,30 @@ void Scene::setupScene()
        addModel(this, "rubberyoy", "/Users/enno/Dev/RubberToy.obj");
 
        addModel(this, "cube_high", "/Users/enno/Dev/Cube_125.obj");
+       addModel(this, "cube_Test", "/Users/enno/Dev/Cube_42.obj");
 
+       addModel(this, "brick1_high", "/Users/enno/Dev/BrickX1_216.obj");
+       addModel(this, "brick2_high", "/Users/enno/Dev/BrickX2_216.obj");
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
-       addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
+       pSceneOb grid = addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
+//       grid->setScale(QVector3D(5,5,5));
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
        QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(0, 0, 45));
 
        float s = 4;
-       auto sceneObjectBallCollider = addSceneObjectFromModel("sphere", 2, QVector3D(-20,4.5,0), rot);
+       auto sceneObjectBallCollider = addSceneObjectFromModel("sphere", 4, QVector3D(10,4,-20), rot);
        sceneObjectBallCollider->setScale(QVector3D(s,s,s));
        m_DynamicsWorld->addDynamicObjectAsNonUniformParticle(sceneObjectBallCollider, s/2);
        mlog<<"Ball Collider ID: "<<sceneObjectBallCollider->getID();
 
-
-//       auto sceneObjSphere = addSceneObjectFromModel("sphere", 2, QVector3D(3,4.5,0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsParticle(sceneObjSphere);
-
-//       auto sceneObjCube = addSceneObjectFromModel("cube", 2, QVector3D(0,4.5,0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjCube);
-
 //       auto sceneObjectRT = addSceneObjectFromModel("bunny_high", 2, QVector3D(0,9.5,0), rot2);
 //       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Bunny_394_volumeGrad.obj", 2);
 
-
-//       auto sceneObjectB = addSceneObjectFromModel("cube_high", 2, QVector3D(0,9.5,0), rot2);
-//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectB , "/Users/enno/Dev/Cube_125_volumeGrad.obj", 2);
-
-
-//       auto sceneObjectRT2 = addSceneObjectFromModel("bunny_high", 1, QVector3D(20,0.5,0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT2 , "/Users/enno/Dev/Bunny_394_volumeGrad.obj");
-
-
-//       auto sceneObjectRT = addSceneObjectFromModel("bunny_high", 2, QVector3D(-20,0.5,0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Bunny_394_volumeGrad.obj");
-
-//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_147_volumeGrad.obj");
-//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/RubberToy_volumeGrad.obj");
-//         m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/RubberToy_dense_volumeGrad.obj");
-
-//        QQuaternion rotx = QQuaternion::fromEulerAngles(QVector3D(0, 0, 0));
-//        auto sceneObject_cloth = addSceneObjectFromModel("cloth", 0 , QVector3D(0,30,0), rotx);
-//        m_DynamicsWorld->addDynamicObjectAsSoftBody(sceneObject_cloth);
+//          auto sceneObjectRT = addSceneObjectFromModel("sphere", 2, QVector3D(0,9.5,0), rot2);
+//          m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/BrickY2_test.obj", 2);
 
 //// cloth mass
 //        for(int i=0; i < 1; i++)
@@ -1032,16 +1035,21 @@ void Scene::setupScene()
 
 
 /// Rigid Body Grid Cubes
-     for(int i=0; i < 10; i++)
-     {
-         float x,y,z;
-         x= randfinRange(-5,5);
-         y= randfinRange(2,30);
-         z= randfinRange(-5,5);
-         QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(rand() % 90,rand() % 90,rand() % 90));
-     auto sceneObjectX = addSceneObjectFromModel("cube_high", (i%3), QVector3D(x, y, z), rotX);
-      m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectX , "/Users/enno/Dev/Cube_125_volumeGrad.obj", (i%3));
-     }
+//     for(int i=0; i < 4; i++)
+//     {
+//         float x,y,z;
+//         x= randfinRange(-5,5);
+//         y= randfinRange(2,30);
+//         z= randfinRange(-5,5);
+////         QQuaternion rotX = QQuaternion::fromEulerAngles(0,0,0);
+
+//         QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(rand() % 90,rand() % 90,rand() % 90));
+////     auto sceneObjectX = addSceneObjectFromModel("cube_Test", (i%3), QVector3D(x, y, z), rotX);
+////     m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX);
+
+//        auto sceneObjectX = addSceneObjectFromModel("brick2_high", (i%3), QVector3D(x, y, z), rotX);
+//        m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectX , "/Users/enno/Dev/BrickX2_420_volumesample.obj", (i%3));
+//     }
 
 /// Rigid Body Bunnies
 //       for(int i=0; i < 5; i++)
@@ -1064,14 +1072,81 @@ void Scene::setupScene()
 //            m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX, (i%3));
 //        }
 
+ /// Rigid Body Stack or Wall Grid
+     int row = 6;
+     int column = 8;
+      for(int i=0; i < row; i++)
+     {
+         QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
+         for(int j=0; j < column; j++)
+         {
+             float aabbY = 1.6;
+             float aabbX = 3.8;
+             float centerOffset = 1;
+             float x = (centerOffset + aabbX *  j);
+             float y = (centerOffset + aabbY *  i) + 0.15 ;
+             if(i % 2 > 0){
+                 if(j==0){
+                     auto sceneObjectHalf = addSceneObjectFromModel("brick1_high", ((j+i+int(randfinRange(0,i)))%(m_Materials.size()-1)), QVector3D(x - 1.0 , y ,0), rotX);
+                     m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectHalf , "/Users/enno/Dev/BrickX1_216_volumesample.obj", (i%3));
+                 }
+                 x += 2.0;
+             }
+             auto sceneObjectX = addSceneObjectFromModel("brick2_high", ((j+i+int(randfinRange(0,i)))%(m_Materials.size()-1)), QVector3D(x , y ,0), rotX);
+             m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectX , "/Users/enno/Dev/BrickX2_216_volumesample.obj", (i%3));
+             if(j == column-1 && i %  2 == 0){
+                 auto sceneObjectHalf = addSceneObjectFromModel("brick1_high", ((j+i+int(randfinRange(0,i)))%(m_Materials.size()-1)), QVector3D(x + 3.0 , y ,0), rotX);
+                 m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectHalf , "/Users/enno/Dev/BrickX1_216_volumesample.obj", (i%3));
+             }
+         }
+     }
 
-/// Rigid Body Stack
-//        for(int i=0; i < 10; i++)
+/// Rigid Body Stack or Wall
+//       for(int i=0; i < 4; i++)
 //        {
 //            QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
-//            auto sceneObjectX = addSceneObjectFromModel("cube", (i%4), QVector3D(0.01*randfinRange(-1,1) ,(1.5 + 3* i),0), rotX);
+//            for(int j=0; j < 8; j++)
+//            {
+//                float aabbY = 2 - 0.15;
+//                float aabbX = 2;
+//                float centerOffset = 1;
+//                float x = (centerOffset + aabbX *  j);
+//                if(i % 2 > 0)
+//                    x += 0.5;
+//                float y = (centerOffset + aabbY *  i) ;
+//                float z;
+//                auto sceneObjectX = addSceneObjectFromModel("cube", (i%4), QVector3D(x , y ,0), rotX);
+//                m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX, (i%3));
+//            }
+//        }
+
+     /// Rigid Body Stack or Wall TEST
+//    for(int i=0; i < 4; i++)
+//     {
+//         QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(0,90,0));
+//         for(int j=0; j < 8; j++)
+//         {
+//             float aabbY = 2.8;
+//             float aabbX = 5;
+//             float centerOffset = 1.5;
+//             float x = (centerOffset + aabbX *  j);
+//             if(i % 2 > 0)
+//                 x += 0.5;
+//             float y = (centerOffset + aabbY *  i) ;
+//             float z;
+//             auto sceneObjectX = addSceneObjectFromModel("cube_Test", (i%4), QVector3D(x , y ,0), rotX);
+//             m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX, (i%3));
+//         }
+//     }
+
+
+/// Rigid BodyGrid  Stack
+//        for(int i=0; i < 3; i++)
+//        {
+//            QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
+//            auto sceneObjectX = addSceneObjectFromModel("cube_high", (i%4), QVector3D(0.01*randfinRange(-1,1) ,(0 + 3* i),0), rotX);
 ////            auto sceneObjectX = addSceneObjectFromModel("cube", (i%4), QVector3D(0 ,(1.5 + 3* i),0), rotX);
-//            m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjectX, (i%3));
+//             m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectX , "/Users/enno/Dev/Cube_125_volumeGrad.obj", (i%3));
 //        }
 
 //// Two Particle pairs for friction
@@ -1141,6 +1216,9 @@ void Scene::setupScene()
        //        addSceneObjectFromModel("sphere", 3, pointLightC, rot);
 
        mlog<<"NUm particles:"<<m_DynamicsWorld->pCount;
+
+
+
 }
 
 

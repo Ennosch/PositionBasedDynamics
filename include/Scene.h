@@ -36,7 +36,6 @@
 #include "Framebuffer.h"
 
 
-
 class Scene : public AbstractScene
 {
   static int numCreation;
@@ -56,6 +55,7 @@ public:
   void setupScene();
   void updateLinesVBO();
   void updatePointsVBO();
+
   void initFramebuffer();
 
   void debug(const QVector3D &_pos);
@@ -64,7 +64,7 @@ public:
   void addShape(Scene *_scene, std::string _name, const QVector3D* _data, int _size);
   ModelPtr addModel(Scene *_scene, std::string _name, std::string _path);
 
-  pSceneOb addSceneObjectFromModel(std::string _name, const uint _materialID, const QVector3D &_pos, const QQuaternion &_rot);
+  pSceneOb addSceneObjectFromModel(std::string _name, uint _materialID, const QVector3D &_pos, const QQuaternion &_rot);
   pSceneOb addSceneObjectFromParticle(const DynamicObjectPtr _particle, ParticlePtr _p, int matID = 1);
 
   LightPtr addPointLight();
@@ -113,6 +113,7 @@ private:
   QOpenGLShaderProgram* m_flat_program;
   QOpenGLShaderProgram* m_manipulator_program;
   QOpenGLShaderProgram* m_picking_program;
+  QOpenGLShaderProgram* m_skybox_program;
   QOpenGLShaderProgram* m_wireframe_program;
   QOpenGLShaderProgram* m_wireframe_lines_program;
 

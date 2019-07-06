@@ -18,9 +18,8 @@ Framebuffer::Framebuffer()
 Framebuffer::Framebuffer(Scene *_scene) :
     m_scene(_scene)
 {
-    WindowWidth = 1392;
-    WindowHeight = 1452;
-
+    WindowWidth = _scene->width();
+    WindowHeight = _scene->height();
     ms = true;
     init();
 }
@@ -100,11 +99,6 @@ void Framebuffer::readPixel(uint _x, uint _y)
 //    qDebug()<<"ReadPixel: "<<Pixel.ObjectID<<Pixel.DrawID<<Pixel.PrimID;
     qDebug()<<"FB ReadPixel: "<<_x<<_y<<pixel.r<<pixel.g<<pixel.b;
 
-
-
-
-
-
 //    Color pixel;
 //    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 //    glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -112,7 +106,13 @@ void Framebuffer::readPixel(uint _x, uint _y)
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-    qDebug()<<"ReadPixel: "<<Pixel.ObjectID<<Pixel.DrawID<<Pixel.PrimID;
+    //    qDebug()<<"ReadPixel: "<<_x<<_y<<pixel.r<<pixel.g<<pixel.b;
+}
+
+void Framebuffer::resize(int _h, int _w)
+{
+    WindowWidth = _w;
+    WindowHeight = _h;
 }
 
 void Framebuffer::debug()

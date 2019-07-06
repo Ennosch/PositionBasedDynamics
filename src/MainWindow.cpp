@@ -94,9 +94,13 @@ void MainWindow::setupUi(GLWidget *_glw)
     glw->setFocus(Qt::ActiveWindowFocusReason);
 
 //    glw->setParent(mainWidget);
-    mainWidget->resize(750,1000);
-    glw->resize(900,720);
-    this->resize(1000,720);
+//    mainWidget->resize(750,1000);
+//    glw->resize(900,720);
+//    this->resize(1000,720);5
+
+//        mainWidget->resize(2000,2000);
+//        glw->resize(900,720);
+//        this->resize(2000,2000);
 }
 
 void MainWindow::setupUi()

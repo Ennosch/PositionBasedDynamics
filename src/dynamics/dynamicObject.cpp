@@ -41,6 +41,7 @@ const QMatrix4x4 DynamicObject::getTransfrom()
 //    {
 //        return m_transform.toMatrix();
 //    }
+//    return QMatrix4x4();
 }
 
 const QVector3D DynamicObject::getTranslation()

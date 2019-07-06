@@ -154,8 +154,8 @@ void GLWidget::renderText()
 //    QString fps = " fps: " + QString::number(int(1000.0 / msRender)) ;
 //    QString fps = " fps: " + QString::number(msRender) ;
      QString fps = " fps: " + QString::number( 1000 / msRender) ;
-//    QString a = QString::number(scene()->dynamicsWorld()->frameCount());
-    QString a = " val2:  " + QString::number(simPerFrame);
+    QString a = QString::number(scene()->dynamicsWorld()->frameCount());
+//    QString a = " val2:  " + QString::number(simPerFrame);
 //    QString b = QString::number(render);
     QString b = " sim fps:  " + QString::number(int(1000.0 / msDynamics));
     painter.drawText(QRect(5, 5,  200, 50), fps);

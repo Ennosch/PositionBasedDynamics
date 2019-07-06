@@ -34,6 +34,9 @@
         <file alias="phong.frag">resources/shaders/phong.frag</file>
         <file alias="phong.vert">resources/shaders/phong.vert</file>
 
+        <file alias="skybox.frag">resources/shaders/skybox.frag</file>
+        <file alias="skybox.vert">resources/shaders/skybox.vert</file>
+
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -120,6 +120,12 @@ void SceneObject::update()
             notify();
         }
     }
+
+//    if(m_ID== 2)
+//    {
+//        mlog<<"--------";
+//        mlog<<m_ModelMatrix;
+//    }
 }
 
 void SceneObject::isActive(bool _isActive)

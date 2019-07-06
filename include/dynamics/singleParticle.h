@@ -19,6 +19,7 @@ public:
     int numParticles();
 
 private:
+    QMatrix4x4 m_mat4;
     ParticlePtr m_particle;
     float m_radius;
 };

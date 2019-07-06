@@ -17,6 +17,7 @@ public:
     bool init();
     void bind();
     void readPixel(uint _x, uint _y);
+    void resize(int _h, int _w);
     void debug();
     uint fbo();
 
