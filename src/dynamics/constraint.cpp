@@ -139,17 +139,19 @@ void ParticleParticleConstraint::project()
 
     QVector3D collisionNormal = d * n;
 
-    if(pptr1->collisionGradLen >=  0.01){
-//        mlog<<"ptr1 col"<<pptr1->ID<<" p1"<<pptr2->ID<<" p2";
-        collisionNormal = pptr1->collisionVector *  pptr1->collisionGradLen;
+    float maxCollisioGrad = std::max(pptr1->collisionGradLen, pptr2->collisionGradLen);
+    if(maxCollisioGrad >= 0.01)
+    {
+        if(pptr1->collisionGradLen > pptr2->collisionGradLen)
+        {
+//            mlog<<"1 "<<pptr1->ID<<pptr2->ID;
+            collisionNormal = -pptr1->collisionVector *  pptr1->collisionGradLen;
+        }
+        else{
+//            mlog<<"2 "<<pptr1->ID<<pptr2->ID;
+            collisionNormal = pptr2->collisionVector *  pptr2->collisionGradLen;
+        }
     }
-    else if(pptr2->collisionGradLen >=  0.01){
-//        mlog<<"ptr2 col"<<pptr2->ID<<" p2"<<pptr1->ID<<" p1";
-    collisionNormal = pptr2->collisionVector *  pptr2->collisionGradLen;
-    }
-    else{
-    }
-//    collisionNormal = collisionNormal.normalized() * d;
 
     pptr1->p += (pptr1->w / totalWeight) * collisionNormal;
     pptr2->p += (pptr2->w / totalWeight) * -collisionNormal;
@@ -180,6 +182,7 @@ void ParticleParticlePreConditionConstraint::project()
 {
     if(!m_dirty)
         return;
+
     return;
 
     QVector3D n = (pptr2->x - pptr1->x).normalized();
@@ -188,21 +191,20 @@ void ParticleParticlePreConditionConstraint::project()
 
     QVector3D collisionNormal = d * n;
 
-    if(pptr1->collisionGradLen >=  0.01){
-        collisionNormal = pptr1->collisionVector *  pptr1->collisionGradLen;
-    }
-    else if(pptr2->collisionGradLen >=  0.01){
-    collisionNormal = pptr2->collisionVector *  pptr2->collisionGradLen;
-    }
-    else{
+    float maxCollisioGrad = std::max(pptr1->collisionGradLen, pptr2->collisionGradLen);
+    if(maxCollisioGrad >= 0.01)
+    {
+        if(pptr1->collisionGradLen > pptr2->collisionGradLen)
+        {
+//            mlog<<"1 "<<pptr1->ID<<pptr2->ID;
+            collisionNormal = pptr1->collisionVector *  pptr1->collisionGradLen;
+        }
+        else{
+//            mlog<<"2 "<<pptr1->ID<<pptr2->ID;
+            collisionNormal = pptr2->collisionVector *  pptr2->collisionGradLen;
+        }
     }
 
-    if(pptr1->collisionGradLen >=  0.01){
-        collisionNormal = pptr1->collisionVector *  pptr1->collisionGradLen;
-    }
-    else if(pptr2->collisionGradLen >=  0.01){
-    collisionNormal = pptr2->collisionVector *  pptr2->collisionGradLen;
-    }
 
     QVector3D correctionA = (pptr1->w / totalWeight) *  collisionNormal;
     QVector3D correctionB = (pptr2->w / totalWeight) * -collisionNormal;

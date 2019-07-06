@@ -55,7 +55,7 @@ class DynamicsWorld
         DynamicObjectPtr addDynamicObjectAsSoftBody(pSceneOb _sceneObject, float _mass = 1);
 
         void addRope(const QVector3D &_start, const QVector3D &_end, int _numParticles);
-        void addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject, std::string _path);
+        void addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject, std::string _path, int _color = 0);
         void addDynamicObjectAsNonUniformParticle(pSceneOb _sceneObject, float radius);
 
         ParticlePtr getParticlePtrFromRawPtr (Particle *_ptr);

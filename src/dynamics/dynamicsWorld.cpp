@@ -47,25 +47,25 @@ void DynamicsWorld::initialize()
 
     float offset = 6;
 
-//    Plane pX;
-//    pX.Normal = QVector3D(-1, 0, 0);
-//    pX.Offset = QVector3D(offset, 0, 0);
-//    addPlane(pX);
+    Plane pX;
+    pX.Normal = QVector3D(-1, 0, 0);
+    pX.Offset = QVector3D(offset, 0, 0);
+    addPlane(pX);
 
-//    Plane nX;
-//    nX.Normal = QVector3D(1, 0, 0);
-//    nX.Offset = QVector3D(-offset, 0, 0);
-//    addPlane(nX);
+    Plane nX;
+    nX.Normal = QVector3D(1, 0, 0);
+    nX.Offset = QVector3D(-offset, 0, 0);
+    addPlane(nX);
 
-//    Plane pZ;
-//    pZ.Normal = QVector3D(0, 0, -1);
-//    pZ.Offset = QVector3D(0, 0, offset);
-//    addPlane(pZ);
+    Plane pZ;
+    pZ.Normal = QVector3D(0, 0, -1);
+    pZ.Offset = QVector3D(0, 0, offset);
+    addPlane(pZ);
 
-//    Plane nZ;
-//    nZ.Normal = QVector3D(0, 0, 1);
-//    nZ.Offset = QVector3D(0, 0, -offset);
-//    addPlane(nZ);
+    Plane nZ;
+    nZ.Normal = QVector3D(0, 0, 1);
+    nZ.Offset = QVector3D(0, 0, -offset);
+    addPlane(nZ);
 
 //    auto nSpring = std::make_shared<DistanceEqualityConstraint>(m_Particles[0], m_Particles[1]);
     for( ParticlePtr p : m_Particles)
@@ -132,6 +132,7 @@ void DynamicsWorld::update()
             {
                 c->project();
             }
+
         }
     }
     m_frameCount++;
@@ -145,6 +146,7 @@ void DynamicsWorld::update()
         {
     //        for( ConstraintWeakPtr c : p->m_Constraints)
             auto p = m_Particles[j];
+
             for( ConstraintWeakPtr c : p->m_Constraints)
             {
                 if(auto constraint = c.lock()){
@@ -153,16 +155,6 @@ void DynamicsWorld::update()
                     }
                 }
             }
-
-
-    //        checkSpherePlane(p, m_Planes[0]);
-    //        collisionCheck(p);
-
-//            for( ConstraintPtr c : p->m_CollisionConstraints)
-//            {
-//    //            if(c->constraintFunction() < 0)
-//                c->project();
-//            }
         }
 
         for( ParticlePtr p : m_Particles)
@@ -441,7 +433,7 @@ DynamicObjectPtr DynamicsWorld::addDynamicObjectAsRigidBody(pSceneOb _sceneObjec
     return nRB;
 }
 
-void DynamicsWorld::addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject, std::string _path)
+void DynamicsWorld::addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject, std::string _path, int _color)
 {
     FILE * file = std::fopen(_path.c_str(), "r");
     if( file == nullptr ){
@@ -493,32 +485,41 @@ void DynamicsWorld::addDynamicObjectAsRigidBodyGrid(pSceneOb _sceneObject, std::
 
          nParticle->collisionGradLen = normals[i].length();
 
-         if(nParticle->collisionGradLen <= 0.01)
-             nParticle->collisionGradLen += 0.050;
+//         if(nParticle->collisionGradLen <= 0.01)
+//             nParticle->collisionGradLen += 0.01;
 //         nParticle->collisionGradLen *= 1.5;
 
          nParticle->collisionVector = (normals[i] * 1000000).normalized();
 //         qDebug()<<"collision normal : "<<pCount<< " = "<< nParticle->collisionVector <<nParticle->collisionGradLen;
-
 //         nParticle->setMass(1);
 
          m_Particles.push_back(nParticle);
          nRBG->addParticle(v, nParticle);
 
          std::shared_ptr<SingleParticle> pDynamicObject = std::make_shared<SingleParticle>(nParticle);
-         auto sO = m_scene->addSceneObjectFromParticle(pDynamicObject, nParticle, 0);
-         sO->isHidden(true);
+         auto sO = m_scene->addSceneObjectFromParticle(pDynamicObject, nParticle, _color);
+//         sO->isHidden(true);
          i++;
     }
 
     auto smCstr = nRBG->createConstraint();
+    for(auto pt : nRBG->getParticles())
+    {
+        if(ParticlePtr p = pt.lock())
+        {
+            QVector3D tmp = p->x;
+            QVector4D pos = QVector4D(p->x.x(), p->x.y(), p->x.z(), 1);
+            pos = _sceneObject->getMatrix() * pos;
+            p->x = QVector3D(pos.x(), pos.y(), pos.z());
+            p->p = QVector3D(pos.x(), pos.y(), pos.z());
+        }
+    }
     m_Constraints.push_back(smCstr);
     m_DynamicObjects.push_back(nRBG);
 
     _sceneObject->makeDynamic(nRBG);
-
+    smCstr->project();
     objectCount++;
-
 }
 
 void DynamicsWorld::addDynamicObjectAsNonUniformParticle(pSceneOb _sceneObject, float radius)

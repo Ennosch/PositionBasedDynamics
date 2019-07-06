@@ -960,13 +960,15 @@ void Scene::setupScene()
        addModel(this, "bunny_high", "/Users/enno/Dev/Bunny_394.obj");
        addModel(this, "rubberyoy", "/Users/enno/Dev/RubberToy.obj");
 
+       addModel(this, "cube_high", "/Users/enno/Dev/Cube_125.obj");
+
 
        // ONlY RENDER WITH addSceneObjectFromModel(), otherwise crash (WIP)
        addSceneObjectFromModel("grid", 1, QVector3D(0, 0 ,0 ), QQuaternion(1,0,0,0));
 
 //       auto sceneObject1 = addSceneObjectFromModel("grid1", 0, QVector3D(0,3,0), QQuaternion(0.8,0.3,0.3,0.1));
        QQuaternion rot = QQuaternion::fromEulerAngles(QVector3D(0,0,0));
-       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(0, 0, 10));
+       QQuaternion rot2 = QQuaternion::fromEulerAngles(QVector3D(0, 0, 45));
 
        float s = 4;
        auto sceneObjectBallCollider = addSceneObjectFromModel("sphere", 2, QVector3D(-20,4.5,0), rot);
@@ -981,9 +983,20 @@ void Scene::setupScene()
 //       auto sceneObjCube = addSceneObjectFromModel("cube", 2, QVector3D(0,4.5,0), rot);
 //       m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObjCube);
 
-       auto sceneObjectRT = addSceneObjectFromModel("bunny_high", 2, QVector3D(-20,0.5,0), rot);
-//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_100_volumeGrad.obj");
-       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Bunny_394_volumeGrad.obj");
+//       auto sceneObjectRT = addSceneObjectFromModel("bunny_high", 2, QVector3D(0,9.5,0), rot2);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Bunny_394_volumeGrad.obj", 2);
+
+
+//       auto sceneObjectB = addSceneObjectFromModel("cube_high", 2, QVector3D(0,9.5,0), rot2);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectB , "/Users/enno/Dev/Cube_125_volumeGrad.obj", 2);
+
+
+//       auto sceneObjectRT2 = addSceneObjectFromModel("bunny_high", 1, QVector3D(20,0.5,0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT2 , "/Users/enno/Dev/Bunny_394_volumeGrad.obj");
+
+
+//       auto sceneObjectRT = addSceneObjectFromModel("bunny_high", 2, QVector3D(-20,0.5,0), rot);
+//       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Bunny_394_volumeGrad.obj");
 
 //       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/Cube_147_volumeGrad.obj");
 //       m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectRT , "/Users/enno/Dev/RubberToy_volumeGrad.obj");
@@ -1005,6 +1018,30 @@ void Scene::setupScene()
 //       m_DynamicsWorld->addRope(QVector3D(3,0,0), QVector3D(-12,0,0), 26);
 //       m_DynamicsWorld->addRope(QVector3D(3,5,0), QVector3D(-12,5,0), 6);
 
+/// Rigid Body Grid Bunnies
+//     for(int i=0; i < 2; i++)
+//     {
+//         float x,y,z;
+//         x= randfinRange(-5,5);
+//         y= randfinRange(2,30);
+//         z= randfinRange(-5,5);
+//         QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(rand() % 90,rand() % 90,rand() % 90));
+//     auto sceneObjectX = addSceneObjectFromModel("bunny_high", (i%3), QVector3D(x, y, z), rotX);
+//      m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectX , "/Users/enno/Dev/Bunny_394_volumeGrad.obj", (i%3));
+//     }
+
+
+/// Rigid Body Grid Cubes
+     for(int i=0; i < 10; i++)
+     {
+         float x,y,z;
+         x= randfinRange(-5,5);
+         y= randfinRange(2,30);
+         z= randfinRange(-5,5);
+         QQuaternion rotX = QQuaternion::fromEulerAngles(QVector3D(rand() % 90,rand() % 90,rand() % 90));
+     auto sceneObjectX = addSceneObjectFromModel("cube_high", (i%3), QVector3D(x, y, z), rotX);
+      m_DynamicsWorld->addDynamicObjectAsRigidBodyGrid(sceneObjectX , "/Users/enno/Dev/Cube_125_volumeGrad.obj", (i%3));
+     }
 
 /// Rigid Body Bunnies
 //       for(int i=0; i < 5; i++)
@@ -1017,6 +1054,7 @@ void Scene::setupScene()
 //       auto sceneObject1 = addSceneObjectFromModel("bunny", (i%3), QVector3D(x, y, z), rotX);
 //        m_DynamicsWorld->addDynamicObjectAsRigidBody(sceneObject1);
 //       }
+
 
 //// RigidBody Rain
 //        for(int i=0; i < 10; i++)
